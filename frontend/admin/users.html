@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Admin - FPV Racer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="../css/antigravity.css?v=14" rel="stylesheet">
+    <script src="../js/config.js?v=14"></script>
+    <script src="../js/theme.js?v=14"></script>
+</head>
+
+<body class="min-h-screen transition-colors duration-500">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 nav-glass border-r border-white/10 flex flex-col">
+            <div class="h-16 flex items-center px-6 border-b border-white/10">
+                <a href="../index.html" class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <span class="font-bold">Admin</span>
+                </a>
+            </div>
+
+            <nav class="flex-1 py-4 px-3 space-y-1">
+                <a href="index.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                        </path>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="cars.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                        </path>
+                    </svg>
+                    Cars
+                </a>
+                <a href="rentals.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Rentals
+                </a>
+                <a href="users.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-500 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                    Users
+                </a>
+                <a href="transactions.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                    Transactions
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-white/10">
+                <a href="../dashboard.html"
+                    class="btn-secondary w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to App
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            <header class="mb-8">
+                <h1 class="text-2xl font-bold mb-1">Users</h1>
+                <p class="text-muted text-sm">Manage pilots and view history</p>
+            </header>
+
+            <div class="card overflow-hidden">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-black/5 dark:bg-white/5">
+                        <tr>
+                            <th class="p-4 text-muted font-medium">Pilot</th>
+                            <th class="p-4 text-muted font-medium">Email</th>
+                            <th class="p-4 text-muted font-medium">Role</th>
+                            <th class="p-4 text-muted font-medium">Balance</th>
+                            <th class="p-4 text-muted font-medium">Rentals</th>
+                            <th class="p-4 text-muted font-medium">Spent</th>
+                            <th class="p-4 text-muted font-medium">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTable" class="divide-y divide-white/10">
+                        <tr>
+                            <td class="p-4 text-center text-muted" colspan="7">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- User History Modal -->
+    <div id="userModal"
+        class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="card p-0 w-full max-w-2xl max-h-[80vh] overflow-hidden animate-fade-in flex flex-col">
+            <div class="p-6 border-b divider flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-semibold" id="modalUserName">User History</h3>
+                    <div class="text-sm text-muted" id="modalUserEmail">email@example.com</div>
+                </div>
+                <button onclick="closeModal()" class="text-muted hover:text-current transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto">
+                <!-- Stats Summary -->
+                <div class="p-6 grid grid-cols-3 gap-4 bg-black/5 dark:bg-white/5">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-500" id="modalBalance">0</div>
+                        <div class="text-xs text-muted">Balance (min)</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-indigo-500" id="modalRentals">0</div>
+                        <div class="text-xs text-muted">Rentals</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-emerald-500" id="modalSpent">₴0</div>
+                        <div class="text-xs text-muted">Total Spent</div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="p-4 border-b divider flex gap-2">
+                    <button id="tabRentals" onclick="switchTab('rentals')"
+                        class="px-4 py-2 rounded-lg bg-blue-500/10 text-blue-500 font-medium text-sm">Rentals</button>
+                    <button id="tabTransactions" onclick="switchTab('transactions')"
+                        class="px-4 py-2 rounded-lg text-muted text-sm hover:bg-black/5 dark:hover:bg-white/5">Transactions</button>
+                </div>
+
+                <!-- Content -->
+                <div id="historyContent" class="p-4">
+                    <div class="text-center text-muted py-8">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js?v=14"></script>
+    <script>
+        let currentHistoryData = null;
+        let currentTab = 'rentals';
+
+        document.addEventListener('DOMContentLoaded', loadUsers);
+
+        async function loadUsers() {
+            const table = document.getElementById('usersTable');
+            try {
+                const users = await api.get('/api/admin/users');
+                if (users.length === 0) {
+                    table.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-muted">No users found</td></tr>';
+                    return;
+                }
+
+                table.innerHTML = '';
+                users.forEach(u => {
+                    const row = document.createElement('tr');
+                    const isAdmin = u.role === 'admin';
+                    const roleBadge = isAdmin ? '<span class="badge badge-warning">ADMIN</span>' : '<span class="badge badge-neutral">PILOT</span>';
+                    const verifiedIcon = u.is_verified
+                        ? '<svg class="w-4 h-4 text-emerald-500 inline ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'
+                        : '<svg class="w-4 h-4 text-orange-500 inline ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-9a1 1 0 11-2 0V6a1 1 0 112 0v3zm0 5a1 1 0 01-1 1 1 1 0 110-2 1 1 0 011 1z" clip-rule="evenodd"/></svg>';
+
+                    row.className = 'hover:bg-black/5 dark:hover:bg-white/5 transition-colors';
+                    row.innerHTML = `
+                        <td class="p-4">
+                            <div class="font-medium">${u.name || 'Unknown'}${verifiedIcon}</div>
+                        </td>
+                        <td class="p-4 text-muted">${u.email}</td>
+                        <td class="p-4">${roleBadge}</td>
+                        <td class="p-4 font-mono text-blue-500">${u.balance_minutes} min</td>
+                        <td class="p-4">${u.total_rentals}</td>
+                        <td class="p-4 font-bold text-emerald-500">₴${u.total_spent.toFixed(0)}</td>
+                        <td class="p-4">
+                            <button onclick="openUserHistory('${u.id}')" class="text-blue-500 hover:text-blue-400 text-xs font-bold uppercase">History</button>
+                        </td>
+                    `;
+                    table.appendChild(row);
+                });
+            } catch (e) {
+                console.error(e);
+                table.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-red-500">Error loading users</td></tr>';
+            }
+        }
+
+        async function openUserHistory(userId) {
+            document.getElementById('userModal').classList.remove('hidden');
+            document.getElementById('historyContent').innerHTML = '<div class="text-center text-muted py-8">Loading...</div>';
+
+            try {
+                const data = await api.get(`/api/admin/users/${userId}/history`);
+                currentHistoryData = data;
+
+                // Update header
+                document.getElementById('modalUserName').innerText = data.user.name || 'Unknown';
+                document.getElementById('modalUserEmail').innerText = data.user.email;
+                document.getElementById('modalBalance').innerText = data.user.balance_minutes;
+                document.getElementById('modalRentals').innerText = data.user.total_rentals;
+                document.getElementById('modalSpent').innerText = `₴${data.user.total_spent.toFixed(0)}`;
+
+                switchTab('rentals');
+            } catch (e) {
+                console.error(e);
+                document.getElementById('historyContent').innerHTML = '<div class="text-center text-red-500 py-8">Error loading history</div>';
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Update tab buttons
+            document.getElementById('tabRentals').className = tab === 'rentals'
+                ? 'px-4 py-2 rounded-lg bg-blue-500/10 text-blue-500 font-medium text-sm'
+                : 'px-4 py-2 rounded-lg text-muted text-sm hover:bg-black/5 dark:hover:bg-white/5';
+            document.getElementById('tabTransactions').className = tab === 'transactions'
+                ? 'px-4 py-2 rounded-lg bg-blue-500/10 text-blue-500 font-medium text-sm'
+                : 'px-4 py-2 rounded-lg text-muted text-sm hover:bg-black/5 dark:hover:bg-white/5';
+
+            if (!currentHistoryData) return;
+
+            const content = document.getElementById('historyContent');
+
+            if (tab === 'rentals') {
+                if (currentHistoryData.rentals.length === 0) {
+                    content.innerHTML = '<div class="text-center text-muted py-8">No rentals yet</div>';
+                    return;
+                }
+
+                let html = '<div class="space-y-3">';
+                currentHistoryData.rentals.forEach(r => {
+                    const date = new Date(r.started_at).toLocaleString('uk-UA');
+                    const statusClass = r.status === 'active' ? 'badge-success' : 'badge-neutral';
+                    html += `
+                        <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 flex justify-between items-center">
+                            <div>
+                                <div class="font-medium">${r.car_name || 'Unknown Car'}</div>
+                                <div class="text-xs text-muted">${date} • ${r.duration_minutes} min</div>
+                            </div>
+                            <span class="badge ${statusClass}">${r.status}</span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                content.innerHTML = html;
+            } else {
+                if (currentHistoryData.transactions.length === 0) {
+                    content.innerHTML = '<div class="text-center text-muted py-8">No transactions yet</div>';
+                    return;
+                }
+
+                let html = '<div class="space-y-3">';
+                currentHistoryData.transactions.forEach(t => {
+                    const date = new Date(t.created_at).toLocaleString('uk-UA');
+                    const statusClass = t.status === 'success' ? 'badge-success' : (t.status === 'pending' ? 'badge-warning' : 'badge-neutral');
+                    html += `
+                        <div class="p-4 rounded-xl bg-black/5 dark:bg-white/5 flex justify-between items-center">
+                            <div>
+                                <div class="font-medium text-emerald-500">+${t.minutes_added} min</div>
+                                <div class="text-xs text-muted">${date}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold">₴${t.amount_uah.toFixed(2)}</div>
+                                <span class="badge ${statusClass}">${t.status}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                content.innerHTML = html;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('userModal').classList.add('hidden');
+            currentHistoryData = null;
+        }
+    </script>
+</body>
+
+</html>

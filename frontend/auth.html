@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-config="PROJECT_NAME">FPV Racer</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind_config.js"></script>
+    <link href="./css/antigravity.css?v=99" rel="stylesheet">
+    <script src="js/config.js?v=99"></script>
+    <script src="js/lang.js?v=99"></script>
+    <script src="js/theme.js?v=99"></script>
+</head>
+
+<body class="flex items-center justify-center relative overflow-hidden min-h-screen transition-colors duration-500">
+
+    <!-- Theme Toggle -->
+    <!-- Theme Toggle Removed -->
+
+    <!-- Particle Animation Canvas injected by particles_engine.js -->
+
+    <div id="auth-card"
+        class="glass-panel p-0 rounded-3xl w-full max-w-md z-10 relative m-4 overflow-hidden animate-fade-in border-blue-500/20 transition-[height] duration-500 ease-in-out">
+
+        <!-- Header -->
+        <div class="p-8 pb-4 text-center">
+            <h1 class="text-4xl font-bold mb-2 tracking-tight font-tech text-blue-600 dark:text-blue-400"
+                data-config="PROJECT_NAME">
+                [NAME]</h1>
+            <p class="text-gray-400 text-sm tracking-wide font-mono" data-i18n="app_subtitle">PILOT ACCESS SYSTEM</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="relative flex border-b border-white/10" id="tabs-container">
+            <button onclick="switchTab('login')" id="tab-login" data-i18n="tab_login"
+                class="flex-1 py-4 text-sm font-bold text-blue-500 transition-all duration-300 tracking-wider z-10">
+                LOGIN
+            </button>
+            <button onclick="switchTab('register')" id="tab-register" data-i18n="tab_register"
+                class="flex-1 py-4 text-sm font-bold text-gray-500 transition-all duration-300 tracking-wider z-10">
+                REGISTER
+            </button>
+            <!-- Sliding Indicator -->
+            <div id="tab-indicator"
+                class="absolute bottom-0 h-[3px] bg-blue-500 transition-all duration-500 ease-out rounded-full"
+                style="width: 50%; left: 0;">
+            </div>
+            <!-- Background Highlight -->
+            <div id="tab-highlight"
+                class="absolute top-0 bottom-0 bg-white/5 transition-all duration-500 ease-out rounded-t-lg"
+                style="width: 50%; left: 0;">
+            </div>
+        </div>
+
+        <div class="p-8 pt-6">
+
+            <!-- Login Form -->
+            <form id="loginForm" class="space-y-4 transition-opacity duration-300">
+                <div class="group">
+                    <label class="block text-gray-400 text-xs font-mono mb-2 uppercase tracking-wider"
+                        data-i18n="label_callsign">Callsign
+                        (Email)</label>
+                    <input type="email" id="email" class="w-full rounded-lg p-3 text-sm" placeholder="pilot@fpv.com"
+                        data-i18n="placeholder_email" required>
+                </div>
+                <div class="group">
+                    <label class="block text-gray-400 text-xs font-mono mb-2 uppercase tracking-wider"
+                        data-i18n="label_security_key">Security
+                        Key</label>
+                    <div class="relative">
+                        <input type="password" id="password" class="w-full rounded-lg p-3 pr-12 text-sm"
+                            placeholder="••••••••" data-i18n="placeholder_pass" required>
+                        <button type="button" onclick="togglePassword('password', this)"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors">
+                            <svg class="w-5 h-5 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                            <svg class="w-5 h-5 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center text-xs mt-2 font-mono text-gray-500">
+                    <label class="flex items-center cursor-pointer hover:text-gray-300">
+                        <input type="checkbox"
+                            class="mr-2 rounded border-gray-600 bg-transparent text-blue-500 focus:ring-offset-0 focus:ring-blue-500">
+                        <span data-i18n="auto_connect">Auto-Connect</span>
+                    </label>
+                    <a href="#" onclick="switchTab('forgot'); return false;"
+                        class="hover:text-blue-500 transition-colors" data-i18n="lost_key">Lost Key?</a>
+                </div>
+
+                <button type="submit"
+                    class="w-full btn-primary py-3 rounded-full font-bold text-sm tracking-widest mt-4"
+                    data-i18n="btn_login">
+                    УВІЙТИ
+                </button>
+            </form>
+
+            <!-- Register Form (Hidden) -->
+            <form id="registerForm" class="space-y-4 hidden transition-opacity duration-300">
+                <div class="group">
+                    <label class="block text-gray-400 text-xs font-mono mb-2 uppercase tracking-wider"
+                        data-i18n="label_pilot_name">Pilot
+                        Name</label>
+                    <input type="text" id="regName" class="w-full rounded-lg p-3 text-sm" placeholder="Maverick"
+                        data-i18n="placeholder_name" required>
+                </div>
+                <div class="group">
+                    <label class="block text-gray-400 text-xs font-mono mb-2 uppercase tracking-wider"
+                        data-i18n="label_callsign">Callsign
+                        (Email)</label>
+                    <input type="email" id="regEmail" class="w-full rounded-lg p-3 text-sm" placeholder="pilot@fpv.com"
+                        data-i18n="placeholder_email" required>
+                </div>
+                <div class="group">
+                    <label class="block text-gray-400 text-xs font-mono mb-2 uppercase tracking-wider"
+                        data-i18n="label_security_key">Security
+                        Key</label>
+                    <div class="relative">
+                        <input type="password" id="regPass" class="w-full rounded-lg p-3 pr-12 text-sm"
+                            placeholder="••••••••" data-i18n="placeholder_pass" required>
+                        <button type="button" onclick="togglePassword('regPass', this)"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors">
+                            <svg class="w-5 h-5 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                            <svg class="w-5 h-5 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Strength Meter -->
+                    <div id="passwordStrength"
+                        class="transition-all duration-300 ease-out overflow-hidden max-h-0 opacity-0">
+                        <div class="strength-meter">
+                            <div class="strength-segment"></div>
+                            <div class="strength-segment"></div>
+                            <div class="strength-segment"></div>
+                        </div>
+                        <div id="strengthText" class="strength-text"></div>
+                    </div>
+                </div>
+                <div class="text-[10px] text-gray-600 text-center mt-2 font-mono" data-i18n="terms">
+                    By registering, you accept the protocol terms.
+                </div>
+
+                <button type="submit"
+                    class="w-full btn-primary py-3 rounded-full font-bold text-sm tracking-widest mt-4"
+                    data-i18n="btn_register">
+                    ЗАРЕЄСТРУВАТИСЬ
+                </button>
+            </form>
+
+            <!-- 1. Forgot Password Form -->
+            <form id="forgotForm" class="space-y-4 hidden transition-opacity duration-300">
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-bold text-blue-600 dark:text-blue-400" data-i18n="forgot_title">Відновлення
+                    </h3>
+                </div>
+                <input type="email" id="forgotEmail"
+                    class="w-full rounded-lg p-3 text-sm bg-black/5 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none transition-colors"
+                    placeholder="email@example.com" data-i18n="placeholder_email" required>
+                <button type="submit" class="w-full btn-primary py-3 rounded-full font-bold text-sm tracking-widest"
+                    data-i18n="btn_send_code">НАДІСЛАТИ КОД</button>
+                <button type="button" onclick="switchTab('login')"
+                    class="w-full text-xs text-gray-500 hover:text-blue-500 mt-2 transition-colors"
+                    data-i18n="back_to_login">← Назад</button>
+            </form>
+
+            <!-- 2. Verify Code Form -->
+            <form id="verifyForm" class="space-y-4 hidden transition-opacity duration-300">
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-bold text-blue-600 dark:text-blue-400" data-i18n="verify_title">Введіть код
+                    </h3>
+                </div>
+                <input type="text" id="verifyCode"
+                    class="w-full rounded-lg p-4 text-2xl tracking-[0.5em] text-center font-bold bg-black/5 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-blue-600 dark:text-blue-400 focus:border-blue-500 focus:outline-none transition-colors"
+                    placeholder="000000" maxlength="6" required>
+                <button type="submit" class="w-full btn-primary py-3 rounded-full font-bold text-sm tracking-widest"
+                    data-i18n="btn_verify">ПІДТВЕРДИТИ</button>
+                <button type="button" onclick="switchTab('login')"
+                    class="w-full text-xs text-gray-500 hover:text-blue-500 mt-2 transition-colors"
+                    data-i18n="back_to_login">← Назад</button>
+            </form>
+
+            <!-- 3. Reset Password Form -->
+            <form id="resetForm" class="space-y-4 hidden transition-opacity duration-300">
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-bold text-blue-600 dark:text-blue-400" data-i18n="reset_title">Новий пароль
+                    </h3>
+                </div>
+                <input type="password" id="resetPass"
+                    class="w-full rounded-lg p-3 text-sm bg-black/5 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none transition-colors"
+                    placeholder="••••••••" required>
+                <button type="submit" class="w-full btn-primary py-3 rounded-full font-bold text-sm tracking-widest"
+                    data-i18n="btn_reset">ЗБЕРЕГТИ</button>
+            </form>
+
+            <!-- Error container removed: using Toasts -->
+        </div>
+    </div>
+
+    <script src="js/api.js?v=11"></script>
+    <script src="js/particles_engine.js?v=11"></script>
+    <script src="js/auth.js?v=999"></script>
+</body>
+
+</html>

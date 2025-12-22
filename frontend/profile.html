@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - FPV Racer</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind_config.js"></script>
+    <link href="./css/antigravity.css?v=99" rel="stylesheet">
+    <script src="js/config.js?v=99"></script>
+    <script src="js/lang.js?v=99"></script>
+    <script src="js/theme.js?v=99"></script>
+</head>
+
+<body class="min-h-screen transition-colors duration-500">
+
+    <!-- Theme Toggle Removed -->
+
+    <!-- Navbar -->
+    <nav class="nav-glass sticky top-0 z-40">
+        <div class="container mx-auto px-6 h-16 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <span class="text-lg font-bold" data-config="PROJECT_NAME">FPV Racer</span>
+            </a>
+            <a href="dashboard.html" class="btn-secondary px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-8 max-w-4xl">
+        <h1 class="text-2xl font-bold mb-8">My Profile</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Profile Card -->
+            <div class="card p-6 text-center">
+                <div class="relative w-24 h-24 mx-auto mb-4 group cursor-pointer">
+                    <img id="profileAvatar" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff"
+                        class="w-full h-full rounded-full object-cover border-4 border-blue-500/20 group-hover:border-blue-500 transition-all">
+                    <div
+                        class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <h2 id="profileName" class="text-xl font-semibold mb-1">Loading...</h2>
+                <!-- Theme Settings -->
+                <div class="mb-6">
+                    <div class="text-xs text-muted uppercase mb-3 font-semibold tracking-wider">Appearance</div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setTheme('system')" id="theme-system"
+                            class="p-2 rounded-xl border border-white/10 hover:border-blue-500/50 hover:bg-white/5 transition-all group">
+                            <div class="flex flex-col items-center gap-1.5">
+                                <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                                <span class="text-[10px] text-gray-500 font-medium">System</span>
+                            </div>
+                        </button>
+                        <button onclick="setTheme('light')" id="theme-light"
+                            class="p-2 rounded-xl border border-white/10 hover:border-blue-500/50 hover:bg-white/5 transition-all group">
+                            <div class="flex flex-col items-center gap-1.5">
+                                <svg class="w-5 h-5 text-gray-400 group-hover:text-yellow-400 transition-colors"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                                    </path>
+                                </svg>
+                                <span class="text-[10px] text-gray-500 font-medium">Light</span>
+                            </div>
+                        </button>
+                        <button onclick="setTheme('dark')" id="theme-dark"
+                            class="p-2 rounded-xl border border-white/10 hover:border-blue-500/50 hover:bg-white/5 transition-all group">
+                            <div class="flex flex-col items-center gap-1.5">
+                                <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                                    </path>
+                                </svg>
+                                <span class="text-[10px] text-gray-500 font-medium">Dark</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <p id="profileEmail" class="text-sm text-muted mb-4">...</p>
+
+                <div class="bg-emerald-500/10 rounded-xl p-4 mb-4">
+                    <div class="text-xs text-muted uppercase tracking-wider mb-1">Balance</div>
+                    <div class="text-2xl font-bold text-emerald-500" id="profileBalance">0 min</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="document.getElementById('topUpModal').classList.remove('hidden')"
+                        class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-blue-500/20">
+                        Top Up
+                    </button>
+                    <button onclick="api.logout()"
+                        class="px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 border border-red-500/20 hover:bg-red-500/10 transition-colors">
+                        Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats & History -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- Stats -->
+                <div class="card p-6">
+                    <h3 class="font-semibold mb-4">Statistics</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-black/5 dark:bg-white/5 rounded-xl p-4">
+                            <div class="text-xs text-muted uppercase mb-1">Total Sessions</div>
+                            <div class="text-2xl font-bold" id="totalSessions">0</div>
+                        </div>
+                        <div class="bg-black/5 dark:bg-white/5 rounded-xl p-4">
+                            <div class="text-xs text-muted uppercase mb-1">Total Time</div>
+                            <div class="text-2xl font-bold" id="totalTime">0 min</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="card p-6">
+                    <h3 class="font-semibold mb-4">Recent Sessions</h3>
+                    <div class="space-y-3" id="historyList">
+                        <div class="text-center text-muted py-6">No sessions yet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js?v=12"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Profile Data
+                const user = await api.get('/api/users/profile');
+                if (user) {
+                    document.getElementById('profileName').innerText = user.name;
+                    document.getElementById('profileEmail').innerText = user.email;
+                    document.getElementById('profileBalance').innerText = user.balance_minutes + ' min';
+                    if (user.avatar_url) document.getElementById('profileAvatar').src = user.avatar_url;
+                }
+
+                // Session History
+                const rentals = await api.get('/api/rentals/my');
+                const historyList = document.getElementById('historyList');
+
+                if (rentals && rentals.length > 0) {
+                    historyList.innerHTML = '';
+                    document.getElementById('totalSessions').innerText = rentals.length;
+
+                    let totalMinutes = 0;
+
+                    rentals.forEach(rental => {
+                        const totalMins = rental.duration_minutes + (rental.extended_minutes || 0);
+                        totalMinutes += totalMins;
+
+                        const date = new Date(rental.started_at).toLocaleDateString();
+                        const time = new Date(rental.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const isActive = rental.status === 'active';
+
+                        const item = document.createElement('div');
+                        item.className = 'flex justify-between items-center p-3 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors';
+                        item.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 font-semibold text-sm">
+                                    #${rental.id.slice(0, 4)}
+                                </div>
+                                <div>
+                                    <div class="font-medium text-sm">Session</div>
+                                    <div class="text-xs text-muted">${date} • ${time}</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-medium">${totalMins} min</div>
+                                <div class="text-xs ${isActive ? 'text-emerald-500' : 'text-muted'}">${rental.status}</div>
+                            </div>
+                        `;
+                        historyList.appendChild(item);
+                    });
+
+                    document.getElementById('totalTime').innerText = totalMinutes + ' min';
+                }
+
+            } catch (e) {
+                console.error(e);
+            }
+        });
+    </script>
+</body>
+
+</html>

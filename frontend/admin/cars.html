@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cars - Admin - FPV Racer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="../css/antigravity.css?v=13" rel="stylesheet">
+    <script src="../js/config.js?v=13"></script>
+    <script src="../js/theme.js?v=13"></script>
+</head>
+
+<body class="min-h-screen transition-colors duration-500">
+
+    <!-- Theme Toggle Removed -->
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 nav-glass border-r border-white/10 flex flex-col">
+            <div class="h-16 flex items-center px-6 border-b border-white/10">
+                <a href="../index.html" class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <span class="font-bold">Admin</span>
+                </a>
+            </div>
+
+            <nav class="flex-1 py-4 px-3 space-y-1">
+                <a href="index.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                        </path>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="cars.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-500 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                        </path>
+                    </svg>
+                    Cars
+                </a>
+                <a href="rentals.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Rentals
+                </a>
+                <a href="users.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                    Users
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-white/10">
+                <a href="../dashboard.html"
+                    class="btn-secondary w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to App
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold mb-1">Cars</h1>
+                    <p class="text-muted text-sm">Manage your RC car fleet</p>
+                </div>
+                <button onclick="openAddModal()"
+                    class="btn-primary px-6 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Add Car
+                </button>
+            </header>
+
+            <!-- Cars Grid -->
+            <div id="adminCarsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div class="card p-4 text-center text-muted">Loading...</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="carModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="card p-6 w-full max-w-md mx-4 animate-fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modalTitle" class="text-lg font-semibold">Add Car</h3>
+                <button onclick="closeModal()" class="text-muted hover:text-current transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="carForm" class="space-y-4">
+                <input type="hidden" id="carId">
+                <div>
+                    <label class="block text-sm text-muted mb-1">Name</label>
+                    <input type="text" id="carName" class="w-full rounded-lg p-3 text-sm" required>
+                </div>
+                <div>
+                    <label class="block text-sm text-muted mb-1">Raspberry ID</label>
+                    <input type="text" id="carRaspberryId" class="w-full rounded-lg p-3 text-sm"
+                        placeholder="e.g. pi_car_01" required>
+                </div>
+                <div>
+                    <label class="block text-sm text-muted mb-1">VDO Ninja ID</label>
+                    <input type="text" id="carVdo" class="w-full rounded-lg p-3 text-sm" required>
+                </div>
+                <div>
+                    <label class="block text-sm text-muted mb-1">Status</label>
+                    <select id="carStatus" class="w-full rounded-lg p-3 text-sm">
+                        <option value="free">Available</option>
+                        <option value="busy">In Use</option>
+                        <option value="offline">Offline</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-muted mb-1">Description</label>
+                    <textarea id="carDesc" class="w-full rounded-lg p-3 text-sm h-20"></textarea>
+                </div>
+                <button type="submit" class="w-full btn-primary py-3 rounded-xl font-medium">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/api.js?v=13"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadCars);
+
+        async function loadCars() {
+            const grid = document.getElementById('adminCarsGrid');
+            try {
+                const cars = await api.get('/api/cars/');
+                grid.innerHTML = '';
+                cars.forEach(car => {
+                    const isFree = car.status === 'free';
+                    const isBusy = car.status === 'busy';
+                    const statusClass = isFree ? 'badge-success' : (isBusy ? 'badge-warning' : 'badge-neutral');
+                    const statusText = isFree ? 'Available' : (isBusy ? 'In Use' : 'Offline');
+
+                    const card = document.createElement('div');
+                    card.className = 'card p-4';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="font-semibold">${car.name}</div>
+                            <span class="badge ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="text-xs text-muted mb-4 font-mono">${car.vdo_ninja_id}</div>
+                        <div class="flex gap-2">
+                            <button onclick="editCar('${car.id}')" class="flex-1 btn-secondary py-2 rounded-lg text-sm">Edit</button>
+                            <button onclick="deleteCar('${car.id}')" class="px-4 py-2 rounded-lg text-sm text-red-500 border border-red-500/20 hover:bg-red-500/10">Delete</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+                if (cars.length === 0) {
+                    grid.innerHTML = '<div class="card p-8 text-center text-muted col-span-full">No cars found</div>';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        const modal = document.getElementById('carModal');
+        const form = document.getElementById('carForm');
+
+        function openAddModal() {
+            document.getElementById('modalTitle').innerText = "Add Car";
+            document.getElementById('carId').value = '';
+            form.reset();
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        async function editCar(id) {
+            try {
+                const car = await api.get(`/api/cars/${id}`);
+                document.getElementById('modalTitle').innerText = "Edit Car";
+                document.getElementById('carId').value = car.id;
+                document.getElementById('carName').value = car.name;
+                document.getElementById('carRaspberryId').value = car.raspberry_id || '';
+                document.getElementById('carVdo').value = car.vdo_ninja_id;
+                document.getElementById('carStatus').value = car.status;
+                document.getElementById('carDesc').value = car.description || '';
+                modal.classList.remove('hidden');
+            } catch (e) { alert(e.message); }
+        }
+
+        async function deleteCar(id) {
+            if (confirm('Delete this car?')) {
+                try {
+                    await api.delete(`/api/cars/${id}`);
+                    loadCars();
+                } catch (e) { alert(e.message); }
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('carId').value;
+            const data = {
+                name: document.getElementById('carName').value,
+                raspberry_id: document.getElementById('carRaspberryId').value,
+                vdo_ninja_id: document.getElementById('carVdo').value,
+                status: document.getElementById('carStatus').value,
+                description: document.getElementById('carDesc').value
+            };
+
+            try {
+                if (id) {
+                    await api.put(`/api/cars/${id}`, data);
+                } else {
+                    await api.post('/api/cars/', data);
+                }
+                closeModal();
+                loadCars();
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        });
+    </script>
+</body>
+
+</html>

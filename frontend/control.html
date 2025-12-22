@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Control - FPV Racer</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind_config.js"></script>
+    <link href="./css/antigravity.css?v=99" rel="stylesheet">
+    <style>
+        body {
+            overflow: hidden;
+            touch-action: none;
+            background: #000;
+        }
+
+        .hud-element {
+            pointer-events: none;
+        }
+
+        .interactive {
+            pointer-events: auto;
+        }
+
+        /* Subtle vignette */
+        .vignette {
+            background: radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.6) 100%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen text-white relative">
+
+    <!-- Video Stream Background -->
+    <iframe id="videoStream" class="absolute inset-0 w-full h-full object-cover z-0" src="" frameborder="0"
+        allow="autoplay; camera; microphone; fullscreen"></iframe>
+
+    <!-- VFX Overlays -->
+    <div class="absolute inset-0 vignette z-10"></div>
+
+    <!-- HUD Layer -->
+    <div class="absolute inset-0 z-20 flex flex-col justify-between p-4 safe-area">
+
+        <!-- Top Bar -->
+        <div class="relative flex justify-between items-start w-full">
+            <!-- Status Left -->
+            <div
+                class="hud-element flex items-center gap-3 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
+                <span id="connectionStatus"
+                    class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm transition-all duration-300"></span>
+                <span id="statusText" class="text-xs font-bold tracking-wide uppercase hidden sm:inline">Offline</span>
+
+                <!-- Divider -->
+                <div class="w-px h-3 bg-white/20 mx-1"></div>
+
+                <!-- Telemetry -->
+                <div class="flex items-center gap-3 text-xs font-mono text-white/80">
+                    <div class="flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <span id="battery" class="text-emerald-400 font-bold">100%</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0">
+                            </path>
+                        </svg>
+                        <span id="ping">--</span><span class="text-[10px] opacity-60 ml-0.5">ms</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timer Center -->
+            <div class="hud-element flex flex-col items-center absolute left-1/2 top-0 -translate-x-1/2">
+                <div id="timerDisplay" class="text-3xl font-bold font-mono tracking-wide drop-shadow-md">00:00</div>
+                <div class="h-1 w-24 bg-white/20 rounded-full mt-1 overflow-hidden backdrop-blur-sm">
+                    <div id="timeProgress"
+                        class="h-full bg-white w-full origin-left transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)]">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Right -->
+            <div class="flex gap-2 interactive ml-auto">
+                <button onclick="openReportModal()"
+                    class="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/20 border border-yellow-500/30 hover:bg-yellow-500 hover:text-black transition-all rounded-full text-xs font-medium">
+                    <span>⚠️</span> Report
+                </button>
+                <button onclick="confirmExit()"
+                    class="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/20 border border-red-500/30 hover:bg-red-500 hover:text-white transition-all rounded-full text-xs font-medium">
+                    <span>✕</span> Exit
+                </button>
+            </div>
+        </div>
+
+        <!-- Center Crosshair -->
+        <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+            <div class="w-6 h-6 border border-white rounded-full"></div>
+            <div class="absolute top-1/2 left-0 w-2 h-px bg-white -translate-x-full -translate-y-1/2"></div>
+            <div class="absolute top-1/2 right-0 w-2 h-px bg-white translate-x-full -translate-y-1/2"></div>
+            <div class="absolute top-0 left-1/2 w-px h-2 bg-white -translate-y-full -translate-x-1/2"></div>
+            <div class="absolute bottom-0 left-1/2 w-px h-2 bg-white translate-y-full -translate-x-1/2"></div>
+        </div>
+
+        <!-- Warning Overlay (Hidden) -->
+        <div id="warningOverlay"
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center hidden">
+            <h1 class="text-4xl font-bold text-red-500 animate-pulse">Connection Lost</h1>
+            <p class="text-red-300 text-sm mt-2">Attempting to reconnect...</p>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="w-full flex justify-between items-end pb-4 md:pb-8">
+
+            <!-- Keyboard Hints (Desktop) -->
+            <div id="desktop-controls" class="hidden flex-col gap-2">
+                <div class="flex gap-4 text-xs text-white/50">
+                    <div class="flex items-center gap-2">
+                        <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-w">W</span>
+                        <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-a">A</span>
+                        <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-s">S</span>
+                        <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-d">D</span>
+                        <span class="ml-2">Drive</span>
+                    </div>
+                </div>
+                <div class="flex gap-4 text-xs text-white/50">
+                    <div class="flex items-center gap-2">
+                        <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-up">↑</span>
+                        <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-left">←</span>
+                        <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-down">↓</span>
+                        <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-right">→</span>
+                        <span class="ml-2">Camera</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Touch Controls (Mobile) -->
+            <div id="mobile-controls" class="absolute inset-0 z-30 pointer-events-none hidden">
+                <!-- Left Joystick Zone (Camera) -->
+                <div id="zone-left"
+                    class="absolute bottom-8 left-8 w-40 h-40 pointer-events-auto bg-white/5 rounded-full border border-white/10 backdrop-blur-[2px]">
+                </div>
+
+                <!-- Right Joystick Zone (Driving) -->
+                <div id="zone-right"
+                    class="absolute bottom-8 right-8 w-40 h-40 pointer-events-auto bg-white/5 rounded-full border border-white/10 backdrop-blur-[2px]">
+                </div>
+
+                <!-- Labels -->
+                <div
+                    class="absolute bottom-4 left-20 text-[10px] text-white/50 tracking-widest uppercase -translate-x-1/2">
+                    Camera</div>
+                <div
+                    class="absolute bottom-4 right-20 text-[10px] text-white/50 tracking-widest uppercase translate-x-1/2">
+                    Drive</div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <!-- Extend Modal -->
+    <div id="extendModal"
+        class="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden interactive">
+        <div
+            class="relative bg-black/60 backdrop-blur-xl border border-white/10 p-8 rounded-3xl max-w-md w-full mx-4 shadow-2xl animate-fade-in text-center overflow-hidden">
+            <!-- Background Glow -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-500 blur-[20px] opacity-70"></div>
+
+            <div class="mb-6">
+                <div
+                    class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 animate-pulse">
+                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2 tracking-tight">Time Running Low</h3>
+                <p class="text-white/60 text-sm">Mission time expiring in less than 30 seconds. <br>Extend now to
+                    maintain uplink.</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <button onclick="extendRental(3)"
+                    class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-2xl py-4 transition-all duration-300">
+                    <span
+                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Extend</span>
+                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+3m</span>
+                </button>
+                <button onclick="extendRental(5)"
+                    class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-2xl py-4 transition-all duration-300">
+                    <span
+                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Extend</span>
+                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+5m</span>
+                </button>
+                <button onclick="extendRental(10)"
+                    class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-2xl py-4 transition-all duration-300">
+                    <span
+                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Extend</span>
+                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+10m</span>
+                </button>
+            </div>
+
+            <button onclick="closeExtendModal()"
+                class="text-sm text-white/40 hover:text-white transition-colors tracking-wide uppercase font-medium text-[10px]">
+                Dismiss & Continue Mission
+            </button>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal"
+        class="absolute inset-0 z-[60] bg-black/90 flex items-center justify-center hidden interactive">
+        <div class="card p-6 max-w-sm w-full mx-4 animate-fade-in">
+            <h3 class="text-lg font-semibold mb-4">Report Issue</h3>
+            <textarea id="issueText"
+                class="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-sm mb-4 h-24 focus:border-blue-500 focus:outline-none"
+                placeholder="Describe the issue..."></textarea>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('reportModal').classList.add('hidden')"
+                    class="flex-1 btn-secondary py-2.5 rounded-lg text-sm">Cancel</button>
+                <button onclick="submitReport()" class="flex-1 btn-primary py-2.5 rounded-lg text-sm">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expiry / Feedback Modal -->
+    <div id="expiryModal"
+        class="absolute inset-0 z-[60] bg-black/90 flex items-center justify-center hidden interactive">
+        <div class="card p-8 max-w-sm w-full mx-4 text-center animate-fade-in">
+            <h1 class="text-2xl font-bold mb-2">Session Complete</h1>
+            <p class="text-muted text-sm mb-6">How was your experience?</p>
+
+            <div class="flex justify-center gap-1 mb-6" id="starRating">
+                <button onclick="setRating(1)"
+                    class="text-3xl text-gray-600 hover:text-yellow-400 transition-colors">★</button>
+                <button onclick="setRating(2)"
+                    class="text-3xl text-gray-600 hover:text-yellow-400 transition-colors">★</button>
+                <button onclick="setRating(3)"
+                    class="text-3xl text-gray-600 hover:text-yellow-400 transition-colors">★</button>
+                <button onclick="setRating(4)"
+                    class="text-3xl text-gray-600 hover:text-yellow-400 transition-colors">★</button>
+                <button onclick="setRating(5)"
+                    class="text-3xl text-gray-600 hover:text-yellow-400 transition-colors">★</button>
+            </div>
+
+            <textarea id="feedbackText"
+                class="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-sm mb-4 hidden focus:border-blue-500 focus:outline-none"
+                placeholder="Optional feedback..."></textarea>
+
+            <button onclick="submitFeedbackAndExit()" class="btn-primary w-full py-3 rounded-lg font-semibold">
+                Return to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
+    <script src="js/api.js?v=12"></script>
+    <script src="js/control.js?v=13"></script>
+</body>
+
+</html>

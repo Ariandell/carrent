@@ -1,0 +1,172 @@
+/* Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Modern Clean Palette - Google-inspired */
+    --bg-light: #f8f9fa;
+    /* Very light gray background */
+    --bg-dark: #020617;
+    /* Dark mode background */
+    --bg-panel: rgba(255, 255, 255, 0.95);
+    /* Light panel with transparency */
+    --bg-panel-dark: rgba(15, 23, 42, 0.85);
+    /* Dark panel */
+    --primary: #3b82f6;
+    /* Blue 500 */
+    --primary-glow: rgba(59, 130, 246, 0.5);
+    --accent: #06b6d4;
+    /* Cyan 500 */
+    --success: #10b981;
+    /* Emerald 500 */
+    --danger: #ef4444;
+    /* Red 500 */
+    --text-main: #1f2937;
+    /* Dark gray for light mode */
+    --text-main-dark: #f8fafc;
+    /* Light for dark mode */
+    --text-muted: #6b7280;
+    /* Gray 500 */
+    --text-muted-dark: #94a3b8;
+    /* Slate 400 */
+
+    /* Glass Effect */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.18);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    --backdrop-blur: blur(16px);
+}
+
+/* Light Mode (Default) */
+body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Particle canvas will be injected here via JS */
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+h1,
+h2,
+h3,
+.font-tech {
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 0.05em;
+}
+
+/* Glass Components */
+.glass-panel {
+    background: var(--bg-panel);
+    backdrop-filter: var(--backdrop-blur);
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+}
+
+.glass-input {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    outline: none;
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #2563eb);
+    color: white;
+    border: none;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    transition: all 0.3s;
+}
+
+.btn-danger:hover {
+    background: var(--danger);
+    color: white;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px var(--primary-glow);
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 20px var(--primary-glow);
+        border-color: rgba(59, 130, 246, 0.6);
+    }
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s infinite;
+}
+
+/* Utilities */
+.text-gradient {
+    background: linear-gradient(to right, var(--primary), var(--accent));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+}

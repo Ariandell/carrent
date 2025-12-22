@@ -1,0 +1,249 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from datetime import datetime, timedelta
+from typing import Optional
+
+from app.database import get_db
+from app.models.rental import Rental, RentalStatus
+from app.models.car import Car, CarStatus
+from app.models.user import User
+from app.schemas.rental import RentalCreate, RentalResponse, RentalExtend
+from app.routers.auth import get_current_user
+from app.websocket.manager import manager
+
+router = APIRouter(prefix="/api/rentals", tags=["Rentals"])
+
+@router.post("/start", response_model=RentalResponse)
+async def start_rental(
+    rental_data: RentalCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # 1. Check Balance
+    total_cost = rental_data.duration_minutes # Assuming 1 min = 1 unit for now
+    if current_user.balance_minutes < total_cost:
+        raise HTTPException(status_code=402, detail="Insufficient balance")
+
+    # 2. Check Car Availability
+    result = await db.execute(select(Car).where(Car.id == rental_data.car_id))
+    car = result.scalars().first()
+    if not car:
+        raise HTTPException(status_code=404, detail="Car not found")
+    
+    if car.status != CarStatus.FREE:
+        raise HTTPException(status_code=409, detail="Car is not available")
+
+    # 3. Create Rental
+    new_rental = Rental(
+        user_id=current_user.id,
+        car_id=car.id,
+        duration_minutes=rental_data.duration_minutes
+    )
+    
+    # 4. Update Car Status
+    car.status = CarStatus.BUSY
+    
+    # 5. Deduct Balance
+    current_user.balance_minutes -= total_cost
+    
+    db.add(new_rental)
+    await db.commit()
+    await db.refresh(new_rental)
+    
+    # Broadcast update
+    await manager.broadcast_status_update()
+    
+    # Start Video Stream on Car
+    if car.raspberry_id:
+        print(f"Sending start_stream to {car.raspberry_id} with ID {car.vdo_ninja_id}")
+        await manager.send_command_to_car(car.raspberry_id, f"start_stream|{car.vdo_ninja_id}")
+
+    return new_rental
+
+@router.get("/active", response_model=Optional[RentalResponse])
+async def get_active_rental(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    result = await db.execute(
+        select(Rental)
+        .where(Rental.user_id == current_user.id)
+        .where(Rental.status == RentalStatus.ACTIVE)
+        .order_by(Rental.started_at.desc())
+    )
+    rental = result.scalars().first()
+
+    if rental:
+        # Check for Expiry
+        # rental.duration_minutes includes extensions (if logic in extend_rental does += cost to duration)
+        # In extend_rental we did: rental.duration_minutes += cost. Correct.
+        expiry_time = rental.started_at + timedelta(minutes=rental.duration_minutes)
+        
+        # Buffer of 10 seconds to avoid race conditions with frontend timer
+        if datetime.utcnow() > expiry_time + timedelta(seconds=10):
+            print(f"Stats: Rental {rental.id} expired at {expiry_time}. Current: {datetime.utcnow()}. Auto-closing.")
+            
+            # Close Rental
+            rental.status = RentalStatus.COMPLETED
+            rental.ended_at = datetime.utcnow()
+            
+            # Free Car
+            result_car = await db.execute(select(Car).where(Car.id == rental.car_id))
+            car = result_car.scalars().first()
+            if car:
+                car.status = CarStatus.FREE
+                # Stop Stream
+                if car.raspberry_id:
+                     await manager.send_command_to_car(car.raspberry_id, "stop_stream")
+                     
+            await db.commit()
+            
+            # Broadcast
+            await manager.broadcast_status_update()
+            
+            return None # No active rental anymore
+
+    return rental
+
+@router.post("/stop/{rental_id}", response_model=RentalResponse)
+async def stop_rental(
+    rental_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    result = await db.execute(select(Rental).where(Rental.id == rental_id))
+    rental = result.scalars().first()
+    
+    if not rental:
+        raise HTTPException(status_code=404, detail="Rental not found")
+        
+    if rental.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your rental")
+        
+    if rental.status != RentalStatus.ACTIVE:
+        raise HTTPException(status_code=400, detail="Rental already finished")
+
+    # End rental
+    rental.status = RentalStatus.COMPLETED
+    rental.ended_at = datetime.utcnow()
+    
+    # Free up car
+    result_car = await db.execute(select(Car).where(Car.id == rental.car_id))
+    car = result_car.scalars().first()
+    if car:
+        car.status = CarStatus.FREE
+    
+    await db.commit()
+    await db.refresh(rental)
+    
+    # Broadcast update
+    await manager.broadcast_status_update()
+    
+    # Disconnect controller if active
+    if car:
+        manager.disconnect_user_controller(str(car.id))
+        if car.raspberry_id:
+            print(f"Sending stop_stream to {car.raspberry_id}")
+            await manager.send_command_to_car(car.raspberry_id, "stop_stream")
+
+    return rental
+
+@router.post("/extend", response_model=RentalResponse)
+async def extend_rental(
+    extend_data: RentalExtend,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    result = await db.execute(select(Rental).where(Rental.id == extend_data.rental_id))
+    rental = result.scalars().first()
+    
+    if not rental or rental.status != RentalStatus.ACTIVE:
+        raise HTTPException(status_code=400, detail="Active rental not found")
+        
+    cost = extend_data.additional_minutes
+    if current_user.balance_minutes < cost:
+        raise HTTPException(status_code=402, detail="Insufficient balance")
+        
+    current_user.balance_minutes -= cost
+    rental.extended_minutes += cost
+    rental.duration_minutes += cost # Use either specific field or just sum up
+    
+    await db.commit()
+    await db.refresh(rental)
+    return rental
+
+from typing import List
+from app.routers.auth import get_admin_user
+
+@router.get("/", response_model=List[RentalResponse])
+async def read_rentals(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_admin_user)
+):
+    result = await db.execute(
+        select(Rental)
+        .order_by(Rental.started_at.desc())
+        .offset(skip).limit(limit)
+    )
+    return result.scalars().all()
+
+@router.get("/my", response_model=List[RentalResponse])
+async def read_my_rentals(
+    skip: int = 0,
+    limit: int = 50,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    result = await db.execute(
+        select(Rental)
+        .where(Rental.user_id == current_user.id)
+        .order_by(Rental.started_at.desc())
+        .offset(skip).limit(limit)
+    )
+    return result.scalars().all()
+
+from app.schemas.rental import RentalReport, RentalFeedback
+
+@router.post("/report", response_model=RentalResponse)
+async def report_rental_issue(
+    report_data: RentalReport,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    result = await db.execute(select(Rental).where(Rental.id == report_data.rental_id))
+    rental = result.scalars().first()
+    
+    if not rental:
+        raise HTTPException(status_code=404, detail="Rental not found")
+        
+    if rental.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your rental")
+        
+    rental.issue_report = report_data.issue
+    await db.commit()
+    await db.refresh(rental)
+    return rental
+
+@router.post("/feedback", response_model=RentalResponse)
+async def submit_rental_feedback(
+    feedback_data: RentalFeedback,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    result = await db.execute(select(Rental).where(Rental.id == feedback_data.rental_id))
+    rental = result.scalars().first()
+    
+    if not rental:
+        raise HTTPException(status_code=404, detail="Rental not found")
+        
+    if rental.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your rental")
+        
+    rental.rating = feedback_data.rating
+    rental.feedback = feedback_data.comment
+    await db.commit()
+    await db.refresh(rental)
+    return rental
