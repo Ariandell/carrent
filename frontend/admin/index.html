@@ -148,6 +148,7 @@
                 }
                 return true;
             } catch (e) {
+                console.error("Admin Check Failed:", e);
                 window.location.href = '../auth.html';
                 return false;
             }
