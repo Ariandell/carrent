@@ -74,13 +74,15 @@ const lang = {
     }
 };
 
+// Expose globally immediately
+window.lang = lang;
+window.t = (key) => lang.t(key);
+
 document.addEventListener('DOMContentLoaded', () => {
     // Load saved lang
     const saved = localStorage.getItem('lang');
     if (saved && window.TRANSLATIONS && window.TRANSLATIONS[saved]) {
         CONFIG.DEFAULT_LANG = saved;
     }
-    window.lang = lang;
-    window.t = (key) => lang.t(key); // Global translation function
-    window.lang.init();
+    lang.init();
 });
