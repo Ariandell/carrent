@@ -202,8 +202,8 @@ async function loadCars() {
                 <!-- Image Section with Parallax Effect -->
                 <div class="relative h-48 overflow-hidden">
                     <!-- iOS Glassmorphism Background -->
-                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-xl"></div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-white/5"></div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-transparent dark:from-white/10 dark:via-white/5 dark:to-transparent backdrop-blur-xl"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-200/50 via-transparent to-transparent dark:from-black/40 dark:via-transparent dark:to-white/5"></div>
                     
                     <!-- Car Image with Hover Scale -->
                     <div class="absolute inset-0 flex items-center justify-center p-4">
