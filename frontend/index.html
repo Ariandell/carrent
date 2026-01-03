@@ -242,7 +242,7 @@
                     <div class="space-y-8">
                         <div class="flex gap-5">
                             <div
-                                class="w-12 h-12 rounded-xl bg-blue-900/40 flex items-center justify-center text-blue-400 flex-shrink-0 border border-blue-500/20">
+                                class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400 flex-shrink-0 border border-blue-200 dark:border-blue-500/20">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -257,7 +257,7 @@
 
                         <div class="flex gap-5">
                             <div
-                                class="w-12 h-12 rounded-xl bg-blue-900/40 flex items-center justify-center text-blue-400 flex-shrink-0 border border-blue-500/20">
+                                class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400 flex-shrink-0 border border-blue-200 dark:border-blue-500/20">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
@@ -281,19 +281,20 @@
 
                     <!-- Main Telemetry Card (Tilted) -->
                     <div
-                        class="card p-8 rounded-3xl relative transform transition-all duration-500 hover:rotate-y-6 hover:scale-105 backdrop-blur-xl border border-white/10 bg-white/5 shadow-2xl">
+                        class="card p-8 rounded-3xl relative transform transition-all duration-500 hover:rotate-y-6 hover:scale-105 backdrop-blur-xl border border-blue-100/50 dark:border-white/10 bg-white/60 dark:bg-white/5 shadow-2xl">
                         <!-- Header -->
                         <div class="flex justify-between items-center mb-8">
                             <div class="flex items-center gap-3">
                                 <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse box-shadow-glow"></div>
-                                <span class="font-mono text-sm text-emerald-400">СИСТЕМА АКТИВНА</span>
+                                <span class="font-mono text-sm text-emerald-600 dark:text-emerald-400 font-bold">СИСТЕМА
+                                    АКТИВНА</span>
                             </div>
-                            <div class="text-xs font-mono text-slate-400">NET_ID: 802.11ax</div>
+                            <div class="text-xs font-mono text-slate-500 dark:text-slate-400">NET_ID: 802.11ax</div>
                         </div>
 
                         <!-- Main Graph Area -->
                         <div
-                            class="relative h-32 mb-8 overflow-hidden rounded-xl bg-black/40 border border-white/5 p-4 flex items-end gap-1">
+                            class="relative h-32 mb-8 overflow-hidden rounded-xl bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/5 p-4 flex items-end gap-1">
                             <!-- Animated Bars (CSS simulated) -->
                             <div class="w-2 h-12 bg-blue-500/50 rounded-sm"></div>
                             <div class="w-2 h-16 bg-blue-500/60 rounded-sm"></div>
@@ -307,41 +308,48 @@
                             <div class="w-2 h-16 bg-blue-500/60 rounded-sm"></div>
 
                             <!-- Overlay Text -->
-                            <div class="absolute top-2 right-2 text-xs font-bold text-blue-400">STABLE</div>
+                            <div class="absolute top-2 right-2 text-xs font-bold text-blue-600 dark:text-blue-400">
+                                STABLE</div>
                         </div>
 
                         <!-- Data Grid -->
                         <div class="grid grid-cols-2 gap-4">
                             <div
-                                class="p-4 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md hover:bg-white/10 transition-colors">
-                                <div class="text-xs text-slate-400 mb-1">Затримка (Ping)</div>
-                                <div class="text-2xl font-bold text-white flex items-end gap-2">
-                                    24 <span class="text-sm font-normal text-slate-500 mb-1">ms</span>
+                                class="p-4 rounded-xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 backdrop-blur-md shadow-sm">
+                                <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">Затримка (Ping)</div>
+                                <div class="text-2xl font-bold text-slate-800 dark:text-white flex items-end gap-2">
+                                    24 <span
+                                        class="text-sm font-normal text-slate-500 dark:text-slate-500 mb-1">ms</span>
                                 </div>
-                                <div class="w-full bg-slate-700 h-1 mt-2 rounded-full overflow-hidden">
+                                <div
+                                    class="w-full bg-slate-200 dark:bg-slate-700 h-1 mt-2 rounded-full overflow-hidden">
                                     <div class="bg-emerald-500 h-full w-[20%]"></div>
                                 </div>
                             </div>
                             <div
-                                class="p-4 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md hover:bg-white/10 transition-colors">
-                                <div class="text-xs text-slate-400 mb-1">Якість відео</div>
-                                <div class="text-2xl font-bold text-white flex items-end gap-2">
-                                    1080 <span class="text-sm font-normal text-slate-500 mb-1">p60</span>
+                                class="p-4 rounded-xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 backdrop-blur-md shadow-sm">
+                                <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">Якість відео</div>
+                                <div class="text-2xl font-bold text-slate-800 dark:text-white flex items-end gap-2">
+                                    1080 <span
+                                        class="text-sm font-normal text-slate-500 dark:text-slate-500 mb-1">p60</span>
                                 </div>
-                                <div class="w-full bg-slate-700 h-1 mt-2 rounded-full overflow-hidden">
+                                <div
+                                    class="w-full bg-slate-200 dark:bg-slate-700 h-1 mt-2 rounded-full overflow-hidden">
                                     <div class="bg-blue-500 h-full w-[95%]"></div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Footer Decoration -->
-                        <div class="mt-6 pt-4 border-t border-white/5 flex justify-between items-center">
+                        <div
+                            class="mt-6 pt-4 border-t border-slate-100 dark:border-white/5 flex justify-between items-center">
                             <div class="flex gap-2">
-                                <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
-                                <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
-                                <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-600"></div>
+                                <div class="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-600"></div>
                             </div>
-                            <div class="text-[10px] text-slate-500 uppercase tracking-widest">WebRTC Protocol v2.0</div>
+                            <div class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">WebRTC
+                                Protocol v2.0</div>
                         </div>
                     </div>
                 </div>
