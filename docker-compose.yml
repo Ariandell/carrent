@@ -12,7 +12,22 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+    restart: always
+
+  backend:
+    build: .
+    container_name: fpv_backend
+    ports:
+      - "80:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://fpv_admin:fpv_secure_2024@postgres:5432/fpv_racer
+      - APP_URL=${APP_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - LIQPAY_PUBLIC_KEY=${LIQPAY_PUBLIC_KEY}
+      - LIQPAY_PRIVATE_KEY=${LIQPAY_PRIVATE_KEY}
+    depends_on:
+      - postgres
+    restart: always
 
 volumes:
   postgres_data:
