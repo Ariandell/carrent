@@ -34,6 +34,7 @@ class UserResponse(UserBase):
     id: UUID
     avatar_url: Optional[str] = None
     balance_minutes: int
+    balance: float
     role: str  # String value to ensure proper serialization
     created_at: datetime
     

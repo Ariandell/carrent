@@ -98,11 +98,12 @@ async def liqpay_callback(
         result_user = await db.execute(select(User).where(User.id == transaction.user_id))
         user = result_user.scalars().first()
         if user:
-            old_balance = user.balance_minutes
-            user.balance_minutes += transaction.minutes_added
+            old_balance = user.balance
+            user.balance += float(transaction.amount_uah) # Update Money Balance
+            # user.balance_minutes += transaction.minutes_added # Optional: decide if we keep minutes logic
             logger.info(
                 f"LiqPay callback: SUCCESS - User {user.email} balance updated: "
-                f"{old_balance} -> {user.balance_minutes} (+{transaction.minutes_added} min)"
+                f"{old_balance} -> {user.balance} (+{transaction.amount_uah} UAH)"
             )
     else:
         transaction.status = TransactionStatus.FAILED
