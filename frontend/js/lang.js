@@ -75,7 +75,8 @@ const lang = {
 };
 
 // Expose globally immediately
-window.lang = lang;
+// Expose globally immediately
+window.AppLang = lang;
 window.t = (key) => lang.t(key);
 
 document.addEventListener('DOMContentLoaded', () => {
