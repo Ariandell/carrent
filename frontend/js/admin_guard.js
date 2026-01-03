@@ -11,18 +11,19 @@
      */
     async function checkAdminAccess() {
         try {
-            const user = await api.get('/api/users/profile');
+            console.log('Admin Guard: User profile:', user);
             if (!user || (user.role !== 'admin' && user.role !== 'UserRole.ADMIN')) {
-                showToast('Доступ заборонено. Потрібні права адміністратора.', 'error');
-                setTimeout(() => {
-                    window.location.href = '../dashboard.html';
-                }, 1500);
+                console.warn('Admin Guard: Role mismatch. User role:', user ? user.role : 'null');
+                alert(`Debug: Access Denied. Role is: ${user ? user.role : 'null'}`);
+                showToast('Доступ заборонено.', 'error');
+                // setTimeout(() => { window.location.href = '../dashboard.html'; }, 1500);
                 return false;
             }
             return true;
         } catch (e) {
             console.error('Admin check failed:', e);
-            window.location.href = '../auth.html';
+            alert(`Debug: Admin Check Error: ${e.message}`);
+            // window.location.href = '../auth.html';
             return false;
         }
     }
