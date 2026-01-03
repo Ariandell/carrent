@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from uuid import uuid4
+from decimal import Decimal
 
 from app.database import get_db
 from app.models.transaction import Transaction, TransactionStatus
@@ -99,7 +100,7 @@ async def liqpay_callback(
         user = result_user.scalars().first()
         if user:
             old_balance = user.balance
-            user.balance += float(transaction.amount_uah) # Update Money Balance
+            user.balance += Decimal(str(transaction.amount_uah)) # Update Money Balance
             # user.balance_minutes += transaction.minutes_added # Optional: decide if we keep minutes logic
             logger.info(
                 f"LiqPay callback: SUCCESS - User {user.email} balance updated: "
