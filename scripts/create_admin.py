@@ -2,6 +2,10 @@ import asyncio
 import sys
 from pathlib import Path
 
+# Fix for Windows Python 3.11+ with psycopg
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 # Add parent directory to path so 'app' module can be found
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -27,3 +31,4 @@ if __name__ == "__main__":
         print("Usage: python create_admin.py <email>")
     else:
         asyncio.run(make_admin(sys.argv[1]))
+

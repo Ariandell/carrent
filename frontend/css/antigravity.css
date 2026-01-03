@@ -30,6 +30,10 @@
     --card-bg: rgba(255, 255, 255, 0.9);
     --nav-bg: rgba(255, 255, 255, 0.95);
     --divider: rgba(0, 0, 0, 0.08);
+
+    /* Icon colors for light theme */
+    --icon-muted: #4b5563;
+    /* gray-600, visible on white */
 }
 
 [data-theme="dark"] {
@@ -58,6 +62,10 @@
     --card-bg: rgba(30, 41, 59, 0.8);
     --nav-bg: rgba(15, 23, 42, 0.95);
     --divider: rgba(255, 255, 255, 0.08);
+
+    /* Icon colors for dark theme */
+    --icon-muted: #9ca3af;
+    /* gray-400, visible on dark */
 }
 
 /* --- BASE STYLES --- */
@@ -536,6 +544,11 @@ input:focus,
 /* Text utilities */
 .text-muted {
     color: var(--text-secondary);
+}
+
+/* Icon utilities - theme-aware colors */
+.icon-muted {
+    color: var(--icon-muted);
 }
 
 /* Animations */

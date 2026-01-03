@@ -1,20 +1,16 @@
 {
   "name": "FPV Racer Pro",
   "short_name": "FPV Racer",
+  "description": "Керуйте FPV дронами дистанційно з професійною точністю",
   "start_url": "/dashboard.html",
   "display": "standalone",
   "background_color": "#0b0f19",
   "theme_color": "#3b82f6",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3097/3097022.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3097/3097022.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ]
 }

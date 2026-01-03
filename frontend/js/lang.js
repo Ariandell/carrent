@@ -10,20 +10,27 @@ const lang = {
         this.applyConfig();
     },
 
-    setLanguage(lang) {
-        if (!window.TRANSLATIONS[lang]) return;
-        CONFIG.DEFAULT_LANG = lang;
-        localStorage.setItem('app_lang', lang); // Fix storage key
-        localStorage.setItem('lang', lang);     // Keep both for compatibility
+    setLanguage(newLang) {
+        if (!window.TRANSLATIONS[newLang]) return;
+
+        this.lang = newLang;
+        this.dict = window.TRANSLATIONS[newLang];
+        CONFIG.DEFAULT_LANG = newLang;
+
+        localStorage.setItem('app_lang', newLang);
+        localStorage.setItem('lang', newLang);
 
         // Update <html> lang attribute
-        document.documentElement.lang = lang;
+        document.documentElement.lang = newLang;
 
-        // Refresh text
-        this.updatePage();
+        // Refresh all text on page
+        this.applyConfig();
 
         // Dispatch event for other components
-        window.dispatchEvent(new CustomEvent('langChanged', { detail: lang }));
+        window.dispatchEvent(new CustomEvent('langChanged', { detail: newLang }));
+
+        // Visual feedback
+        console.log('Language changed to:', newLang);
     },
 
     toggle() {

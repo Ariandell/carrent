@@ -12,25 +12,22 @@ app = FastAPI(title="FPV Racer Pro")
 # CORS Setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8001",
-        "http://127.0.0.1:8001",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-    ], 
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 # from app.database import init_db
 # Env reload trigger
-from app.routers import auth, users, cars, websockets, rentals, payments, admin
+from app.routers import auth, users, cars, websockets, rentals, payments, admin, support, uploads
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(cars.router)
 app.include_router(rentals.router)
 app.include_router(payments.router)
 app.include_router(admin.router)
+app.include_router(support.router)
+app.include_router(uploads.router)
 app.include_router(websockets.router)
 
 @app.get("/")

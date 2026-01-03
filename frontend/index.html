@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-config="PROJECT_NAME">FPV Racer - Remote Control Experience</title>
+    <title data-config="PROJECT_NAME">FPV Racer - Керування в реальному часі</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/tailwind_config.js"></script>
@@ -115,26 +115,46 @@
                 <div class="relative hidden lg:block">
                     <div class="float-animation">
                         <div class="relative z-10">
-                            <!-- Car Preview Card -->
-                            <div class="card p-6 rounded-3xl glow-blue max-w-md mx-auto relative group">
+                            <!-- Car Preview Card with Parallax Effect -->
+                            <div id="heroCarPreview"
+                                class="card p-6 rounded-3xl glow-blue max-w-md mx-auto relative group">
                                 <div
                                     class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-transparent opacity-20 blur rounded-3xl group-hover:opacity-40 transition-opacity">
                                 </div>
 
-                                <div class="aspect-video rounded-2xl bg-black mb-4 overflow-hidden relative">
-                                    <img src="https://images.unsplash.com/photo-1594787318286-3d835c1d207f?auto=format&fit=crop&w=800&q=80"
-                                        class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
-                                        alt="RC Car">
+                                <div class="aspect-video rounded-2xl mb-4 overflow-hidden relative">
+                                    <!-- Static Background -->
+                                    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/30 to-purple-600/30">
+                                    </div>
                                     <div
-                                        class="absolute top-3 left-3 flex items-center gap-2 bg-black/60 backdrop-blur px-2 py-1 rounded border border-white/10">
+                                        class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22none%22 fill-rule=%22evenodd%22%3E%3Cg fill=%22%239C92AC%22 fill-opacity=%220.1%22%3E%3Cpath d=%22M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-60">
+                                    </div>
+
+                                    <!-- Car Image with Parallax Hover -->
+                                    <div class="absolute inset-0 flex items-center justify-center p-4">
+                                        <img id="heroCarImage"
+                                            src="https://images.unsplash.com/photo-1594787318286-3d835c1d207f?auto=format&fit=crop&w=800&q=80"
+                                            class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-2xl"
+                                            alt="RC Car">
+                                    </div>
+
+                                    <div
+                                        class="absolute top-3 left-3 flex items-center gap-2 bg-black/60 backdrop-blur px-2 py-1 rounded border border-white/10 z-10">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                        <span class="text-xs font-bold text-emerald-400">ONLINE</span>
+                                        <span class="text-xs font-bold text-emerald-400">ОНЛАЙН</span>
+                                    </div>
+
+                                    <!-- Price Badge -->
+                                    <div class="absolute bottom-3 right-3 z-10">
+                                        <span id="heroCarPrice"
+                                            class="px-2 py-1 rounded bg-emerald-500/90 text-xs font-bold text-white">1
+                                            ₴/хв</span>
                                     </div>
                                 </div>
                                 <div class="flex justify-between items-center relative z-10">
                                     <div>
-                                        <h3 class="font-bold text-lg text-white">Defender X1</h3>
-                                        <p class="text-sm text-slate-500">Off-road Crawler</p>
+                                        <h3 id="heroCarName" class="font-bold text-lg text-white">Завантаження...</h3>
+                                        <p id="heroCarDesc" class="text-sm text-slate-500">FPV машинка</p>
                                     </div>
                                     <div
                                         class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
@@ -304,7 +324,7 @@
                             d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
                 </div>
-                <span class="font-bold text-slate-300">FPV Racer</span>
+                <span class="font-bold text-slate-300" data-config="PROJECT_NAME">FPV Racer</span>
             </div>
             <p>© 2024 Всі права захищено.</p>
         </div>
@@ -355,6 +375,29 @@
                     // Token invalid, clear it
                     localStorage.removeItem('access_token');
                 }
+            }
+
+            // Load a random car for hero section
+            try {
+                const cars = await fetch('/api/cars/').then(r => r.json());
+                if (cars && cars.length > 0) {
+                    // Pick a random car (or first available)
+                    const car = cars.find(c => c.status === 'free') || cars[0];
+
+                    const heroName = document.getElementById('heroCarName');
+                    const heroDesc = document.getElementById('heroCarDesc');
+                    const heroImage = document.getElementById('heroCarImage');
+                    const heroPrice = document.getElementById('heroCarPrice');
+
+                    if (heroName) heroName.textContent = car.name;
+                    if (heroDesc) heroDesc.textContent = car.description || 'FPV машинка';
+                    if (heroPrice) heroPrice.textContent = (car.price_per_minute || 1) + ' ₴/хв';
+                    if (heroImage && car.image_url) {
+                        heroImage.src = car.image_url;
+                    }
+                }
+            } catch (e) {
+                console.log('Could not load car for hero');
             }
         });
     </script>

@@ -30,3 +30,7 @@ class Rental(Base):
 
     user = relationship("User", back_populates="rentals")
     car = relationship("Car", back_populates="rentals")
+
+    @property
+    def car_name(self):
+        return self.car.name if self.car else None

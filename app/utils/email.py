@@ -32,29 +32,29 @@ async def send_verification_email(email: EmailStr, code: str, token: str):
 
     html = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb; border-radius: 10px;">
-        <h2 style="color: #2563eb; text-align: center;">Welcome to FPV Racer!</h2>
-        <p style="color: #374151; font-size: 16px;">Hello Pilot,</p>
-        <p style="color: #374151; font-size: 16px;">Confirm your email to start your engines.</p>
+        <h2 style="color: #2563eb; text-align: center;">Ласкаво просимо до FPV Racer!</h2>
+        <p style="color: #374151; font-size: 16px;">Вітаємо, Пілоте,</p>
+        <p style="color: #374151; font-size: 16px;">Підтвердіть свою електронну пошту, щоб запустити двигуни.</p>
         
         <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
-            <p style="margin-bottom: 10px; color: #6b7280; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">Your Verification Code</p>
+            <p style="margin-bottom: 10px; color: #6b7280; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">Ваш код підтвердження</p>
             <div style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111827;">{code}</div>
         </div>
         
         <p style="text-align: center; margin: 20px 0;">
             <a href="{magic_link}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                Verify & Login Automatically
+                Підтвердити та увійти
             </a>
         </p>
         
         <p style="color: #6b7280; font-size: 12px; text-align: center;">
-            If the button doesn't work, copy this code or ignore this email if you didn't register.
+            Якщо кнопка не працює, скопіюйте цей код або ігноруйте цей лист, якщо ви не реєструвалися.
         </p>
     </div>
     """
 
     message = MessageSchema(
-        subject="FWD: Pilot Verification Required",
+        subject="Підтвердження реєстрації пілота",
         recipients=[email],
         body=html,
         subtype=MessageType.html
@@ -86,16 +86,16 @@ async def send_reset_email(email: EmailStr, code: str):
     """
     html = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb; border-radius: 10px;">
-        <h2 style="color: #dc2626; text-align: center;">Password Reset Request</h2>
+        <h2 style="color: #dc2626; text-align: center;">Запит на відновлення паролю</h2>
         <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
-            <p style="margin-bottom: 10px; color: #6b7280; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">Your Recovery Code</p>
+            <p style="margin-bottom: 10px; color: #6b7280; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;">Ваш код відновлення</p>
             <div style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111827;">{code}</div>
         </div>
     </div>
     """
     
     message = MessageSchema(
-        subject="Security Alert: Password Reset",
+        subject="Відновлення паролю",
         recipients=[email],
         body=html,
         subtype=MessageType.html
@@ -114,6 +114,49 @@ async def send_reset_email(email: EmailStr, code: str):
                 f.write(f"--------------------------------------------------\n")
                 f.write(f"To: {email} (Password Reset)\n")
                 f.write(f"Code: {code}\n")
+                f.write(f"--------------------------------------------------\n")
+        except Exception:
+            pass
+
+async def send_support_reply_email(to_email: str, original_subject: str, reply_text: str):
+    """
+    Sends a support reply email.
+    """
+    html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb; border-radius: 10px;">
+        <h2 style="color: #2563eb; text-align: center;">Служба підтримки FPV Racer</h2>
+        <p style="color: #374151; font-size: 16px;">Вітаємо,</p>
+        <p style="color: #374151; font-size: 16px;">Ми маємо відповідь стосовно вашого запиту: <strong>{original_subject}</strong></p>
+        
+        <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+            <p style="color: #111827; font-size: 16px; white-space: pre-wrap;">{reply_text}</p>
+        </div>
+        
+        <p style="color: #6b7280; font-size: 12px; text-align: center;">
+            Ви можете відповісти на цей лист, щоб продовжити діалог.
+        </p>
+    </div>
+    """
+    
+    message = MessageSchema(
+        subject=f"Відповідь: {original_subject}",
+        recipients=[to_email],
+        body=html,
+        subtype=MessageType.html
+    )
+
+    try:
+        fm = FastMail(conf)
+        await fm.send_message(message)
+        logger.info(f"SUPPORT REPLY SENT to {to_email}")
+    except Exception as e:
+        logger.error(f"Failed to send support reply: {e}")
+        # Debug logging
+        try:
+            with open("debug_emails.log", "a") as f:
+                f.write(f"--------------------------------------------------\n")
+                f.write(f"To: {to_email} (Support Reply)\n")
+                f.write(f"Body: {reply_text}\n")
                 f.write(f"--------------------------------------------------\n")
         except Exception:
             pass

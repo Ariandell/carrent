@@ -4,101 +4,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - FPV Racer</title>
+    <title data-config="PROJECT_NAME">FPV Racer - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="../css/antigravity.css?v=13" rel="stylesheet">
     <script src="../js/config.js?v=13"></script>
     <script src="../js/theme.js?v=13"></script>
+    <script src="../js/toast.js?v=13"></script>
+    <script src="../js/admin_guard.js?v=13"></script>
+    <script src="../js/admin_sidebar.js?v=13"></script>
 </head>
 
 <body class="min-h-screen transition-colors duration-500">
+    <script>
+        // Init admin protection
+        initAdminPage(() => {
+            console.log('Admin access granted');
+        });
+    </script>
 
     <!-- Theme Toggle Removed -->
 
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 nav-glass border-r border-white/10 flex flex-col">
-            <div class="h-16 flex items-center px-6 border-b border-white/10">
-                <a href="../index.html" class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                    </div>
-                    <span class="font-bold">Admin</span>
-                </a>
-            </div>
-
-            <nav class="flex-1 py-4 px-3 space-y-1">
-                <a href="index.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-500 font-medium">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
-                        </path>
-                    </svg>
-                    Dashboard
-                </a>
-                <a href="cars.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                        </path>
-                    </svg>
-                    Cars
-                </a>
-                <a href="rentals.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Rentals
-                </a>
-                <a href="users.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-                        </path>
-                    </svg>
-                    Users
-                </a>
-                <a href="transactions.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
-                        </path>
-                    </svg>
-                    Transactions
-                </a>
-            </nav>
-
-            <div class="p-4 border-t border-white/10">
-                <a href="../dashboard.html"
-                    class="btn-secondary w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                    Back to App
-                </a>
-            </div>
-        </aside>
+        <div id="admin-sidebar"></div>
 
         <!-- Main Content -->
         <main class="flex-1 p-8 overflow-y-auto">
             <header class="flex justify-between items-center mb-8">
                 <div>
-                    <h1 class="text-2xl font-bold mb-1">Dashboard</h1>
-                    <p class="text-muted text-sm">System overview and statistics</p>
+                    <h1 class="text-2xl font-bold mb-1">Головна</h1>
+                    <p class="text-muted text-sm">Огляд системи та статистика</p>
                 </div>
                 <div class="badge badge-success flex items-center gap-2 px-3 py-1.5">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    System Online
+                    Система Онлайн
                 </div>
             </header>
 
@@ -106,7 +45,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div class="card p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="text-muted text-sm">Total Rentals</div>
+                        <div class="text-muted text-sm">Всього оренд</div>
                         <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -118,7 +57,7 @@
                 </div>
                 <div class="card p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="text-muted text-sm">Online Cars</div>
+                        <div class="text-muted text-sm">Машинок онлайн</div>
                         <div
                             class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +70,7 @@
                 </div>
                 <div class="card p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="text-muted text-sm">Users</div>
+                        <div class="text-muted text-sm">Користувачі</div>
                         <div
                             class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +84,7 @@
                 </div>
                 <div class="card p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="text-muted text-sm">Revenue Today</div>
+                        <div class="text-muted text-sm">Дохід за сьогодні</div>
                         <div
                             class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,28 +100,28 @@
 
             <!-- Fleet Grid -->
             <div class="mb-8">
-                <h2 class="text-xl font-semibold mb-4">Fleet Status</h2>
+                <h2 class="text-xl font-semibold mb-4">Стан автопарку</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="fleetGrid">
-                    <div class="card p-4 text-center text-muted">Loading...</div>
+                    <div class="card p-4 text-center text-muted">Завантаження...</div>
                 </div>
             </div>
 
             <!-- Recent Activity -->
             <div>
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold">Recent Rentals</h2>
-                    <a href="rentals.html" class="text-sm text-blue-500 hover:underline">View All</a>
+                    <h2 class="text-xl font-semibold">Останні оренди</h2>
+                    <a href="rentals.html" class="text-sm text-blue-500 hover:underline">Всі</a>
                 </div>
 
-                <div class="card overflow-hidden">
+                <div class="card overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-black/5 dark:bg-white/5">
                             <tr>
                                 <th class="p-4 text-muted font-medium">ID</th>
-                                <th class="p-4 text-muted font-medium">User</th>
-                                <th class="p-4 text-muted font-medium">Car</th>
-                                <th class="p-4 text-muted font-medium">Duration</th>
-                                <th class="p-4 text-muted font-medium">Status</th>
+                                <th class="p-4 text-muted font-medium">Користувач</th>
+                                <th class="p-4 text-muted font-medium">Авто</th>
+                                <th class="p-4 text-muted font-medium">Тривалість</th>
+                                <th class="p-4 text-muted font-medium">Статус</th>
                             </tr>
                         </thead>
                         <tbody id="rentalsTable" class="divide-y divide-white/10">
@@ -198,6 +137,22 @@
 
     <script src="../js/api.js?v=14"></script>
     <script>
+        // Admin Access Protection
+        async function checkAdminAccess() {
+            try {
+                const user = await api.get('/api/users/profile');
+                if (!user || (user.role !== 'admin' && user.role !== 'UserRole.ADMIN')) {
+                    alert('Доступ заборонено. Потрібні права адміністратора.');
+                    window.location.href = '../dashboard.html';
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                window.location.href = '../auth.html';
+                return false;
+            }
+        }
+
         async function loadStats() {
             try {
                 // Load stats from new endpoint
@@ -216,7 +171,7 @@
                     const isFree = car.status === 'free';
                     const isBusy = car.status === 'busy';
                     const statusClass = isFree ? 'badge-success' : (isBusy ? 'badge-warning' : 'badge-neutral');
-                    const statusText = isFree ? 'Available' : (isBusy ? 'In Use' : 'Offline');
+                    const statusText = isFree ? 'Вільна' : (isBusy ? 'Зайнята' : 'Офлайн');
 
                     // Driver info
                     let driverHTML = '';
@@ -230,7 +185,7 @@
                                     </svg>
                                     <span class="font-medium text-indigo-700 dark:text-indigo-300">${car.current_driver_name}</span>
                                 </div>
-                                <div class="text-xs text-indigo-600 dark:text-indigo-400">Until ${endsAt}</div>
+                                <div class="text-xs text-indigo-600 dark:text-indigo-400">До ${endsAt}</div>
                             </div>
                         `;
                     }
@@ -244,12 +199,12 @@
                         </div>
                         <div class="grid grid-cols-2 gap-3 text-sm">
                             <div class="bg-black/5 dark:bg-white/5 p-3 rounded-lg">
-                                <div class="text-muted text-xs mb-1">Battery</div>
+                                <div class="text-muted text-xs mb-1">Батарея</div>
                                 <div class="font-semibold ${car.battery_level > 30 ? 'text-emerald-500' : 'text-red-500'}">${car.battery_level}%</div>
                             </div>
                             <div class="bg-black/5 dark:bg-white/5 p-3 rounded-lg">
-                                <div class="text-muted text-xs mb-1">Status</div>
-                                <div class="font-semibold">${isBusy ? 'Active' : (isFree ? 'Ready' : 'Offline')}</div>
+                                <div class="text-muted text-xs mb-1">Статус</div>
+                                <div class="font-semibold">${isBusy ? 'Активна' : (isFree ? 'Готова' : 'Офлайн')}</div>
                             </div>
                         </div>
                         ${driverHTML}
@@ -267,9 +222,12 @@
                     row.className = 'hover:bg-black/5 dark:hover:bg-white/5 transition-colors';
                     row.innerHTML = `
                         <td class="p-4 text-blue-500 font-mono text-xs">#${r.id.slice(0, 8)}</td>
-                        <td class="p-4 font-medium">${r.user_id.slice(0, 8)}...</td>
-                        <td class="p-4">${r.car_name || 'N/A'}</td>
-                        <td class="p-4">${r.duration_minutes} min</td>
+                        <td class="p-4 font-medium">
+                            <div class="text-sm">${r.user && r.user.email ? r.user.email : r.user_id.slice(0, 8) + '...'}</div>
+                            ${r.user && r.user.name ? `<div class="text-xs text-muted">${r.user.name}</div>` : ''}
+                        </td>
+                        <td class="p-4">${r.car_name || 'Н/Д'}</td>
+                        <td class="p-4">${r.duration_minutes} хв</td>
                         <td class="p-4"><span class="badge ${isActive ? 'badge-success' : 'badge-neutral'}">${r.status}</span></td>
                     `;
                     table.appendChild(row);
@@ -278,8 +236,13 @@
             } catch (e) { console.error("Admin Load Error:", e); }
         }
 
-        loadStats();
-        setInterval(loadStats, 5000);
+        // First verify admin access, then load data
+        checkAdminAccess().then(isAdmin => {
+            if (isAdmin) {
+                loadStats();
+                setInterval(loadStats, 5000);
+            }
+        });
     </script>
 </body>
 

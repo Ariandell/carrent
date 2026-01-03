@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-config="PROJECT_NAME">FPV Racer - Admin - Support</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="../css/antigravity.css?v=13" rel="stylesheet">
+    <script src="../js/config.js?v=13"></script>
+    <script src="../js/theme.js?v=13"></script>
+    <script src="../js/toast.js?v=13"></script>
+    <script src="../js/admin_guard.js?v=13"></script>
+    <script src="../js/admin_sidebar.js?v=13"></script>
+</head>
+
+<body class="min-h-screen transition-colors duration-500">
+    <script>
+        initAdminPage();
+    </script>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <div id="admin-sidebar"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            <header class="mb-8">
+                <h1 class="text-2xl font-bold mb-1">Запити на підтримку</h1>
+                <p class="text-muted text-sm">Перегляд та управління зверненнями користувачів</p>
+            </header>
+
+            <div class="card overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-black/5 dark:bg-white/5">
+                        <tr>
+                            <th class="p-4 text-muted font-medium">ID</th>
+                            <th class="p-4 text-muted font-medium">Email</th>
+                            <th class="p-4 text-muted font-medium">Тема</th>
+                            <th class="p-4 text-muted font-medium">Повідомлення</th>
+                            <th class="p-4 text-muted font-medium">Дата</th>
+                            <th class="p-4 text-muted font-medium">Статус</th>
+                            <th class="p-4 text-muted font-medium">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody id="supportTable" class="divide-y divide-white/10">
+                        <tr>
+                            <td class="p-4 text-center text-muted" colspan="7">Завантаження...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Ticket Detail Modal -->
+    <div id="ticketModal"
+        class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="card p-6 w-full max-w-2xl mx-4 animate-fade-in relative">
+            <button onclick="closeTicketModal()" class="absolute top-4 right-4 text-muted hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+
+            <div class="mb-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <span id="ticketStatusBadge" class="badge">Open</span>
+                    <span class="text-xs font-mono text-muted" id="ticketId">#ID</span>
+                    <span class="text-xs text-muted" id="ticketDate">Date</span>
+                </div>
+                <h2 class="text-xl font-bold mb-1" id="ticketSubject">Subject</h2>
+                <div class="text-sm text-blue-400" id="ticketEmail">user@example.com</div>
+            </div>
+
+            <div class="bg-black/20 rounded-xl p-4 min-h-[150px] text-sm leading-relaxed whitespace-pre-wrap"
+                id="ticketMessage">Message content...</div>
+
+            <div class="mt-4 border-t border-white/10 pt-4">
+                <label class="block text-sm text-muted mb-2">Відповісти користувачу</label>
+                <textarea id="replyText"
+                    class="w-full rounded-xl p-3 text-sm h-24 bg-black/20 text-white placeholder-white/30 border border-white/10 focus:border-blue-500 focus:outline-none transition-colors"
+                    placeholder="Введіть текст відповіді..."></textarea>
+                <div class="flex justify-end mt-2">
+                    <button id="sendReplyBtn" class="btn-primary px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                        Відправити відповідь
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <button onclick="closeTicketModal()" class="btn-secondary px-4 py-2 rounded-lg text-sm">Закрити</button>
+                <button id="closeTicketBtn" class="btn-primary px-4 py-2 rounded-lg text-sm">Позначити як
+                    вирішене</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Ticket Modal (Optional for future, currently inline or just basics) -->
+
+    <script src="../js/api.js?v=13"></script>
+    <script>
+        // Admin Access Protection
+        async function checkAdminAccess() {
+            try {
+                const user = await api.get('/api/users/profile');
+                if (!user || (user.role !== 'admin' && user.role !== 'UserRole.ADMIN')) {
+                    alert('Доступ заборонено.');
+                    window.location.href = '../dashboard.html';
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                window.location.href = '../auth.html';
+                return false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!await checkAdminAccess()) return;
+            loadTickets();
+        });
+
+        async function loadTickets() {
+            const table = document.getElementById('supportTable');
+            try {
+                const tickets = await api.get('/api/support/');
+                window.allTickets = tickets; // Store for modal access
+
+                if (tickets.length === 0) {
+                    table.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-muted">Нових запитів немає</td></tr>';
+                    return;
+                }
+
+                table.innerHTML = '';
+                tickets.forEach(t => {
+                    const date = new Date(t.created_at).toLocaleString('uk-UA');
+                    const isOpen = t.status === 'open';
+
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-black/5 dark:hover:bg-white/5 transition-colors';
+                    row.innerHTML = `
+                        <td class="p-4 text-xs font-mono text-muted">#${t.id.slice(0, 8)}</td>
+                        <td class="p-4 font-medium">${t.email || t.user_email || 'Невідомо'}</td>
+                        <td class="p-4 font-semibold text-white/90">${t.subject}</td>
+                        <td class="p-4 text-muted max-w-xs truncate" title="${t.message}">${t.message}</td>
+                        <td class="p-4 text-xs font-mono">${date}</td>
+                        <td class="p-4">
+                            <span class="badge ${isOpen ? 'badge-success' : 'badge-neutral'} uppercase text-[10px] tracking-wider">
+                                ${t.status}
+                            </span>
+                        </td>
+                        <td class="p-4 flex items-center gap-2">
+                            <button onclick="viewTicket('${t.id}')" 
+                                    class="px-2 py-1 text-xs rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors">
+                                Перегляд
+                            </button>
+                            ${isOpen ? `
+                            <button onclick="updateStatus('${t.id}', 'closed')" 
+                                    class="px-2 py-1 text-xs rounded-lg border border-white/10 hover:bg-white/5 transition-colors">
+                                Закрити
+                            </button>` : `<span class="text-xs text-muted">Завершено</span>`}
+                        </td>
+                    `;
+                    table.appendChild(row);
+                });
+            } catch (e) {
+                console.error(e);
+                table.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-red-500">Помилка завантаження</td></tr>';
+            }
+        }
+
+        async function updateStatus(id, status, isModal = false) {
+            if (!confirm('Позначити запит як виконаний?')) return;
+            try {
+                await api.put(`/api/support/${id}`, { status });
+                if (isModal) closeTicketModal();
+                loadTickets();
+            } catch (e) {
+                alert('Помилка оновлення: ' + e.message);
+            }
+        }
+
+        function viewTicket(id) {
+            const ticket = window.allTickets.find(t => t.id === id);
+            if (!ticket) return;
+
+            document.getElementById('ticketId').textContent = '#' + ticket.id.slice(0, 8);
+            document.getElementById('ticketDate').textContent = new Date(ticket.created_at).toLocaleString('uk-UA');
+            document.getElementById('ticketSubject').textContent = ticket.subject;
+            document.getElementById('ticketEmail').textContent = ticket.email || ticket.user_email || 'Невідомо';
+            document.getElementById('ticketMessage').textContent = ticket.message;
+
+            const badge = document.getElementById('ticketStatusBadge');
+            badge.className = `badge ${ticket.status === 'open' ? 'badge-success' : 'badge-neutral'} uppercase text-[10px] tracking-wider`;
+            badge.textContent = ticket.status;
+
+            const resolveBtn = document.getElementById('closeTicketBtn');
+            if (ticket.status === 'open') {
+                resolveBtn.classList.remove('hidden');
+                resolveBtn.onclick = () => updateStatus(ticket.id, 'closed', true);
+            } else {
+                resolveBtn.classList.add('hidden');
+            }
+
+            // Reset reply form
+            document.getElementById('replyText').value = '';
+            document.getElementById('sendReplyBtn').onclick = () => sendReply(ticket.id);
+
+            document.getElementById('ticketModal').classList.remove('hidden');
+        }
+
+        function closeTicketModal() {
+            document.getElementById('ticketModal').classList.add('hidden');
+        }
+
+        async function sendReply(id) {
+            const message = document.getElementById('replyText').value.trim();
+            if (!message) {
+                alert("Введіть текст відповіді");
+                return;
+            }
+            if (!confirm("Відправити відповідь на email?")) return;
+
+            const btn = document.getElementById('sendReplyBtn');
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Відправка...';
+
+            try {
+                await api.post(`/api/support/${id}/reply`, { message });
+                alert("Відповідь успішно відправлено!");
+                document.getElementById('replyText').value = '';
+            } catch (e) {
+                alert("Помилка: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        }
+    </script>
+</body>
+
+</html>

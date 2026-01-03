@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - FPV Racer</title>
+    <title data-config="PROJECT_NAME">FPV Racer - Profile</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/tailwind_config.js"></script>
@@ -12,6 +12,7 @@
     <script src="js/config.js?v=99"></script>
     <script src="js/lang.js?v=99"></script>
     <script src="js/theme.js?v=99"></script>
+    <script src="js/toast.js?v=99"></script>
 </head>
 
 <body class="min-h-screen transition-colors duration-500">
@@ -35,23 +36,24 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
-                Back to Dashboard
+                На Головну
             </a>
         </div>
     </nav>
 
     <div class="container mx-auto px-6 py-8 max-w-4xl">
-        <h1 class="text-2xl font-bold mb-8">My Profile</h1>
+        <h1 class="text-2xl font-bold mb-8">Мій Профіль</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Profile Card -->
             <div class="card p-6 text-center">
-                <div class="relative w-24 h-24 mx-auto mb-4 group cursor-pointer">
+                <div class="relative w-24 h-24 mx-auto mb-4 group cursor-pointer"
+                    onclick="document.getElementById('avatarInput').click()">
                     <img id="profileAvatar" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff"
                         class="w-full h-full rounded-full object-cover border-4 border-blue-500/20 group-hover:border-blue-500 transition-all">
                     <div
                         class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
                             </path>
@@ -59,48 +61,64 @@
                                 d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                     </div>
+                    <input type="file" id="avatarInput" class="hidden" accept="image/*" onchange="uploadAvatar(this)">
                 </div>
 
-                <h2 id="profileName" class="text-xl font-semibold mb-1">Loading...</h2>
+                <h2 id="profileName" class="text-xl font-semibold mb-1">Завантаження...</h2>
                 <!-- Theme Settings -->
                 <div class="mb-6">
-                    <div class="text-xs text-muted uppercase mb-3 font-semibold tracking-wider">Appearance</div>
+                    <div class="text-xs text-muted uppercase mb-3 font-semibold tracking-wider">Зовнішній вигляд</div>
                     <div class="grid grid-cols-3 gap-2">
                         <button onclick="setTheme('system')" id="theme-system"
-                            class="p-2 rounded-xl border border-white/10 hover:border-blue-500/50 hover:bg-white/5 transition-all group">
+                            class="p-2 rounded-xl border border-[var(--divider)] hover:border-blue-500/50 hover:bg-[var(--input-bg)] transition-all group">
                             <div class="flex flex-col items-center gap-1.5">
-                                <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 icon-muted group-hover:text-blue-400 transition-colors" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                                     </path>
                                 </svg>
-                                <span class="text-[10px] text-gray-500 font-medium">System</span>
+                                <span class="text-[10px] text-muted font-medium">Системна</span>
                             </div>
                         </button>
                         <button onclick="setTheme('light')" id="theme-light"
-                            class="p-2 rounded-xl border border-white/10 hover:border-blue-500/50 hover:bg-white/5 transition-all group">
+                            class="p-2 rounded-xl border border-[var(--divider)] hover:border-blue-500/50 hover:bg-[var(--input-bg)] transition-all group">
                             <div class="flex flex-col items-center gap-1.5">
-                                <svg class="w-5 h-5 text-gray-400 group-hover:text-yellow-400 transition-colors"
+                                <svg class="w-5 h-5 icon-muted group-hover:text-yellow-400 transition-colors"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
                                     </path>
                                 </svg>
-                                <span class="text-[10px] text-gray-500 font-medium">Light</span>
+                                <span class="text-[10px] text-muted font-medium">Світла</span>
                             </div>
                         </button>
                         <button onclick="setTheme('dark')" id="theme-dark"
-                            class="p-2 rounded-xl border border-white/10 hover:border-blue-500/50 hover:bg-white/5 transition-all group">
+                            class="p-2 rounded-xl border border-[var(--divider)] hover:border-blue-500/50 hover:bg-[var(--input-bg)] transition-all group">
                             <div class="flex flex-col items-center gap-1.5">
-                                <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 icon-muted group-hover:text-blue-400 transition-colors" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
                                     </path>
                                 </svg>
-                                <span class="text-[10px] text-gray-500 font-medium">Dark</span>
+                                <span class="text-[10px] text-muted font-medium">Темна</span>
                             </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Language Settings -->
+                <div class="mb-6">
+                    <div class="text-xs text-muted uppercase mb-3 font-semibold tracking-wider">Мова / Language</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="lang.setLanguage('uk')" id="lang-uk"
+                            class="p-2 rounded-xl border border-[var(--divider)] hover:border-blue-500/50 hover:bg-[var(--input-bg)] transition-all">
+                            <span class="text-sm font-medium">🇺🇦 Українська</span>
+                        </button>
+                        <button onclick="lang.setLanguage('en')" id="lang-en"
+                            class="p-2 rounded-xl border border-[var(--divider)] hover:border-blue-500/50 hover:bg-[var(--input-bg)] transition-all">
+                            <span class="text-sm font-medium">🇬🇧 English</span>
                         </button>
                     </div>
                 </div>
@@ -108,18 +126,18 @@
                 <p id="profileEmail" class="text-sm text-muted mb-4">...</p>
 
                 <div class="bg-emerald-500/10 rounded-xl p-4 mb-4">
-                    <div class="text-xs text-muted uppercase tracking-wider mb-1">Balance</div>
-                    <div class="text-2xl font-bold text-emerald-500" id="profileBalance">0 min</div>
+                    <div class="text-xs text-muted uppercase tracking-wider mb-1">Баланс</div>
+                    <div class="text-2xl font-bold text-emerald-500" id="profileBalance">0 хв</div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <button onclick="document.getElementById('topUpModal').classList.remove('hidden')"
                         class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-blue-500/20">
-                        Top Up
+                        Поповнити
                     </button>
                     <button onclick="api.logout()"
                         class="px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 border border-red-500/20 hover:bg-red-500/10 transition-colors">
-                        Logout
+                        Вийти
                     </button>
                 </div>
             </div>
@@ -128,27 +146,68 @@
             <div class="md:col-span-2 space-y-6">
                 <!-- Stats -->
                 <div class="card p-6">
-                    <h3 class="font-semibold mb-4">Statistics</h3>
+                    <h1 class="font-semibold mb-4">Статистика</h1>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-black/5 dark:bg-white/5 rounded-xl p-4">
-                            <div class="text-xs text-muted uppercase mb-1">Total Sessions</div>
+                            <div class="text-xs text-muted uppercase mb-1">Всього сесій</div>
                             <div class="text-2xl font-bold" id="totalSessions">0</div>
                         </div>
                         <div class="bg-black/5 dark:bg-white/5 rounded-xl p-4">
-                            <div class="text-xs text-muted uppercase mb-1">Total Time</div>
-                            <div class="text-2xl font-bold" id="totalTime">0 min</div>
+                            <div class="text-xs text-muted uppercase mb-1">Загальний час</div>
+                            <div class="text-2xl font-bold" id="totalTime">0 хв</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- History -->
                 <div class="card p-6">
-                    <h3 class="font-semibold mb-4">Recent Sessions</h3>
+                    <h3 class="font-semibold mb-4">Останні сесії</h3>
                     <div class="space-y-3" id="historyList">
-                        <div class="text-center text-muted py-6">No sessions yet</div>
+                        <div class="text-center text-muted py-6">Сесій поки немає</div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- TopUp Modal -->
+    <div id="topUpModal"
+        class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="card p-6 w-full max-w-sm mx-4 animate-fade-in shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-semibold">Поповнити баланс</h3>
+                <button onclick="closeTopUpModal()" class="text-muted hover:text-current transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <button onclick="selectAmount(50)"
+                    class="amount-btn p-4 rounded-xl border-2 border-transparent hover:border-blue-500 transition-all text-center font-semibold bg-black/5 dark:bg-white/5">
+                    50 ₴
+                </button>
+                <button onclick="selectAmount(100)"
+                    class="amount-btn p-4 rounded-xl border-2 border-blue-500 bg-blue-500/10 text-center font-semibold">
+                    100 ₴
+                </button>
+                <button onclick="selectAmount(200)"
+                    class="amount-btn p-4 rounded-xl border-2 border-transparent hover:border-blue-500 transition-all text-center font-semibold bg-black/5 dark:bg-white/5">
+                    200 ₴
+                </button>
+            </div>
+
+            <button onclick="processPayment()" class="w-full btn-primary py-3 rounded-lg font-semibold">
+                Перейти до оплати
+            </button>
+
+            <form id="liqpayForm" method="POST" action="https://www.liqpay.ua/api/3/checkout" accept-charset="utf-8"
+                class="hidden">
+                <input type="hidden" name="data" id="liqpayData" />
+                <input type="hidden" name="signature" id="liqpaySignature" />
+            </form>
         </div>
     </div>
 
@@ -161,7 +220,7 @@
                 if (user) {
                     document.getElementById('profileName').innerText = user.name;
                     document.getElementById('profileEmail').innerText = user.email;
-                    document.getElementById('profileBalance').innerText = user.balance_minutes + ' min';
+                    document.getElementById('profileBalance').innerText = (user.balance || 0) + ' ₴';
                     if (user.avatar_url) document.getElementById('profileAvatar').src = user.avatar_url;
                 }
 
@@ -191,25 +250,120 @@
                                     #${rental.id.slice(0, 4)}
                                 </div>
                                 <div>
-                                    <div class="font-medium text-sm">Session</div>
+                                    <div class="font-medium text-sm">Сесія</div>
                                     <div class="text-xs text-muted">${date} • ${time}</div>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <div class="font-medium">${totalMins} min</div>
-                                <div class="text-xs ${isActive ? 'text-emerald-500' : 'text-muted'}">${rental.status}</div>
+                                <div class="font-medium">${totalMins} хв</div>
+                                <div class="text-xs ${isActive ? 'text-emerald-500' : 'text-muted'}">${isActive ? 'Активна' : 'Завершена'}</div>
                             </div>
                         `;
                         historyList.appendChild(item);
                     });
 
-                    document.getElementById('totalTime').innerText = totalMinutes + ' min';
+                    document.getElementById('totalTime').innerText = totalMinutes + ' хв';
                 }
 
             } catch (e) {
                 console.error(e);
             }
         });
+
+        let selectedTopUpAmount = 100;
+
+        function closeTopUpModal() {
+            document.getElementById('topUpModal').classList.add('hidden');
+        }
+
+        function selectAmount(amount) {
+            selectedTopUpAmount = amount;
+            const buttons = document.querySelectorAll('.amount-btn');
+            buttons.forEach(btn => {
+                if (btn.innerText.includes(amount + ' ₴')) {
+                    btn.classList.add('border-blue-500', 'bg-blue-500/10');
+                    btn.classList.remove('border-transparent', 'bg-black/5', 'dark:bg-white/5');
+                } else {
+                    btn.classList.remove('border-blue-500', 'bg-blue-500/10');
+                    btn.classList.add('border-transparent', 'bg-black/5', 'dark:bg-white/5');
+                }
+            });
+        }
+
+        async function processPayment() {
+            const url = `/api/payments/create?amount=${selectedTopUpAmount}`;
+            try {
+                const res = await api.post(url, {});
+                if (res && res.data && res.signature) {
+                    document.getElementById('liqpayData').value = res.data;
+                    document.getElementById('liqpaySignature').value = res.signature;
+                    document.getElementById('liqpayForm').submit();
+                } else {
+                    alert('Помилка ініціалізації оплати');
+                }
+            } catch (e) {
+                console.error('Payment error:', e);
+                alert('Помилка оплати: ' + e.message);
+            }
+        }
+
+        async function uploadAvatar(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    // Show loading state
+                    const img = document.getElementById('profileAvatar');
+                    const originalSrc = img.src;
+                    img.style.opacity = '0.5';
+
+                    // Use fetch directly for FormData or ensure api wrapper handles it.
+                    // api.js usually handles JSON. For upload we need native or special handling.
+                    // Let's use native fetch with token for simplicity if api.js wrapper is JSON-centric
+
+                    const token = localStorage.getItem('access_token');
+                    const res = await fetch('/api/uploads/avatar', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+
+                    if (!res.ok) {
+                        try {
+                            const errData = await res.json();
+                            throw new Error(errData.detail || 'Upload failed');
+                        } catch (parseErr) {
+                            throw new Error('Upload failed: ' + res.statusText);
+                        }
+                    }
+
+                    const data = await res.json();
+
+                    // Update image to new URL + random param to burst cache
+                    img.src = data.url + '?t=' + new Date().getTime();
+                    img.style.opacity = '1';
+
+                    if (window.showToast) {
+                        showToast('Аватар успішно оновлено', 'success');
+                    } else {
+                        alert('Аватар оновлено!');
+                    }
+
+                } catch (e) {
+                    console.error(e);
+                    if (window.showToast) {
+                        showToast(e.message, 'error');
+                    } else {
+                        alert("Помилка завантаження: " + e.message);
+                    }
+                    document.getElementById('profileAvatar').style.opacity = '1';
+                }
+            }
+        }
     </script>
 </body>
 

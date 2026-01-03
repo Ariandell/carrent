@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Control - FPV Racer</title>
+    <title data-config="PROJECT_NAME">FPV Racer - Керування</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/tailwind_config.js"></script>
+    <script src="js/config.js?v=99"></script>
     <link href="./css/antigravity.css?v=99" rel="stylesheet">
     <style>
         body {
@@ -52,7 +53,7 @@
                 class="hud-element flex items-center gap-3 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
                 <span id="connectionStatus"
                     class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm transition-all duration-300"></span>
-                <span id="statusText" class="text-xs font-bold tracking-wide uppercase hidden sm:inline">Offline</span>
+                <span id="statusText" class="text-xs font-bold tracking-wide uppercase hidden sm:inline">Офлайн</span>
 
                 <!-- Divider -->
                 <div class="w-px h-3 bg-white/20 mx-1"></div>
@@ -91,11 +92,11 @@
             <div class="flex gap-2 interactive ml-auto">
                 <button onclick="openReportModal()"
                     class="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/20 border border-yellow-500/30 hover:bg-yellow-500 hover:text-black transition-all rounded-full text-xs font-medium">
-                    <span>⚠️</span> Report
+                    <span>⚠️</span> Скарга
                 </button>
                 <button onclick="confirmExit()"
                     class="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/20 border border-red-500/30 hover:bg-red-500 hover:text-white transition-all rounded-full text-xs font-medium">
-                    <span>✕</span> Exit
+                    <span>✕</span> Вихід
                 </button>
             </div>
         </div>
@@ -113,8 +114,8 @@
         <!-- Warning Overlay (Hidden) -->
         <div id="warningOverlay"
             class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center hidden">
-            <h1 class="text-4xl font-bold text-red-500 animate-pulse">Connection Lost</h1>
-            <p class="text-red-300 text-sm mt-2">Attempting to reconnect...</p>
+            <h1 class="text-4xl font-bold text-red-500 animate-pulse">Зв'язок втрачено</h1>
+            <p class="text-red-300 text-sm mt-2">Спроба відновлення...</p>
         </div>
 
         <!-- Bottom Controls -->
@@ -128,7 +129,7 @@
                         <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-a">A</span>
                         <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-s">S</span>
                         <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-d">D</span>
-                        <span class="ml-2">Drive</span>
+                        <span class="ml-2">Рух</span>
                     </div>
                 </div>
                 <div class="flex gap-4 text-xs text-white/50">
@@ -137,7 +138,7 @@
                         <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-left">←</span>
                         <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-down">↓</span>
                         <span class="border border-white/30 px-2 py-1 rounded bg-white/10" id="key-right">→</span>
-                        <span class="ml-2">Camera</span>
+                        <span class="ml-2">Камера</span>
                     </div>
                 </div>
             </div>
@@ -155,16 +156,20 @@
                 </div>
 
                 <!-- Labels -->
+                <!-- Labels -->
                 <div
                     class="absolute bottom-4 left-20 text-[10px] text-white/50 tracking-widest uppercase -translate-x-1/2">
-                    Camera</div>
+                    Камера
+                </div>
                 <div
                     class="absolute bottom-4 right-20 text-[10px] text-white/50 tracking-widest uppercase translate-x-1/2">
-                    Drive</div>
+                    Рух
+                </div>
             </div>
-
-
         </div>
+
+
+    </div>
     </div>
 
     <!-- Extend Modal -->
@@ -183,35 +188,34 @@
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-white mb-2 tracking-tight">Time Running Low</h3>
-                <p class="text-white/60 text-sm">Mission time expiring in less than 30 seconds. <br>Extend now to
-                    maintain uplink.</p>
+                <h3 class="text-2xl font-bold text-white mb-2 tracking-tight">Час вичерпується</h3>
+                <p class="text-white/60 text-sm">До кінця сесії менше 30 секунд. <br>Подовжіть час для продовження.</p>
             </div>
 
             <div class="grid grid-cols-3 gap-3 mb-6">
-                <button onclick="extendRental(3)"
+                <button id="btnExtend3" onclick="extendRental(3)"
                     class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-2xl py-4 transition-all duration-300">
                     <span
-                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Extend</span>
-                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+3m</span>
+                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Подовжити</span>
+                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+3хв</span>
                 </button>
-                <button onclick="extendRental(5)"
+                <button id="btnExtend5" onclick="extendRental(5)"
                     class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-2xl py-4 transition-all duration-300">
                     <span
-                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Extend</span>
-                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+5m</span>
+                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Подовжити</span>
+                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+5хв</span>
                 </button>
-                <button onclick="extendRental(10)"
+                <button id="btnExtend10" onclick="extendRental(10)"
                     class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-2xl py-4 transition-all duration-300">
                     <span
-                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Extend</span>
-                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+10m</span>
+                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Подовжити</span>
+                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+10хв</span>
                 </button>
             </div>
 
             <button onclick="closeExtendModal()"
                 class="text-sm text-white/40 hover:text-white transition-colors tracking-wide uppercase font-medium text-[10px]">
-                Dismiss & Continue Mission
+                Закрити та продовжити
             </button>
         </div>
     </div>
@@ -220,14 +224,14 @@
     <div id="reportModal"
         class="absolute inset-0 z-[60] bg-black/90 flex items-center justify-center hidden interactive">
         <div class="card p-6 max-w-sm w-full mx-4 animate-fade-in">
-            <h3 class="text-lg font-semibold mb-4">Report Issue</h3>
+            <h3 class="text-lg font-semibold mb-4">Повідомити про проблему</h3>
             <textarea id="issueText"
                 class="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-sm mb-4 h-24 focus:border-blue-500 focus:outline-none"
-                placeholder="Describe the issue..."></textarea>
+                placeholder="Опишіть проблему..."></textarea>
             <div class="flex gap-3">
                 <button onclick="document.getElementById('reportModal').classList.add('hidden')"
-                    class="flex-1 btn-secondary py-2.5 rounded-lg text-sm">Cancel</button>
-                <button onclick="submitReport()" class="flex-1 btn-primary py-2.5 rounded-lg text-sm">Submit</button>
+                    class="flex-1 btn-secondary py-2.5 rounded-lg text-sm">Скасувати</button>
+                <button onclick="submitReport()" class="flex-1 btn-primary py-2.5 rounded-lg text-sm">Надіслати</button>
             </div>
         </div>
     </div>
@@ -236,8 +240,8 @@
     <div id="expiryModal"
         class="absolute inset-0 z-[60] bg-black/90 flex items-center justify-center hidden interactive">
         <div class="card p-8 max-w-sm w-full mx-4 text-center animate-fade-in">
-            <h1 class="text-2xl font-bold mb-2">Session Complete</h1>
-            <p class="text-muted text-sm mb-6">How was your experience?</p>
+            <h1 class="text-2xl font-bold mb-2">Сесія завершена</h1>
+            <p class="text-muted text-sm mb-6">Як пройшла поїздка?</p>
 
             <div class="flex justify-center gap-1 mb-6" id="starRating">
                 <button onclick="setRating(1)"
@@ -254,10 +258,10 @@
 
             <textarea id="feedbackText"
                 class="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-sm mb-4 hidden focus:border-blue-500 focus:outline-none"
-                placeholder="Optional feedback..."></textarea>
+                placeholder="Ваш відгук (необов'язково)..."></textarea>
 
             <button onclick="submitFeedbackAndExit()" class="btn-primary w-full py-3 rounded-lg font-semibold">
-                Return to Dashboard
+                На Головну
             </button>
         </div>
     </div>

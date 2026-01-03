@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from enum import Enum as PyEnum
-from sqlalchemy import String, Integer, DateTime, Enum
+from sqlalchemy import String, Integer, DateTime, Enum, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.database import Base
@@ -19,6 +19,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String)
     avatar_url: Mapped[str | None] = mapped_column(String, nullable=True)
     balance_minutes: Mapped[int] = mapped_column(Integer, default=0)
+    balance: Mapped[float] = mapped_column(Numeric(10, 2), default=0.00)
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER)
     is_verified: Mapped[bool] = mapped_column(default=False)
     google_id: Mapped[str | None] = mapped_column(String, nullable=True)

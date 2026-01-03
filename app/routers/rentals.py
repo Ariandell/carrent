@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from datetime import datetime, timedelta
 from typing import Optional
+from sqlalchemy.orm import joinedload
 
 from app.database import get_db
 from app.models.rental import Rental, RentalStatus
@@ -20,12 +21,7 @@ async def start_rental(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # 1. Check Balance
-    total_cost = rental_data.duration_minutes # Assuming 1 min = 1 unit for now
-    if current_user.balance_minutes < total_cost:
-        raise HTTPException(status_code=402, detail="Insufficient balance")
-
-    # 2. Check Car Availability
+    # 1. Get Car and Price
     result = await db.execute(select(Car).where(Car.id == rental_data.car_id))
     car = result.scalars().first()
     if not car:
@@ -34,18 +30,28 @@ async def start_rental(
     if car.status != CarStatus.FREE:
         raise HTTPException(status_code=409, detail="Car is not available")
 
-    # 3. Create Rental
+    # 2. Calculate Cost (UAH)
+    # Using Decimal for currency arithmetic is better but float/Numeric works with SQLAlchemy
+    price_per_minute = float(car.price_per_minute)  # Ensure float for calc
+    total_cost = price_per_minute * rental_data.duration_minutes
+    
+    # 3. Check Balance (UAH)
+    user_balance = float(current_user.balance)
+    if user_balance < total_cost:
+        raise HTTPException(status_code=402, detail=f"Insufficient funds. Required: {total_cost} UAH, Available: {user_balance} UAH")
+
+    # 4. Create Rental
     new_rental = Rental(
         user_id=current_user.id,
         car_id=car.id,
         duration_minutes=rental_data.duration_minutes
     )
     
-    # 4. Update Car Status
+    # 5. Update Car Status
     car.status = CarStatus.BUSY
     
-    # 5. Deduct Balance
-    current_user.balance_minutes -= total_cost
+    # 6. Deduct Balance
+    current_user.balance -= total_cost 
     
     db.add(new_rental)
     await db.commit()
@@ -68,6 +74,7 @@ async def get_active_rental(
 ):
     result = await db.execute(
         select(Rental)
+        .options(joinedload(Rental.user), joinedload(Rental.car))
         .where(Rental.user_id == current_user.id)
         .where(Rental.status == RentalStatus.ACTIVE)
         .order_by(Rental.started_at.desc())
@@ -76,8 +83,7 @@ async def get_active_rental(
 
     if rental:
         # Check for Expiry
-        # rental.duration_minutes includes extensions (if logic in extend_rental does += cost to duration)
-        # In extend_rental we did: rental.duration_minutes += cost. Correct.
+        # rental.duration_minutes includes extensions
         expiry_time = rental.started_at + timedelta(minutes=rental.duration_minutes)
         
         # Buffer of 10 seconds to avoid race conditions with frontend timer
@@ -155,19 +161,32 @@ async def extend_rental(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # 1. Get Rental and Car
     result = await db.execute(select(Rental).where(Rental.id == extend_data.rental_id))
     rental = result.scalars().first()
     
     if not rental or rental.status != RentalStatus.ACTIVE:
         raise HTTPException(status_code=400, detail="Active rental not found")
+    
+    car_result = await db.execute(select(Car).where(Car.id == rental.car_id))
+    car = car_result.scalars().first()
+    
+    if not car:
+         raise HTTPException(status_code=404, detail="Car associated with rental not found")
+
+    # 2. Calculate Cost (UAH)
+    price_per_minute = float(car.price_per_minute)
+    cost = price_per_minute * extend_data.additional_minutes
+    
+    # 3. Check Balance (UAH)
+    user_balance = float(current_user.balance)
+    if user_balance < cost:
+        raise HTTPException(status_code=402, detail=f"Insufficient funds. Required: {cost} UAH, Available: {user_balance} UAH")
         
-    cost = extend_data.additional_minutes
-    if current_user.balance_minutes < cost:
-        raise HTTPException(status_code=402, detail="Insufficient balance")
-        
-    current_user.balance_minutes -= cost
-    rental.extended_minutes += cost
-    rental.duration_minutes += cost # Use either specific field or just sum up
+    # 4. Deduct and Update
+    current_user.balance -= cost
+    rental.extended_minutes += extend_data.additional_minutes
+    rental.duration_minutes += extend_data.additional_minutes
     
     await db.commit()
     await db.refresh(rental)
@@ -185,6 +204,7 @@ async def read_rentals(
 ):
     result = await db.execute(
         select(Rental)
+        .options(joinedload(Rental.user), joinedload(Rental.car))
         .order_by(Rental.started_at.desc())
         .offset(skip).limit(limit)
     )
@@ -199,6 +219,7 @@ async def read_my_rentals(
 ):
     result = await db.execute(
         select(Rental)
+        .options(joinedload(Rental.user), joinedload(Rental.car))
         .where(Rental.user_id == current_user.id)
         .order_by(Rental.started_at.desc())
         .offset(skip).limit(limit)

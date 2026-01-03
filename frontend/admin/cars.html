@@ -4,110 +4,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cars - Admin - FPV Racer</title>
+    <title data-config="PROJECT_NAME">FPV Racer - Admin - Cars</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="../css/antigravity.css?v=13" rel="stylesheet">
     <script src="../js/config.js?v=13"></script>
     <script src="../js/theme.js?v=13"></script>
+    <script src="../js/toast.js?v=13"></script>
+    <script src="../js/admin_guard.js?v=13"></script>
+    <script src="../js/admin_sidebar.js?v=13"></script>
 </head>
 
 <body class="min-h-screen transition-colors duration-500">
+    <script>
+        initAdminPage();
+    </script>
 
     <!-- Theme Toggle Removed -->
 
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 nav-glass border-r border-white/10 flex flex-col">
-            <div class="h-16 flex items-center px-6 border-b border-white/10">
-                <a href="../index.html" class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                    </div>
-                    <span class="font-bold">Admin</span>
-                </a>
-            </div>
-
-            <nav class="flex-1 py-4 px-3 space-y-1">
-                <a href="index.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
-                        </path>
-                    </svg>
-                    Dashboard
-                </a>
-                <a href="cars.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-500 font-medium">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                        </path>
-                    </svg>
-                    Cars
-                </a>
-                <a href="rentals.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Rentals
-                </a>
-                <a href="users.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-                        </path>
-                    </svg>
-                    Users
-                </a>
-            </nav>
-
-            <div class="p-4 border-t border-white/10">
-                <a href="../dashboard.html"
-                    class="btn-secondary w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                    Back to App
-                </a>
-            </div>
-        </aside>
+        <div id="admin-sidebar"></div>
 
         <!-- Main Content -->
         <main class="flex-1 p-8 overflow-y-auto">
             <header class="flex justify-between items-center mb-8">
                 <div>
-                    <h1 class="text-2xl font-bold mb-1">Cars</h1>
-                    <p class="text-muted text-sm">Manage your RC car fleet</p>
+                    <h1 class="text-2xl font-bold mb-1">Автопарк</h1>
+                    <p class="text-muted text-sm">Керування автопарком</p>
                 </div>
                 <button onclick="openAddModal()"
                     class="btn-primary px-6 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    Add Car
+                    Додати авто
                 </button>
             </header>
 
             <!-- Cars Grid -->
             <div id="adminCarsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <div class="card p-4 text-center text-muted">Loading...</div>
+                <div class="card p-4 text-center text-muted">Завантаження...</div>
             </div>
         </main>
     </div>
 
     <!-- Modal -->
-    <div id="carModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
-        <div class="card p-6 w-full max-w-md mx-4 animate-fade-in">
+    <div id="carModal"
+        class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm overflow-y-auto">
+        <div class="card p-6 w-full max-w-2xl mx-4 my-8 animate-fade-in">
             <div class="flex justify-between items-center mb-6">
-                <h3 id="modalTitle" class="text-lg font-semibold">Add Car</h3>
+                <h3 id="modalTitle" class="text-lg font-semibold">Додати авто</h3>
                 <button onclick="closeModal()" class="text-muted hover:text-current transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
@@ -116,41 +62,122 @@
                 </button>
             </div>
 
-            <form id="carForm" class="space-y-4">
-                <input type="hidden" id="carId">
-                <div>
-                    <label class="block text-sm text-muted mb-1">Name</label>
-                    <input type="text" id="carName" class="w-full rounded-lg p-3 text-sm" required>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Form -->
+                <form id="carForm" class="space-y-4">
+                    <input type="hidden" id="carId">
+                    <input type="hidden" id="carImageUrl">
+
+                    <div>
+                        <label class="block text-sm text-muted mb-1">Назва</label>
+                        <input type="text" id="carName" class="w-full rounded-lg p-3 text-sm" required
+                            oninput="updatePreview()">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-muted mb-1">Raspberry ID</label>
+                        <input type="text" id="carRaspberryId" class="w-full rounded-lg p-3 text-sm"
+                            placeholder="e.g. pi_car_01" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-muted mb-1">VDO Ninja ID</label>
+                        <input type="text" id="carVdo" class="w-full rounded-lg p-3 text-sm" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm text-muted mb-1">Статус</label>
+                            <select id="carStatus" class="w-full rounded-lg p-3 text-sm">
+                                <option value="free">Вільна</option>
+                                <option value="busy">Зайнята</option>
+                                <option value="offline">Офлайн</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-muted mb-1">Ціна (₴/хв)</label>
+                            <input type="number" id="carPrice" class="w-full rounded-lg p-3 text-sm" value="1.00"
+                                min="0.01" step="0.01" required oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-muted mb-1">Опис</label>
+                        <textarea id="carDesc" class="w-full rounded-lg p-3 text-sm h-16"
+                            oninput="updatePreview()"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-muted mb-1">Зображення (PNG з прозорістю рекомендовано)</label>
+                        <input type="file" id="carImageFile" accept="image/*"
+                            class="w-full rounded-lg p-2 text-sm bg-black/5 dark:bg-white/5"
+                            onchange="handleImageSelect(event)">
+                    </div>
+                    <button type="submit" class="w-full btn-primary py-3 rounded-xl font-medium">Зберегти</button>
+                </form>
+
+                <!-- Live Preview Card -->
+                <div class="flex items-center justify-center">
+                    <div class="w-full max-w-xs">
+                        <div class="text-xs text-muted uppercase tracking-wider mb-2 text-center">Попередній перегляд
+                        </div>
+                        <div id="previewCard"
+                            class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10">
+                            <!-- Background Pattern -->
+                            <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\" 60\" height=\"60\"
+                                viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\"
+                                fill-rule=\"evenodd\"%3E%3Cg fill=\"%239C92AC\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M36
+                                34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6
+                                34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6
+                                4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+
+                            <!-- Car Image Container -->
+                            <div class="relative h-40 flex items-center justify-center overflow-hidden p-4">
+                                <img id="previewImage"
+                                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80' fill='%23666'%3E%3Crect width='120' height='80' rx='8' fill='%23333'/%3E%3Ctext x='60' y='45' text-anchor='middle' fill='%23666' font-size='12'%3EНемає фото%3C/text%3E%3C/svg%3E"
+                                    class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-2xl"
+                                    alt="Preview">
+                            </div>
+
+                            <!-- Card Content -->
+                            <div class="p-4 bg-gradient-to-t from-black/80 to-transparent">
+                                <div class="flex justify-between items-end">
+                                    <div>
+                                        <h4 id="previewName" class="font-bold text-white text-lg">Назва авто</h4>
+                                        <p id="previewDesc" class="text-sm text-white/60 line-clamp-1">Опис...</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xs text-white/50">Ціна</div>
+                                        <div class="font-bold text-emerald-400"><span id="previewPrice">1.00</span> ₴/хв
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm text-muted mb-1">Raspberry ID</label>
-                    <input type="text" id="carRaspberryId" class="w-full rounded-lg p-3 text-sm"
-                        placeholder="e.g. pi_car_01" required>
-                </div>
-                <div>
-                    <label class="block text-sm text-muted mb-1">VDO Ninja ID</label>
-                    <input type="text" id="carVdo" class="w-full rounded-lg p-3 text-sm" required>
-                </div>
-                <div>
-                    <label class="block text-sm text-muted mb-1">Status</label>
-                    <select id="carStatus" class="w-full rounded-lg p-3 text-sm">
-                        <option value="free">Available</option>
-                        <option value="busy">In Use</option>
-                        <option value="offline">Offline</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm text-muted mb-1">Description</label>
-                    <textarea id="carDesc" class="w-full rounded-lg p-3 text-sm h-20"></textarea>
-                </div>
-                <button type="submit" class="w-full btn-primary py-3 rounded-xl font-medium">Save</button>
-            </form>
+            </div>
         </div>
     </div>
 
     <script src="../js/api.js?v=13"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', loadCars);
+        // Admin Access Protection
+        async function checkAdminAccess() {
+            try {
+                const user = await api.get('/api/users/profile');
+                if (!user || (user.role !== 'admin' && user.role !== 'UserRole.ADMIN')) {
+                    alert('Доступ заборонено. Потрібні права адміністратора.');
+                    window.location.href = '../dashboard.html';
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                window.location.href = '../auth.html';
+                return false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (await checkAdminAccess()) {
+                loadCars();
+            }
+        });
 
         async function loadCars() {
             const grid = document.getElementById('adminCarsGrid');
@@ -161,7 +188,7 @@
                     const isFree = car.status === 'free';
                     const isBusy = car.status === 'busy';
                     const statusClass = isFree ? 'badge-success' : (isBusy ? 'badge-warning' : 'badge-neutral');
-                    const statusText = isFree ? 'Available' : (isBusy ? 'In Use' : 'Offline');
+                    const statusText = isFree ? 'Вільна' : (isBusy ? 'Зайнята' : 'Офлайн');
 
                     const card = document.createElement('div');
                     card.className = 'card p-4';
@@ -172,48 +199,112 @@
                         </div>
                         <div class="text-xs text-muted mb-4 font-mono">${car.vdo_ninja_id}</div>
                         <div class="flex gap-2">
-                            <button onclick="editCar('${car.id}')" class="flex-1 btn-secondary py-2 rounded-lg text-sm">Edit</button>
-                            <button onclick="deleteCar('${car.id}')" class="px-4 py-2 rounded-lg text-sm text-red-500 border border-red-500/20 hover:bg-red-500/10">Delete</button>
+                            <button onclick="editCar('${car.id}')" class="flex-1 btn-secondary py-2 rounded-lg text-sm">Редагувати</button>
+                            <button onclick="deleteCar('${car.id}')" class="px-4 py-2 rounded-lg text-sm text-red-500 border border-red-500/20 hover:bg-red-500/10">Видалити</button>
                         </div>
                     `;
                     grid.appendChild(card);
                 });
                 if (cars.length === 0) {
-                    grid.innerHTML = '<div class="card p-8 text-center text-muted col-span-full">No cars found</div>';
+                    grid.innerHTML = '<div class="card p-8 text-center text-muted col-span-full">Авто не знайдено</div>';
                 }
             } catch (e) { console.error(e); }
         }
 
         const modal = document.getElementById('carModal');
         const form = document.getElementById('carForm');
+        let pendingImageUrl = null; // Hold uploaded image URL before save
+
+        // Live Preview Update
+        function updatePreview() {
+            document.getElementById('previewName').innerText = document.getElementById('carName').value || 'Назва авто';
+            document.getElementById('previewDesc').innerText = document.getElementById('carDesc').value || 'Опис...';
+            document.getElementById('previewPrice').innerText = document.getElementById('carPrice').value || '1.00';
+        }
+
+        // Handle Image Selection and Upload
+        async function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Show local preview immediately
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('previewImage').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // Upload to server
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/uploads/car-image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    pendingImageUrl = result.url;
+                    document.getElementById('carImageUrl').value = result.url;
+                } else {
+                    alert('Помилка завантаження зображення');
+                }
+            } catch (e) {
+                console.error('Upload error:', e);
+                alert('Помилка завантаження');
+            }
+        }
 
         function openAddModal() {
-            document.getElementById('modalTitle').innerText = "Add Car";
+            document.getElementById('modalTitle').innerText = "Додати авто";
             document.getElementById('carId').value = '';
+            document.getElementById('carImageUrl').value = '';
+            pendingImageUrl = null;
             form.reset();
+            document.getElementById('carPrice').value = '1.00';
+            document.getElementById('previewImage').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' rx='8' fill='%23333'/%3E%3Ctext x='60' y='45' text-anchor='middle' fill='%23666' font-size='12'%3EНемає фото%3C/text%3E%3C/svg%3E";
+            updatePreview();
             modal.classList.remove('hidden');
         }
 
         function closeModal() {
             modal.classList.add('hidden');
+            pendingImageUrl = null;
         }
 
         async function editCar(id) {
             try {
                 const car = await api.get(`/api/cars/${id}`);
-                document.getElementById('modalTitle').innerText = "Edit Car";
+                document.getElementById('modalTitle').innerText = "Редагувати авто";
                 document.getElementById('carId').value = car.id;
                 document.getElementById('carName').value = car.name;
                 document.getElementById('carRaspberryId').value = car.raspberry_id || '';
                 document.getElementById('carVdo').value = car.vdo_ninja_id;
                 document.getElementById('carStatus').value = car.status;
+                document.getElementById('carPrice').value = car.price_per_minute || 1.00;
                 document.getElementById('carDesc').value = car.description || '';
+                document.getElementById('carImageUrl').value = car.image_url || '';
+
+                // Update preview with existing image
+                if (car.image_url) {
+                    document.getElementById('previewImage').src = car.image_url;
+                } else {
+                    document.getElementById('previewImage').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' rx='8' fill='%23333'/%3E%3Ctext x='60' y='45' text-anchor='middle' fill='%23666' font-size='12'%3EНемає фото%3C/text%3E%3C/svg%3E";
+                }
+
+                pendingImageUrl = car.image_url || null;
+                updatePreview();
                 modal.classList.remove('hidden');
             } catch (e) { alert(e.message); }
         }
 
         async function deleteCar(id) {
-            if (confirm('Delete this car?')) {
+            if (confirm('Видалити це авто?')) {
                 try {
                     await api.delete(`/api/cars/${id}`);
                     loadCars();
@@ -229,7 +320,9 @@
                 raspberry_id: document.getElementById('carRaspberryId').value,
                 vdo_ninja_id: document.getElementById('carVdo').value,
                 status: document.getElementById('carStatus').value,
-                description: document.getElementById('carDesc').value
+                description: document.getElementById('carDesc').value,
+                price_per_minute: parseFloat(document.getElementById('carPrice').value) || 1.00,
+                image_url: pendingImageUrl || document.getElementById('carImageUrl').value || null
             };
 
             try {
@@ -241,7 +334,7 @@
                 closeModal();
                 loadCars();
             } catch (err) {
-                alert("Error: " + err.message);
+                alert("Помилка: " + err.message);
             }
         });
     </script>

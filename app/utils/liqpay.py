@@ -9,17 +9,20 @@ import os
 from dataclasses import dataclass
 
 
+from app.config import settings
+
 @dataclass
 class LiqPayClient:
     """LiqPay API client for payment processing."""
     
-    public_key: str
-    private_key: str
-    sandbox: bool = True  # Set to False for production
+    public_key: str = ""
+    private_key: str = ""
+    sandbox: bool = True
 
     def __init__(self):
-        self.public_key = os.getenv("LIQPAY_PUBLIC_KEY", "sandbox_public_key")
-        self.private_key = os.getenv("LIQPAY_PRIVATE_KEY", "sandbox_private_key")
+        self.public_key = settings.LIQPAY_PUBLIC_KEY
+        self.private_key = settings.LIQPAY_PRIVATE_KEY
+        # Check if we should use sandbox (default to True if not specified or "true")
         self.sandbox = os.getenv("LIQPAY_SANDBOX", "true").lower() == "true"
 
     def _encode_data(self, data: dict) -> str:

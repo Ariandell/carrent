@@ -15,10 +15,20 @@ class RentalExtend(BaseModel):
     rental_id: UUID
     additional_minutes: int
 
+class RentalUser(BaseModel):
+    id: UUID
+    email: str
+    name: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
 class RentalResponse(BaseModel):
     id: UUID
     car_id: UUID
+    car_name: Optional[str] = None
     user_id: UUID
+    user: Optional[RentalUser] = None
     started_at: datetime
     duration_minutes: int
     extended_minutes: int

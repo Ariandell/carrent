@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const rental = await api.get('/api/rentals/active');
         if (!rental) {
-            showToast("No active uplink found. Returning to base.", 'error');
+            showToast("Активного зв'язку не знайдено. Повернення на базу.", 'error');
             setTimeout(() => window.location.href = 'dashboard.html', 2000);
             return;
         }
@@ -27,10 +27,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         expiryTime = startedAt + totalDurationMs;
 
         const car = await api.get(`/api/cars/${rental.car_id}`);
-        if (car && car.vdo_ninja_id) {
-            // Updated to use clean params for VDO
-            const vdoUrl = `https://vdo.ninja/?view=${car.vdo_ninja_id}&autoplay&clean&transparent&label=CarCam&controls=0&info=0`;
-            document.getElementById('videoStream').src = vdoUrl;
+        if (car) {
+            if (car.vdo_ninja_id) {
+                // Updated to use clean params for VDO
+                const vdoUrl = `https://vdo.ninja/?view=${car.vdo_ninja_id}&autoplay&clean&transparent&label=CarCam&controls=0&info=0`;
+                document.getElementById('videoStream').src = vdoUrl;
+            }
+            // Store price
+            currentPricePerMinute = car.price_per_minute || 1.0;
+            updateExtendButtons();
         }
 
         connectWebSocket(rental.car_id);
@@ -55,7 +60,7 @@ function connectWebSocket(carId) {
         el.classList.add('bg-emerald-400', 'shadow-[0_0_10px_#34d399]');
 
         const txt = document.getElementById('statusText');
-        if (txt) txt.innerText = "ONLINE";
+        if (txt) txt.innerText = "ОНЛАЙН";
 
         document.getElementById('ping').innerText = '24'; // Fake initial ping
     };
@@ -66,7 +71,7 @@ function connectWebSocket(carId) {
         el.classList.remove('bg-emerald-400', 'shadow-[0_0_10px_#34d399]');
 
         const txt = document.getElementById('statusText');
-        if (txt) txt.innerText = "OFFLINE";
+        if (txt) txt.innerText = "ОФЛАЙН";
 
         document.getElementById('ping').innerText = '--';
     };
@@ -221,7 +226,7 @@ function startTimer() {
             document.getElementById('timerDisplay').innerText = "00:00";
 
             // Auto-release logic: Force exit when time is up
-            showToast("Session Expired. Returning to base...", 'error');
+            showToast("Сесія минула. Повернення на базу...", 'error');
             sendCommand('stop'); // Safety stop
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
@@ -260,6 +265,9 @@ function closeExtendModal() {
     document.getElementById('extendModal').classList.add('hidden');
 }
 
+// Global state update
+let currentPricePerMinute = 1.0;
+
 async function extendRental(minutes) {
     if (!currentRentalId) return;
     try {
@@ -280,13 +288,30 @@ async function extendRental(minutes) {
         document.getElementById('timeProgress').className = "h-full bg-white relative w-full origin-left transition-all duration-1000";
         document.getElementById('timerDisplay').classList.remove('text-red-500', 'animate-pulse');
 
+        showToast(`Оренду продовжено на ${minutes} хв`, 'success');
+
     } catch (e) {
-        showToast("Extensions unavailable: " + e.message, 'error');
+        showToast("Продовження недоступне: " + e.message, 'error');
     }
 }
 
+// Update initialization to fetch price and update button text
+function updateExtendButtons() {
+    // 3 min
+    const cost3 = (3 * currentPricePerMinute).toFixed(2);
+    document.querySelector('#btnExtend3 span:last-child').innerText = `+3хв (${cost3} ₴)`;
+
+    // 5 min
+    const cost5 = (5 * currentPricePerMinute).toFixed(2);
+    document.querySelector('#btnExtend5 span:last-child').innerText = `+5хв (${cost5} ₴)`;
+
+    // 10 min
+    const cost10 = (10 * currentPricePerMinute).toFixed(2);
+    document.querySelector('#btnExtend10 span:last-child').innerText = `+10хв (${cost10} ₴)`;
+}
+
 function confirmExit() {
-    if (confirm("Abort mission and return to hangar?")) {
+    if (confirm("Перервати місію і повернутись до ангару?")) {
         window.location.href = 'dashboard.html';
     }
 }
@@ -302,17 +327,17 @@ function openReportModal() {
 
 async function submitReport() {
     const issue = document.getElementById('issueText').value;
-    if (!issue) { showToast('Please describe the issue', 'error'); return; }
+    if (!issue) { showToast('Будь ласка, опишіть проблему', 'error'); return; }
 
     try {
         await api.post('/api/rentals/report', {
             rental_id: currentRentalId,
             issue: issue
         });
-        showToast('Report transmitted. Support notified.', 'success');
+        showToast('Звіт надіслано. Підтримка повідомлена.', 'success');
         document.getElementById('reportModal').classList.add('hidden');
     } catch (e) {
-        showToast('Transmission failed: ' + e.message, 'error');
+        showToast('Помилка передачі: ' + e.message, 'error');
     }
 }
 

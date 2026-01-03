@@ -28,6 +28,10 @@ class ApiClient {
             headers['Authorization'] = `Bearer ${this.token}`;
         }
 
+        // Bypass ngrok warning page for API calls
+        headers['ngrok-skip-browser-warning'] = 'true';
+
+
         const config = {
             method,
             headers,

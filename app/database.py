@@ -2,8 +2,8 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 from app.config import settings
 
-# echo=True prints SQL queries to console, useful for debugging
-engine = create_async_engine(settings.DATABASE_URL, echo=True)
+# echo=True prints SQL queries to console, set to False to clean up logs
+engine = create_async_engine(settings.DATABASE_URL, echo=False)
 
 AsyncSessionLocal = sessionmaker(
     bind=engine,

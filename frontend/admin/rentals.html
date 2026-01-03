@@ -4,104 +4,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rentals - Admin - FPV Racer</title>
+    <title data-config="PROJECT_NAME">FPV Racer - Admin - Rentals</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="../css/antigravity.css?v=13" rel="stylesheet">
     <script src="../js/config.js?v=13"></script>
     <script src="../js/theme.js?v=13"></script>
+    <script src="../js/toast.js?v=13"></script>
+    <script src="../js/admin_guard.js?v=13"></script>
+    <script src="../js/admin_sidebar.js?v=13"></script>
 </head>
 
 <body class="min-h-screen transition-colors duration-500">
+    <script>
+        initAdminPage();
+    </script>
 
     <!-- Theme Toggle Removed -->
 
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 nav-glass border-r border-white/10 flex flex-col">
-            <div class="h-16 flex items-center px-6 border-b border-white/10">
-                <a href="../index.html" class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                    </div>
-                    <span class="font-bold">Admin</span>
-                </a>
-            </div>
-
-            <nav class="flex-1 py-4 px-3 space-y-1">
-                <a href="index.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
-                        </path>
-                    </svg>
-                    Dashboard
-                </a>
-                <a href="cars.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                        </path>
-                    </svg>
-                    Cars
-                </a>
-                <a href="rentals.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-500 font-medium">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Rentals
-                </a>
-                <a href="users.html"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-                        </path>
-                    </svg>
-                    Users
-                </a>
-            </nav>
-
-            <div class="p-4 border-t border-white/10">
-                <a href="../dashboard.html"
-                    class="btn-secondary w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                    Back to App
-                </a>
-            </div>
-        </aside>
+        <div id="admin-sidebar"></div>
 
         <!-- Main Content -->
         <main class="flex-1 p-8 overflow-y-auto">
             <header class="mb-8">
-                <h1 class="text-2xl font-bold mb-1">Rental Logs</h1>
-                <p class="text-muted text-sm">System activity audits</p>
+                <h1 class="text-2xl font-bold mb-1">Історія оренд</h1>
+                <p class="text-muted text-sm">Аудит активності системи</p>
             </header>
 
-            <div class="card overflow-hidden">
+            <div class="card overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-black/5 dark:bg-white/5">
                         <tr>
-                            <th class="p-4 text-muted font-medium">Mission ID</th>
-                            <th class="p-4 text-muted font-medium">Pilot</th>
-                            <th class="p-4 text-muted font-medium">Car</th>
-                            <th class="p-4 text-muted font-medium">Date/Time</th>
-                            <th class="p-4 text-muted font-medium">Duration</th>
-                            <th class="p-4 text-muted font-medium">Status</th>
+                            <th class="p-4 text-muted font-medium">ID Місії</th>
+                            <th class="p-4 text-muted font-medium">Пілот</th>
+                            <th class="p-4 text-muted font-medium">Авто</th>
+                            <th class="p-4 text-muted font-medium">Дата/Час</th>
+                            <th class="p-4 text-muted font-medium">Тривалість</th>
+                            <th class="p-4 text-muted font-medium">Статус</th>
                         </tr>
                     </thead>
                     <tbody id="rentalsTable" class="divide-y divide-white/10">
                         <tr>
-                            <td class="p-4 text-center text-muted" colspan="6">Loading...</td>
+                            <td class="p-4 text-center text-muted" colspan="6">Завантаження...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -111,35 +56,58 @@
 
     <script src="../js/api.js?v=13"></script>
     <script>
+        // Admin Access Protection
+        async function checkAdminAccess() {
+            try {
+                const user = await api.get('/api/users/profile');
+                if (!user || (user.role !== 'admin' && user.role !== 'UserRole.ADMIN')) {
+                    alert('Доступ заборонено. Потрібні права адміністратора.');
+                    window.location.href = '../dashboard.html';
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                window.location.href = '../auth.html';
+                return false;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
+            if (!await checkAdminAccess()) return;
+
             const table = document.getElementById('rentalsTable');
             try {
                 const rentals = await api.get('/api/rentals/'); // Admin route returns all
                 if (rentals.length === 0) {
-                    table.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-muted">No logs found</td></tr>';
+                    table.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-muted">Записів не знайдено</td></tr>';
                     return;
                 }
 
                 table.innerHTML = '';
                 rentals.forEach(r => {
                     const isActive = r.status === 'active';
-                    const date = new Date(r.started_at).toLocaleString();
-                    const row = document.createElement('tr');
+                    const date = new Date(r.started_at).toLocaleString('uk-UA');
+                    const pilotIdentifier = r.user && r.user.email ? r.user.email : (r.user_id.slice(0, 8) + '...');
+                    const pilotName = r.user && r.user.name ? r.user.name : '';
 
+                    const row = document.createElement('tr');
                     row.className = 'hover:bg-black/5 dark:hover:bg-white/5 transition-colors';
                     row.innerHTML = `
                         <td class="p-4 text-xs font-mono text-muted">#${r.id.slice(0, 8)}</td>
-                        <td class="p-4 font-medium">${r.user_id.slice(0, 8)}...</td>
+                        <td class="p-4">
+                            <div class="font-medium text-sm">${pilotIdentifier}</div>
+                            ${pilotName ? `<div class="text-xs text-muted">${pilotName}</div>` : ''}
+                        </td>
                         <td class="p-4 text-muted">${r.car_name || r.car_id}</td>
                         <td class="p-4 text-xs font-mono">${date}</td>
-                        <td class="p-4 font-mono">${r.duration_minutes} min</td>
+                        <td class="p-4 font-mono">${r.duration_minutes} хв</td>
                         <td class="p-4"><span class="badge ${isActive ? 'badge-success' : 'badge-neutral'}">${r.status}</span></td>
                     `;
                     table.appendChild(row);
                 });
             } catch (e) {
                 console.error(e);
-                table.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-red-500">Error loading logs</td></tr>';
+                table.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-red-500">Помилка завантаження журналів</td></tr>';
             }
         });
     </script>

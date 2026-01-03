@@ -4,25 +4,45 @@ let selectedDurationMinutes = 10;
 let userBalance = 0;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Check for payment success query param
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment') === 'success') {
+        // Clear the query param from URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        // Show success toast after page loads (delayed to ensure showToast is available)
+        setTimeout(() => {
+            if (typeof showToast === 'function') {
+                showToast('Оплата успішна! Баланс оновлено.', 'success');
+            }
+        }, 500);
+    }
+
     // 1. Fetch User Info
     try {
         const user = await api.get('/api/users/profile');
         if (user) {
-            userBalance = user.balance_minutes;
-            document.getElementById('balanceDisplay').innerHTML = `${userBalance} <small class="text-xs">MIN</small>`;
+            userBalance = user.balance || 0;
+            document.getElementById('balanceDisplay').innerHTML = `${userBalance} <small class="text-xs">₴</small>`;
 
             if (user.avatar_url) document.getElementById('userAvatar').src = user.avatar_url;
             if (user.name) document.getElementById('userName').innerText = user.name;
 
-            // Admin Button Logic
+            // Admin Button Logic - Only show for admin users
             if (user.role === 'admin' || user.role === 'UserRole.ADMIN') {
-                // Fixed selector to match dashboard.html (gap-4 instead of gap-6)
-                const navContainer = document.querySelector('nav .flex.items-center.gap-4');
-                const adminBtn = document.createElement('a');
-                adminBtn.href = 'admin/index.html';
-                adminBtn.className = 'hidden md:block px-3 py-1 rounded border border-blue-500/50 text-blue-400 text-xs font-bold hover:bg-blue-500/10 transition-colors uppercase tracking-wider';
-                adminBtn.innerText = 'Admin Panel';
-                navContainer.insertBefore(adminBtn, navContainer.firstChild);
+                // Admin Panel link embedded in dropdown below
+
+                // Add Admin Panel link to dropdown menu
+                const dropdown = document.getElementById('userDropdown');
+                if (dropdown) {
+                    const profileLink = dropdown.querySelector('a[href="profile.html"]');
+                    if (profileLink) {
+                        const adminLink = document.createElement('a');
+                        adminLink.href = 'admin/index.html';
+                        adminLink.className = 'block px-4 py-2.5 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors';
+                        adminLink.innerText = 'Адмін';
+                        profileLink.insertAdjacentElement('afterend', adminLink);
+                    }
+                }
             }
 
             // Check for active rental
@@ -92,7 +112,7 @@ async function loadCars() {
         skeletons.forEach(el => el.remove());
 
         if (cars.length === 0) {
-            grid.innerHTML = '<div class="col-span-full text-center text-muted py-12">No devices available</div>';
+            grid.innerHTML = '<div class="col-span-full text-center text-muted py-12">Немає доступних пристроїв</div>';
             return;
         }
 
@@ -115,7 +135,7 @@ async function loadCars() {
             // Status styling
             const statusColor = isFree ? 'bg-emerald-500' : (isBusy ? 'bg-indigo-500' : 'bg-red-500');
             const statusTextColor = isFree ? 'text-emerald-400' : (isBusy ? 'text-indigo-400' : 'text-red-400');
-            const statusText = isFree ? 'ONLINE' : (isBusy ? 'IN USE' : 'OFFLINE');
+            const statusText = isFree ? 'ОНЛАЙН' : (isBusy ? 'ЗАЙНЯТО' : 'ОФЛАЙН');
 
             // Reservation Info Logic
             let reservationHTML = '';
@@ -125,17 +145,17 @@ async function loadCars() {
                 // Use data attribute strictly for logic
                 busyUntilAttr = `data-busy-until="${car.busy_until}"`;
 
-                const bookedByName = car.booked_by_name || 'Unknown User';
+                const bookedByName = car.booked_by_name || 'Невідомий користувач';
 
                 reservationHTML = `
                     <div class="mt-3 p-3 rounded-lg bg-indigo-50 border border-indigo-200 dark:bg-indigo-500/10 dark:border-indigo-500/20 text-xs">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wider">Reserved by</span>
+                            <span class="text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wider">Зарезервовано</span>
                             <span class="text-indigo-700 dark:text-indigo-300 font-bold truncate max-w-[80px]" title="${bookedByName}">${bookedByName}</span>
                         </div>
                         <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-mono text-sm">
                             <svg class="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span class="countdown-timer" data-until="${car.busy_until}">Calculating...</span>
+                            <span class="countdown-timer" data-until="${car.busy_until}">Розрахунок...</span>
                         </div>
                     </div>
                 `;
@@ -159,8 +179,8 @@ async function loadCars() {
             }
 
             const btnText = isFree
-                ? '<span>Start Session</span> <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>'
-                : (isBusy ? 'Occupied' : 'Unavailable');
+                ? '<span>Почати сесію</span> <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>'
+                : (isBusy ? 'Зайнято' : 'Недоступно');
 
             const btnDisabled = !isFree ? 'disabled' : '';
 
@@ -175,27 +195,36 @@ async function loadCars() {
                     dark:bg-white/5 dark:border-white/5 dark:hover:border-white/10 dark:hover:bg-white/10 
                     ${!isFree ? 'opacity-90 grayscale-[0.2]' : ''}`;
                 card.dataset.status = car.status;
+                card.dataset.price = car.price_per_minute || 1.0; // Store price
                 if (busyUntilAttr) card.dataset.busyUntil = car.busy_until;
 
                 card.innerHTML = `
-                <!-- Image Section -->
-                <div class="relative h-48 overflow-hidden bg-gray-100 dark:bg-black">
-                    <!-- Gradient only needed for dark mode image blend, but consistent is okay -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-60"></div>
+                <!-- Image Section with Parallax Effect -->
+                <div class="relative h-48 overflow-hidden">
+                    <!-- Static Background Pattern -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/30 to-purple-600/30 dark:from-blue-900/50 dark:to-purple-900/50"></div>
+                    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%239C92AC\" fill-opacity=\"0.08\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
                     
-                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600" 
-                         class="w-full h-full object-cover opacity-90 dark:opacity-80 transition-transform duration-700 group-hover:scale-105"
-                         alt="${car.name}">
+                    <!-- Car Image with Hover Scale -->
+                    <div class="absolute inset-0 flex items-center justify-center p-4">
+                        <img src="${car.image_url || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600'}" 
+                             class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-2xl"
+                             alt="${car.name}"
+                             onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600'">
+                    </div>
                          
                     <!-- Top Float -->
                     <div class="absolute top-4 left-4 z-20" id="status-${car.id}">
                         ${statusBadgeHTML}
                     </div>
 
-                    <!-- Bottom Info -->
+                    <!-- Bottom Info: Battery + Price -->
                     <div class="absolute bottom-3 right-4 z-20 flex items-center gap-2">
                          <div class="px-2 py-1 rounded-md bg-black/40 backdrop-blur border border-white/10 text-[10px] font-mono text-white/80">
                             BAT <span id="batt-${car.id}" class="text-white font-bold ml-1">${car.battery_level}%</span>
+                         </div>
+                         <div class="px-2 py-1 rounded-md bg-emerald-500/80 backdrop-blur border border-emerald-400/30 text-[10px] font-bold text-white">
+                            ${car.price_per_minute || 1} ₴/хв
                          </div>
                     </div>
                 </div>
@@ -241,6 +270,7 @@ async function loadCars() {
                     if (!isFree) btn.setAttribute('disabled', 'true'); else btn.removeAttribute('disabled');
                     card.className = `card overflow-hidden ${!isFree ? 'opacity-90 grayscale-[0.2]' : ''}`;
                     card.dataset.status = car.status;
+                    card.dataset.price = car.price_per_minute || 1.0;
                     card.dataset.busyUntil = car.busy_until || '';
 
                     // Update reservation info part specifically
@@ -281,7 +311,7 @@ function updateTimers() {
         const diff = until - now;
 
         if (diff <= 0) {
-            timer.innerText = "Available soon";
+            timer.innerText = "Скоро буде";
             // Optional: trigger reload if it just expired
             return;
         }
@@ -294,11 +324,32 @@ function updateTimers() {
 }
 
 // === Rent Modal ===
+let selectedCarPrice = 1.0; // Default
+
 function openRentModal(id, name) {
     selectedCarId = id;
+
+    // Find car price from loaded cars logic or DOM
+    // We can grab it from the DOM element we created or pass it in
+    // Simpler: find the card logic
+    const priceEl = document.querySelector(`#car-${id} .text-emerald-500\\/80`);
+    // Wait, the DOM structure has the price in a specific div. 
+    // Let's rely on looking up the text or storing it in dataset
+    const card = document.getElementById(`car-${id}`);
+
+    // Parse price from card text or API data if available. 
+    // Since we don't keep a global cars map easily here, let's look at the card.
+    // In loadCars we added price to the HTML: "1.00 ₴/хв"
+    // Let's update loadCars to store price in dataset for easier access
+    if (card && card.dataset.price) {
+        selectedCarPrice = parseFloat(card.dataset.price);
+    } else {
+        selectedCarPrice = 1.0; // Fallback
+    }
+
     selectDuration(10); // Reset to default
     document.getElementById('rentCarName').innerText = name;
-    document.getElementById('modalBalance').innerText = `${userBalance} MIN`;
+    document.getElementById('modalBalance').innerText = `${userBalance} ₴`;
     document.getElementById('rentModal').classList.remove('hidden');
 }
 
@@ -309,12 +360,18 @@ function closeRentModal() {
 
 function selectDuration(minutes) {
     selectedDurationMinutes = minutes;
+    const estimatedCost = (minutes * selectedCarPrice).toFixed(2);
 
-    // Update UI styling for buttons
+    // Update UI styling and text
     const buttons = document.querySelectorAll('.duration-btn');
     buttons.forEach(btn => {
-        // Very basic text check or add data-attributes would be better, but this works for simple MVP
-        if (btn.innerText.includes(minutes + ' Minutes')) {
+        const durationText = btn.querySelector('.font-medium');
+        const badge = btn.querySelector('.badge');
+
+        // Reset base text if needed or just update badge
+        // We know the structure: span (Time), span (Badge)
+        // Let's just update the badge to show cost
+        if (btn.innerText.includes(minutes + ' ')) { // Simple check
             btn.classList.add('border-blue-500', 'bg-blue-500/10');
             btn.classList.remove('border-[var(--divider)]', 'bg-[var(--card-bg)]');
         } else {
@@ -322,13 +379,35 @@ function selectDuration(minutes) {
             btn.classList.add('border-[var(--divider)]', 'bg-[var(--card-bg)]');
         }
     });
+
+    // Update the visual confirmation of cost if we had a dedicated element, 
+    // but for now let's just update the specific button badges if we can identify them
+    // Or simpler: Update a "Total Cost" display in the modal
+    const costDisplay = document.getElementById('rentalCostDisplay');
+    if (!costDisplay) {
+        // Create it if missing or just append to modal
+        // For this iteration, let's keep it simple and maybe update the button text dynamically?
+        // Actually, let's add a cost line above the button
+        let costEl = document.getElementById('estimatedCost');
+        if (!costEl) {
+            costEl = document.createElement('div');
+            costEl.id = 'estimatedCost';
+            costEl.className = 'flex justify-between items-center mb-4 text-sm font-bold text-white';
+            document.querySelector('#rentModal .p-6:last-child').insertBefore(costEl, document.querySelector('#rentModal .btn-primary'));
+        }
+        costEl.innerHTML = `<span>Вартість</span> <span class="text-emerald-400">${estimatedCost} ₴</span>`;
+    } else {
+        document.getElementById('estimatedCost').innerHTML = `<span>Вартість</span> <span class="text-emerald-400">${estimatedCost} ₴</span>`;
+    }
 }
 
 async function confirmRental() {
     if (!selectedCarId) return;
 
-    if (userBalance < selectedDurationMinutes) {
-        showToast("Insufficient balance! Please deposit credits.", 'error');
+    const cost = selectedDurationMinutes * selectedCarPrice;
+
+    if (userBalance < cost) {
+        showToast(`Недостатньо коштів! Потрібно: ${cost.toFixed(2)} ₴`, 'error');
         return;
     }
 
@@ -343,7 +422,7 @@ async function confirmRental() {
             window.location.href = 'control.html?rental_id=' + res.id;
         }
     } catch (e) {
-        showToast("Rental Failed: " + e.message, 'error');
+        showToast("Помилка оренди: " + e.message, 'error');
     }
 }
 
@@ -356,7 +435,17 @@ function closeTopUpModal() { document.getElementById('topUpModal').classList.add
 
 function selectAmount(amount) {
     selectedTopUpAmount = amount;
-    // UI update logic for amounts (similar to duration) could be added here
+    // Update UI styling for amount buttons
+    const buttons = document.querySelectorAll('.amount-btn');
+    buttons.forEach(btn => {
+        if (btn.innerText.includes(amount + ' ₴')) {
+            btn.classList.add('border-blue-500', 'bg-blue-500/10');
+            btn.classList.remove('border-transparent', 'bg-black/5', 'dark:bg-white/5');
+        } else {
+            btn.classList.remove('border-blue-500', 'bg-blue-500/10');
+            btn.classList.add('border-transparent', 'bg-black/5', 'dark:bg-white/5');
+        }
+    });
 }
 
 async function processPayment() {
@@ -369,7 +458,36 @@ async function processPayment() {
             document.getElementById('liqpayForm').submit();
         }
     } catch (e) {
-        showToast("Payment Error: " + e.message, 'error');
+        showToast("Помилка оплати: " + e.message, 'error');
+    }
+}
+
+// === Support Modal ===
+function openSupportModal() {
+    document.getElementById('supportModal').classList.remove('hidden');
+}
+function closeSupportModal() {
+    document.getElementById('supportModal').classList.add('hidden');
+}
+async function submitSupport() {
+    const subject = document.getElementById('supportSubject').value;
+    const message = document.getElementById('supportMessage').value;
+
+    if (!message.trim()) {
+        showToast('Будь ласка, введіть повідомлення', 'error');
+        return;
+    }
+
+    try {
+        await api.post('/api/support/', {
+            subject: subject,
+            message: message
+        });
+        showToast('Запит надіслано! Ми зв\'яжемось з вами.', 'success');
+        document.getElementById('supportMessage').value = '';
+        closeSupportModal();
+    } catch (e) {
+        showToast('Помилка надсилання: ' + e.message, 'error');
     }
 }
 
