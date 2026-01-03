@@ -74,14 +74,20 @@
 }
 
 /* --- BASE STYLES --- */
-body {
+/* --- BASE STYLES --- */
+html {
     background: var(--bg-core);
-    /* Removed radial gradient for cleaner look */
+    transition: background 0.5s ease;
+}
+
+body {
+    background: transparent;
+    /* Changed from var(--bg-core) to allow fade without flash */
     color: var(--text-primary);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
-    transition: background 0.5s ease, color 0.5s ease;
+    transition: background 0.5s ease, color 0.5s ease, opacity 0.3s ease;
 }
 
 /* Clean font for headings - using Inter bold */

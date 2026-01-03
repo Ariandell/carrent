@@ -13,24 +13,32 @@ const lang = {
     setLanguage(newLang) {
         if (!window.TRANSLATIONS[newLang]) return;
 
-        this.lang = newLang;
-        this.dict = window.TRANSLATIONS[newLang];
-        CONFIG.DEFAULT_LANG = newLang;
+        // Smooth transition
+        document.body.classList.add('opacity-0');
 
-        localStorage.setItem('app_lang', newLang);
-        localStorage.setItem('lang', newLang);
+        setTimeout(() => {
+            this.lang = newLang;
+            this.dict = window.TRANSLATIONS[newLang];
+            CONFIG.DEFAULT_LANG = newLang;
 
-        // Update <html> lang attribute
-        document.documentElement.lang = newLang;
+            localStorage.setItem('app_lang', newLang);
+            localStorage.setItem('lang', newLang);
 
-        // Refresh all text on page
-        this.applyConfig();
+            // Update <html> lang attribute
+            document.documentElement.lang = newLang;
 
-        // Dispatch event for other components
-        window.dispatchEvent(new CustomEvent('langChanged', { detail: newLang }));
+            // Refresh all text on page
+            this.applyConfig();
 
-        // Visual feedback
-        console.log('Language changed to:', newLang);
+            // Dispatch event for other components
+            window.dispatchEvent(new CustomEvent('langChanged', { detail: newLang }));
+
+            // Visual feedback
+            console.log('Language changed to:', newLang);
+
+            // Fade back in
+            document.body.classList.remove('opacity-0');
+        }, 300); // Wait for fade out
     },
 
     toggle() {
