@@ -233,9 +233,9 @@ async function loadCars() {
                 <div class="p-5 pt-4 flex flex-col flex-1">
                     <div class="mb-4">
                         <div class="flex justify-between items-start">
-                            <h3 class="font-bold text-xl text-gray-900 dark:text-white mb-1 tracking-tight">${car.name}</h3>
+                            <h3 class="font-bold text-xl text-slate-800 dark:text-white mb-1 tracking-tight">${car.name}</h3>
                         </div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 font-light">${car.description || 'High-performance FPV unit'}</p>
+                        <p class="text-sm text-slate-500 dark:text-gray-400 font-light">${car.description || 'High-performance FPV unit'}</p>
                         
                         <!-- Reservation Info Container -->
                         <div id="reservation-${car.id}">
