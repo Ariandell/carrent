@@ -15,6 +15,8 @@ from app.websocket.manager import manager
 
 router = APIRouter(prefix="/api/rentals", tags=["Rentals"])
 
+from decimal import Decimal
+
 @router.post("/start", response_model=RentalResponse)
 async def start_rental(
     rental_data: RentalCreate,
@@ -31,12 +33,13 @@ async def start_rental(
         raise HTTPException(status_code=409, detail="Car is not available")
 
     # 2. Calculate Cost (UAH)
-    # Using Decimal for currency arithmetic is better but float/Numeric works with SQLAlchemy
-    price_per_minute = float(car.price_per_minute)  # Ensure float for calc
-    total_cost = price_per_minute * rental_data.duration_minutes
+    # Use Decimal for financial calculations
+    price_per_minute = Decimal(str(car.price_per_minute))
+    duration_decimal = Decimal(str(rental_data.duration_minutes))
+    total_cost = price_per_minute * duration_decimal
     
     # 3. Check Balance (UAH)
-    user_balance = float(current_user.balance)
+    user_balance = current_user.balance # Already Decimal
     if user_balance < total_cost:
         raise HTTPException(status_code=402, detail=f"Insufficient funds. Required: {total_cost} UAH, Available: {user_balance} UAH")
 
