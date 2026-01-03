@@ -24,7 +24,7 @@ async def init_db():
     from app.models.rental import Rental
     from app.models.transaction import Transaction
     from app.models.support import SupportTicket
-    from app.models.offer import Offer
+    from app.models.offer import RentalOffer
     from app.models.car_tariff import CarTariff
     
     async with engine.begin() as conn:
