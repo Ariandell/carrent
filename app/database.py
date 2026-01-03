@@ -16,3 +16,17 @@ Base = declarative_base()
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
+
+async def init_db():
+    # Import all models to ensure they are registered with Base metadata
+    from app.models.user import User
+    from app.models.car import Car
+    from app.models.rental import Rental
+    from app.models.transaction import Transaction
+    from app.models.support import SupportTicket
+    from app.models.offer import Offer
+    from app.models.car_tariff import CarTariff
+    
+    async with engine.begin() as conn:
+        # await conn.run_sync(Base.metadata.drop_all) # Uncomment to reset DB
+        await conn.run_sync(Base.metadata.create_all)

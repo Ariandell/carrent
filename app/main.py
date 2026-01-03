@@ -17,8 +17,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# from app.database import init_db
-# Env reload trigger
+from app.database import init_db
+
+@app.on_event("startup")
+async def startup_event():
+    await init_db()
+
 from app.routers import auth, users, cars, websockets, rentals, payments, admin, support, uploads
 app.include_router(auth.router)
 app.include_router(users.router)
