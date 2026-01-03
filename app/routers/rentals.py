@@ -190,11 +190,11 @@ async def extend_rental(
          raise HTTPException(status_code=404, detail="Car associated with rental not found")
 
     # 2. Calculate Cost (UAH)
-    price_per_minute = float(car.price_per_minute)
-    cost = price_per_minute * extend_data.additional_minutes
+    price_per_minute = Decimal(str(car.price_per_minute))
+    cost = price_per_minute * Decimal(str(extend_data.additional_minutes))
     
     # 3. Check Balance (UAH)
-    user_balance = float(current_user.balance)
+    user_balance = current_user.balance
     if user_balance < cost:
         raise HTTPException(status_code=402, detail=f"Insufficient funds. Required: {cost} UAH, Available: {user_balance} UAH")
         
@@ -204,7 +204,21 @@ async def extend_rental(
     rental.duration_minutes += extend_data.additional_minutes
     
     await db.commit()
-    await db.refresh(rental)
+    
+    # Refresh with relations for Pydantic
+    result = await db.execute(
+        select(Rental)
+        .options(joinedload(Rental.user), joinedload(Rental.car))
+        .where(Rental.id == rental.id)
+    )
+    rental = result.scalars().first()
+    
+    # Broadcast status update
+    try:
+        await manager.broadcast_status_update()
+    except Exception as e:
+        print(f"⚠️ Failed to broadcast update: {e}")
+
     return rental
 
 from typing import List
