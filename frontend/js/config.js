@@ -48,6 +48,7 @@ const TRANSLATIONS = {
         "nav_admin": "Адмін",
         "nav_logout": "Вийти",
         "nav_back": "На Головну",
+        "btn_login_register": "Вхід / Реєстрація",
 
         // Dashboard
         "balance": "Баланс",
@@ -161,7 +162,8 @@ const TRANSLATIONS = {
         "nav_support": "Support",
         "nav_admin": "Admin",
         "nav_logout": "Logout",
-        "nav_back": "Back",
+        "nav_back": "To Home",
+        "btn_login_register": "Login / Register",
 
         // Dashboard
         "balance": "Balance",
