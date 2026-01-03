@@ -189,10 +189,10 @@ async function loadCars() {
             if (!card) {
                 card = document.createElement('div');
                 card.id = cardId;
-                // Adaptive Card Container: White/Shadow in Light Mode, Glass in Dark Mode
+                // iOS Glass Card Container
                 card.className = `group relative flex flex-col overflow-hidden rounded-3xl transition-all duration-300 
-                    bg-white border border-gray-200 shadow-sm hover:shadow-md
-                    dark:bg-white/5 dark:border-white/5 dark:hover:border-white/10 dark:hover:bg-white/10 
+                    bg-white/80 backdrop-blur-lg border border-gray-200/50 shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-black/10 hover:scale-[1.02]
+                    dark:bg-white/5 dark:backdrop-blur-xl dark:border-white/10 dark:hover:border-white/20 dark:hover:bg-white/10 dark:shadow-lg dark:shadow-black/20
                     ${!isFree ? 'opacity-90 grayscale-[0.2]' : ''}`;
                 card.dataset.status = car.status;
                 card.dataset.price = car.price_per_minute || 1.0; // Store price
@@ -201,9 +201,9 @@ async function loadCars() {
                 card.innerHTML = `
                 <!-- Image Section with Parallax Effect -->
                 <div class="relative h-48 overflow-hidden">
-                    <!-- Static Background Pattern -->
-                    <div class="absolute inset-0 bg-gradient-to-br from-slate-700/80 to-slate-800/90"></div>
-                    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%239C92AC\" fill-opacity=\"0.08\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+                    <!-- iOS Glassmorphism Background -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-xl"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-white/5"></div>
                     
                     <!-- Car Image with Hover Scale -->
                     <div class="absolute inset-0 flex items-center justify-center p-4">
