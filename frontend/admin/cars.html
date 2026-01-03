@@ -86,7 +86,8 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-sm text-muted mb-1">Статус</label>
-                            <select id="carStatus" class="w-full rounded-lg p-3 text-sm">
+                            <select id="carStatus"
+                                class="w-full rounded-lg p-3 text-sm bg-black/5 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20">
                                 <option value="free">Вільна</option>
                                 <option value="busy">Зайнята</option>
                                 <option value="offline">Офлайн</option>
@@ -100,7 +101,8 @@
                     </div>
                     <div>
                         <label class="block text-sm text-muted mb-1">Опис</label>
-                        <textarea id="carDesc" class="w-full rounded-lg p-3 text-sm h-16"
+                        <textarea id="carDesc"
+                            class="w-full rounded-lg p-3 text-sm h-16 bg-black/5 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20"
                             oninput="updatePreview()"></textarea>
                     </div>
                     <div>
@@ -118,7 +120,7 @@
                         <div class="text-xs text-muted uppercase tracking-wider mb-2 text-center">Попередній перегляд
                         </div>
                         <div id="previewCard"
-                            class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10">
+                            class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/80 border border-white/10">
                             <!-- Background Pattern -->
                             <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\" 60\" height=\"60\"
                                 viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\"
