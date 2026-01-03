@@ -60,13 +60,17 @@ async def start_rental(
     await db.commit()
     await db.refresh(new_rental)
     
-    # Broadcast update
-    await manager.broadcast_status_update()
-    
-    # Start Video Stream on Car
-    if car.raspberry_id:
-        print(f"Sending start_stream to {car.raspberry_id} with ID {car.vdo_ninja_id}")
-        await manager.send_command_to_car(car.raspberry_id, f"start_stream|{car.vdo_ninja_id}")
+    # Broadcast update (Safe execution)
+    try:
+        await manager.broadcast_status_update()
+        
+        # Start Video Stream on Car
+        if car.raspberry_id:
+            print(f"Sending start_stream to {car.raspberry_id} with ID {car.vdo_ninja_id}")
+            await manager.send_command_to_car(car.raspberry_id, f"start_stream|{car.vdo_ninja_id}")
+    except Exception as e:
+        print(f"⚠️ Warning: Failed to send websocket command: {e}")
+        # We do NOT raise an exception here, so the rental is still returned successfully.
 
     return new_rental
 
