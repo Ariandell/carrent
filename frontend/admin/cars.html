@@ -86,11 +86,11 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-sm text-muted mb-1">Статус</label>
-                            <select id="carStatus" class="w-full rounded-lg p-3 text-sm border border-white/20"
-                                style="background-color: rgba(255,255,255,0.1); color: white;">
-                                <option value="free" style="background: #1e293b; color: white;">Вільна</option>
-                                <option value="busy" style="background: #1e293b; color: white;">Зайнята</option>
-                                <option value="offline" style="background: #1e293b; color: white;">Офлайн</option>
+                            <select id="carStatus" class="w-full rounded-lg p-3 text-sm border border-gray-600"
+                                style="background-color: #374151; color: white;">
+                                <option value="free" style="background: #374151; color: white;">Вільна</option>
+                                <option value="busy" style="background: #374151; color: white;">Зайнята</option>
+                                <option value="offline" style="background: #374151; color: white;">Офлайн</option>
                             </select>
                         </div>
                         <div>
@@ -101,9 +101,8 @@
                     </div>
                     <div>
                         <label class="block text-sm text-muted mb-1">Опис</label>
-                        <textarea id="carDesc" class="w-full rounded-lg p-3 text-sm h-16 border border-white/20"
-                            style="background-color: rgba(255,255,255,0.1); color: white;"
-                            oninput="updatePreview()"></textarea>
+                        <textarea id="carDesc" class="w-full rounded-lg p-3 text-sm h-16 border border-gray-600"
+                            style="background-color: #374151; color: white;" oninput="updatePreview()"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm text-muted mb-1">Зображення (PNG з прозорістю рекомендовано)</label>
@@ -119,8 +118,8 @@
                     <div class="w-full max-w-xs">
                         <div class="text-xs text-muted uppercase tracking-wider mb-2 text-center">Попередній перегляд
                         </div>
-                        <div id="previewCard"
-                            class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/80 border border-white/10">
+                        <div id="previewCard" class="group relative overflow-hidden rounded-2xl border border-gray-600"
+                            style="background: linear-gradient(135deg, #374151 0%, #1f2937 100%);">
                             <!-- Background Pattern -->
                             <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\" 60\" height=\"60\"
                                 viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\"
