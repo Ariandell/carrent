@@ -86,11 +86,11 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-sm text-muted mb-1">Статус</label>
-                            <select id="carStatus"
-                                class="w-full rounded-lg p-3 text-sm bg-black/5 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20">
-                                <option value="free">Вільна</option>
-                                <option value="busy">Зайнята</option>
-                                <option value="offline">Офлайн</option>
+                            <select id="carStatus" class="w-full rounded-lg p-3 text-sm border border-white/20"
+                                style="background-color: rgba(255,255,255,0.1); color: white;">
+                                <option value="free" style="background: #1e293b; color: white;">Вільна</option>
+                                <option value="busy" style="background: #1e293b; color: white;">Зайнята</option>
+                                <option value="offline" style="background: #1e293b; color: white;">Офлайн</option>
                             </select>
                         </div>
                         <div>
@@ -101,8 +101,8 @@
                     </div>
                     <div>
                         <label class="block text-sm text-muted mb-1">Опис</label>
-                        <textarea id="carDesc"
-                            class="w-full rounded-lg p-3 text-sm h-16 bg-black/5 dark:bg-white/10 text-gray-900 dark:text-white border border-gray-300 dark:border-white/20"
+                        <textarea id="carDesc" class="w-full rounded-lg p-3 text-sm h-16 border border-white/20"
+                            style="background-color: rgba(255,255,255,0.1); color: white;"
                             oninput="updatePreview()"></textarea>
                     </div>
                     <div>
