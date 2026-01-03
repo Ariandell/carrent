@@ -58,7 +58,15 @@ async def start_rental(
     
     db.add(new_rental)
     await db.commit()
-    await db.refresh(new_rental)
+    
+    # Refresh to get ID and relationships populated
+    # Explicitly load user for Pydantic schema
+    result = await db.execute(
+        select(Rental)
+        .options(joinedload(Rental.user), joinedload(Rental.car))
+        .where(Rental.id == new_rental.id)
+    )
+    new_rental = result.scalars().first()
     
     # Broadcast update (Safe execution)
     try:
