@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Checking active rental:
             checkActiveRental();
         } else {
-            window.location.href = 'auth.html';
+            window.location.href = 'index.html';
         }
 
         loadCars();

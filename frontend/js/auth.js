@@ -436,6 +436,6 @@ document.getElementById('resetForm').addEventListener('submit', async (e) => {
 
 // Check if already logged in
 if (api.getToken()) {
-    // Optional: Verify token validity via /me endpoint
-    // window.location.href = 'dashboard.html';
+    // Verify token validity via /me endpoint or just redirect
+    window.location.href = 'dashboard.html';
 }
