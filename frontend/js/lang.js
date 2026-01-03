@@ -61,7 +61,7 @@ const lang = {
             if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                 el.placeholder = text;
             } else {
-                el.innerText = text;
+                el.innerHTML = text;
             }
         });
     },

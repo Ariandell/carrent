@@ -28,7 +28,7 @@ const ASSETS = {
 const TRANSLATIONS = {
     "uk": {
         // Landing Page
-        "hero_title": "Відчуй швидкість реальності",
+        "hero_title": "Відчуй швидкість <span class=\"text-blue-500 text-glow\">реальності</span>",
         "hero_text": "Справжні RC-машинки, якими ти керуєш через інтернет. Мінімальна затримка, максимальний драйв.",
         "btn_start_journey": "Почати подорож",
         "btn_how_it_works": "Як це працює?",
@@ -188,7 +188,7 @@ const TRANSLATIONS = {
     },
     "en": {
         // Landing Page
-        "hero_title": "Feel the Speed of Reality",
+        "hero_title": "Feel the Speed of <span class=\"text-blue-500 text-glow\">Reality</span>",
         "hero_text": "Real RC cars you control over the internet. Minimal latency, maximum drive.",
         "btn_start_journey": "Start Journey",
         "btn_how_it_works": "How it works?",
