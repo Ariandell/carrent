@@ -68,13 +68,14 @@
                         class="absolute -inset-10 bg-[radial-gradient(closest-side,var(--bg-core)_40%,transparent_100%)] opacity-80 z-[-1] pointer-events-none blur-xl">
                     </div>
 
-                    <h1
-                        class="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-tight tracking-tight mt-10 lg:mt-0">
+                    <h1 class="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-tight tracking-tight mt-10 lg:mt-0"
+                        data-i18n="hero_title">
                         Відчуй швидкість
                         <span class="text-blue-500 text-glow">реальності</span>
                     </h1>
 
-                    <p class="text-lg text-muted mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed drop-shadow-sm">
+                    <p class="text-lg text-muted mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed drop-shadow-sm"
+                        data-i18n="hero_text">
                         Справжні RC-машинки, якими ти керуєш через інтернет.
                         Мінімальна затримка, максимальний драйв.
                     </p>
@@ -82,14 +83,15 @@
                     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                         <a href="auth.html" id="heroAuthBtn"
                             class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all hover:shadow-[0_0_30px_rgba(37,99,235,0.6)] hover:-translate-y-1">
-                            Почати подорож
+                            <span data-i18n="btn_start_journey">Почати подорож</span>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                             </svg>
                         </a>
                         <a href="#how-it-works"
-                            class="px-8 py-4 rounded-2xl font-semibold text-lg border border-[var(--divider)] hover:border-blue-500 text-muted hover:text-[var(--text-primary)] transition-all hover:bg-[var(--glass-bg)]">
+                            class="px-8 py-4 rounded-2xl font-semibold text-lg border border-[var(--divider)] hover:border-blue-500 text-muted hover:text-[var(--text-primary)] transition-all hover:bg-[var(--glass-bg)]"
+                            data-i18n="btn_how_it_works">
                             Як це працює?
                         </a>
                     </div>
@@ -98,11 +100,13 @@
                     <div class="grid grid-cols-3 gap-8 mt-16 pt-8 border-t border-white/5 relative z-10">
                         <div>
                             <div class="text-3xl font-bold text-[var(--text-primary)]">50+</div>
-                            <div class="text-sm text-muted uppercase tracking-wider mt-1">Машинок</div>
+                            <div class="text-sm text-muted uppercase tracking-wider mt-1" data-i18n="stats_cars">Машинок
+                            </div>
                         </div>
                         <div>
                             <div class="text-3xl font-bold text-[var(--text-primary)]">HD</div>
-                            <div class="text-sm text-muted uppercase tracking-wider mt-1">Стрім</div>
+                            <div class="text-sm text-muted uppercase tracking-wider mt-1" data-i18n="stats_stream">Стрім
+                            </div>
                         </div>
                         <div>
                             <div class="text-3xl font-bold text-blue-400">30<span
@@ -142,7 +146,8 @@
                                     <div
                                         class="absolute top-3 left-3 flex items-center gap-2 bg-black/60 backdrop-blur px-2 py-1 rounded border border-white/10 z-10">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                        <span class="text-xs font-bold text-emerald-400">ОНЛАЙН</span>
+                                        <span class="text-xs font-bold text-emerald-400"
+                                            data-i18n="status_online">ОНЛАЙН</span>
                                     </div>
 
                                     <!-- Price Badge -->
@@ -155,7 +160,8 @@
                                 <div class="flex justify-between items-center relative z-10">
                                     <div>
                                         <h3 id="heroCarName" class="font-bold text-lg text-white">Завантаження...</h3>
-                                        <p id="heroCarDesc" class="text-sm text-slate-500">FPV машинка</p>
+                                        <p id="heroCarDesc" class="text-sm text-slate-500" data-i18n="car_default_desc">
+                                            FPV машинка</p>
                                     </div>
                                     <div
                                         class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
@@ -185,8 +191,9 @@
     <section id="how-it-works" class="py-32 relative z-10">
         <div class="container mx-auto px-6">
             <div class="text-center mb-20">
-                <h2 class="text-3xl sm:text-4xl font-bold mb-4">Твій шлях пілота</h2>
-                <p class="text-muted text-lg">Всього три кроки відокремлюють тебе від старту</p>
+                <h2 class="text-3xl sm:text-4xl font-bold mb-4" data-i18n="steps_title">Твій шлях пілота</h2>
+                <p class="text-muted text-lg" data-i18n="steps_subtitle">Всього три кроки відокремлюють тебе від старту
+                </p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-8">
@@ -196,8 +203,10 @@
                         class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 text-blue-500 font-bold text-xl">
                         1
                     </div>
-                    <h3 class="font-bold text-xl mb-3 text-[var(--text-primary)]">Обери болід</h3>
-                    <p class="text-muted leading-relaxed">В нашому гаражі є все: від швидкісних багі до потужних
+                    <h3 class="font-bold text-xl mb-3 text-[var(--text-primary)]" data-i18n="step1_title">Обери болід
+                    </h3>
+                    <p class="text-muted leading-relaxed" data-i18n="step1_desc">В нашому гаражі є все: від швидкісних
+                        багі до потужних
                         краулерів для бездоріжжя.</p>
                 </div>
 
@@ -207,8 +216,10 @@
                         class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 text-blue-500 font-bold text-xl">
                         2
                     </div>
-                    <h3 class="font-bold text-xl mb-3 text-[var(--text-primary)]">Підключись</h3>
-                    <p class="text-muted leading-relaxed">Не потрібно нічого встановлювати. Керування відбувається
+                    <h3 class="font-bold text-xl mb-3 text-[var(--text-primary)]" data-i18n="step2_title">Підключись
+                    </h3>
+                    <p class="text-muted leading-relaxed" data-i18n="step2_desc">Не потрібно нічого встановлювати.
+                        Керування відбувається
                         прямо з браузера.</p>
                 </div>
 
@@ -218,8 +229,10 @@
                         class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 text-blue-500 font-bold text-xl">
                         3
                     </div>
-                    <h3 class="font-bold text-xl mb-3 text-[var(--text-primary)]">Тисни на газ!</h3>
-                    <p class="text-muted leading-relaxed">Отримуй відеопотік в реальному часі та керуй клавіатурою
+                    <h3 class="font-bold text-xl mb-3 text-[var(--text-primary)]" data-i18n="step3_title">Тисни на газ!
+                    </h3>
+                    <p class="text-muted leading-relaxed" data-i18n="step3_desc">Отримуй відеопотік в реальному часі та
+                        керуй клавіатурою
                         (WASD).</p>
                 </div>
             </div>
@@ -232,10 +245,10 @@
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div>
                     <h2 class="text-3xl sm:text-4xl font-bold mb-6">
-                        Технології
+                        <span data-i18n="features_title">Технології</span>
                         <span class="text-blue-500">Low Latency</span>
                     </h2>
-                    <p class="text-lg text-muted mb-10 leading-relaxed">
+                    <p class="text-lg text-muted mb-10 leading-relaxed" data-i18n="features_desc">
                         Ми розробили власну систему передачі відео та команд, яка забезпечує миттєвий відгук навіть
                         через мобільний інтернет.
                     </p>
@@ -250,8 +263,10 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-bold text-[var(--text-primary)] mb-2">WebRTC Core</h3>
-                                <p class="text-muted text-sm">Пряме Peer-to-Peer з'єднання для мінімальної затримки.
+                                <h3 class="font-bold text-[var(--text-primary)] mb-2" data-i18n="feature_webrtc_title">
+                                    WebRTC Core</h3>
+                                <p class="text-muted text-sm" data-i18n="feature_webrtc_desc">Пряме Peer-to-Peer
+                                    з'єднання для мінімальної затримки.
                                 </p>
                             </div>
                         </div>
@@ -266,8 +281,10 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-bold text-[var(--text-primary)] mb-2">Secure Link</h3>
-                                <p class="text-muted text-sm">Шифрований канал керування захистить від перехоплення.
+                                <h3 class="font-bold text-[var(--text-primary)] mb-2" data-i18n="feature_secure_title">
+                                    Secure Link</h3>
+                                <p class="text-muted text-sm" data-i18n="feature_secure_desc">Шифрований канал керування
+                                    захистить від перехоплення.
                                 </p>
                             </div>
                         </div>
@@ -287,7 +304,8 @@
                         <div class="flex justify-between items-center mb-8">
                             <div class="flex items-center gap-3">
                                 <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse box-shadow-glow"></div>
-                                <span class="font-mono text-sm text-emerald-600 dark:text-emerald-400 font-bold">СИСТЕМА
+                                <span class="font-mono text-sm text-emerald-600 dark:text-emerald-400 font-bold"
+                                    data-i18n="system_active">СИСТЕМА
                                     АКТИВНА</span>
                             </div>
                             <div class="text-xs font-mono text-slate-500 dark:text-slate-400">NET_ID: 802.11ax</div>
@@ -317,7 +335,8 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div
                                 class="p-4 rounded-xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 backdrop-blur-md shadow-sm">
-                                <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">Затримка (Ping)</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 mb-1" data-i18n="latency_ping">
+                                    Затримка (Ping)</div>
                                 <div class="text-2xl font-bold text-slate-800 dark:text-white flex items-end gap-2">
                                     24 <span
                                         class="text-sm font-normal text-slate-500 dark:text-slate-500 mb-1">ms</span>
@@ -329,7 +348,8 @@
                             </div>
                             <div
                                 class="p-4 rounded-xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 backdrop-blur-md shadow-sm">
-                                <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">Якість відео</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 mb-1" data-i18n="video_quality">
+                                    Якість відео</div>
                                 <div class="text-2xl font-bold text-slate-800 dark:text-white flex items-end gap-2">
                                     1080 <span
                                         class="text-sm font-normal text-slate-500 dark:text-slate-500 mb-1">p60</span>
@@ -371,7 +391,7 @@
                 </div>
                 <span class="font-bold text-slate-700 dark:text-slate-300" data-config="PROJECT_NAME">(NAME)</span>
             </div>
-            <p>© 2024 Всі права захищено.</p>
+            <p data-i18n="footer_rights">© 2024 Всі права захищено.</p>
         </div>
     </footer>
 

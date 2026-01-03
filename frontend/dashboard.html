@@ -101,7 +101,7 @@
                     </div>
                 </div>
                 <a href="control.html" class="btn-primary px-6 py-2.5 rounded-lg font-medium flex items-center gap-2">
-                    Увійти в керування
+                    <span data-i18n="btn_enter_control">Увійти в керування</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -113,14 +113,16 @@
         <!-- Header -->
         <div class="flex justify-between items-end mb-8">
             <div>
-                <h1 class="text-2xl font-bold mb-1">Доступні машинки</h1>
-                <p class="text-muted text-sm">Оберіть машинку щоб розпочати сесію</p>
+                <h1 class="text-2xl font-bold mb-1" data-i18n="dashboard_title">Доступні машинки</h1>
+                <p class="text-muted text-sm" data-i18n="dashboard_subtitle">Оберіть машинку щоб розпочати сесію</p>
             </div>
             <div class="flex gap-2">
                 <button id="filterAll" onclick="setFilter('all')"
-                    class="btn-primary px-3 py-1.5 text-sm rounded-lg transition-all">Всі</button>
+                    class="btn-primary px-3 py-1.5 text-sm rounded-lg transition-all"
+                    data-i18n="filter_all">Всі</button>
                 <button id="filterAvailable" onclick="setFilter('available')"
-                    class="btn-secondary px-3 py-1.5 text-sm rounded-lg opacity-60 transition-all">Вільні</button>
+                    class="btn-secondary px-3 py-1.5 text-sm rounded-lg opacity-60 transition-all"
+                    data-i18n="filter_available">Вільні</button>
             </div>
         </div>
 
@@ -138,7 +140,7 @@
         class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
         <div class="card p-6 w-full max-w-sm mx-4 animate-fade-in">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-semibold">Поповнити баланс</h3>
+                <h3 class="text-lg font-semibold" data-i18n="top_up">Поповнити баланс</h3>
                 <button onclick="closeTopUpModal()" class="text-muted hover:text-current transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
@@ -162,7 +164,8 @@
                 </button>
             </div>
 
-            <button onclick="processPayment()" class="w-full btn-primary py-3 rounded-lg font-semibold">
+            <button onclick="processPayment()" class="w-full btn-primary py-3 rounded-lg font-semibold"
+                data-i18n="proceed_to_payment">
                 Перейти до оплати
             </button>
 
@@ -179,7 +182,7 @@
         class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
         <div class="card p-6 w-full max-w-md mx-4 animate-fade-in">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-semibold">Служба підтримки</h3>
+                <h3 class="text-lg font-semibold" data-i18n="support_title">Служба підтримки</h3>
                 <button onclick="closeSupportModal()" class="text-muted hover:text-current transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
@@ -190,23 +193,30 @@
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-muted mb-1">Тема звернення</label>
+                    <label class="block text-xs uppercase tracking-wider text-muted mb-1" data-i18n="support_topic">Тема
+                        звернення</label>
                     <select id="supportSubject"
                         class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg p-3 outline-none focus:border-blue-500 transition-colors">
-                        <option class="bg-gray-900 text-white" value="Технічна проблема">Технічна проблема</option>
-                        <option class="bg-gray-900 text-white" value="Помилка оплати">Помилка оплати</option>
-                        <option class="bg-gray-900 text-white" value="Вхід та Акаунт">Вхід та Акаунт</option>
-                        <option class="bg-gray-900 text-white" value="Інше">Інше</option>
+                        <option class="bg-gray-900 text-white" value="Технічна проблема" data-i18n="support_topic_tech">
+                            Технічна проблема</option>
+                        <option class="bg-gray-900 text-white" value="Помилка оплати" data-i18n="support_topic_payment">
+                            Помилка оплати</option>
+                        <option class="bg-gray-900 text-white" value="Вхід та Акаунт" data-i18n="support_topic_account">
+                            Вхід та Акаунт</option>
+                        <option class="bg-gray-900 text-white" value="Інше" data-i18n="support_topic_other">Інше
+                        </option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs uppercase tracking-wider text-muted mb-1">Повідомлення</label>
+                    <label class="block text-xs uppercase tracking-wider text-muted mb-1"
+                        data-i18n="support_message">Повідомлення</label>
                     <textarea id="supportMessage" rows="5"
                         class="w-full bg-black/5 dark:bg-white/5 border border-transparent rounded-lg p-3 outline-none focus:border-blue-500 transition-colors resize-none"
-                        placeholder="Детально опишіть ситуацію..."></textarea>
+                        placeholder="Детально опишіть ситуацію..." data-i18n="placeholder_support_msg"></textarea>
                 </div>
 
-                <button onclick="submitSupport()" class="w-full btn-primary py-3 rounded-lg font-semibold">
+                <button onclick="submitSupport()" class="w-full btn-primary py-3 rounded-lg font-semibold"
+                    data-i18n="support_btn">
                     Надіслати запит
                 </button>
             </div>
@@ -220,7 +230,7 @@
             <div class="p-6">
                 <div class="flex justify-between items-start mb-2">
                     <div>
-                        <h3 class="text-lg font-semibold">Оренда машинки</h3>
+                        <h3 class="text-lg font-semibold" data-i18n="rent_title">Оренда машинки</h3>
                         <div id="rentCarName" class="text-blue-500 font-medium text-sm">Car Name</div>
                     </div>
                     <button onclick="closeRentModal()" class="text-muted hover:text-current transition-colors">
@@ -233,29 +243,31 @@
             </div>
 
             <div class="p-6 bg-black/5 dark:bg-white/5 border-y divider">
-                <div class="text-xs text-muted uppercase tracking-wider mb-3">Оберіть тривалість</div>
+                <div class="text-xs text-muted uppercase tracking-wider mb-3" data-i18n="select_duration">Оберіть
+                    тривалість</div>
                 <div class="space-y-2">
                     <button onclick="selectDuration(5)"
                         class="duration-btn w-full p-3 rounded-lg border divider hover:border-blue-500 flex justify-between items-center transition-all">
-                        <span class="font-medium">5 Хвилин</span>
+                        <span class="font-medium" data-i18n="rent_duration_5">5 Хвилин</span>
                     </button>
                     <button onclick="selectDuration(10)"
                         class="duration-btn w-full p-3 rounded-lg border-2 border-blue-500 bg-blue-500/10 flex justify-between items-center transition-all">
-                        <span class="font-medium">10 Хвилин</span>
+                        <span class="font-medium" data-i18n="rent_duration_10">10 Хвилин</span>
                     </button>
                     <button onclick="selectDuration(20)"
                         class="duration-btn w-full p-3 rounded-lg border divider hover:border-blue-500 flex justify-between items-center transition-all">
-                        <span class="font-medium">20 Хвилин</span>
+                        <span class="font-medium" data-i18n="rent_duration_20">20 Хвилин</span>
                     </button>
                 </div>
             </div>
 
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4 text-sm">
-                    <span class="text-muted">Ваш баланс</span>
+                    <span class="text-muted" data-i18n="your_balance">Ваш баланс</span>
                     <span class="font-medium" id="modalBalance">0 ХВ</span>
                 </div>
-                <button onclick="confirmRental()" class="w-full btn-primary py-3 rounded-lg font-semibold">
+                <button onclick="confirmRental()" class="w-full btn-primary py-3 rounded-lg font-semibold"
+                    data-i18n="confirm_rent">
                     Підтвердити та підключитись
                 </button>
             </div>

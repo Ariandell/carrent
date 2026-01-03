@@ -5,7 +5,7 @@
 const CONFIG = {
     PROJECT_NAME: "(NAME)",
     APP_VERSION: "1.0.0",    // Used for cache busting
-    DEFAULT_LANG: 'en',      // Ukrainian by default
+    DEFAULT_LANG: 'uk',      // Ukrainian by default
     API_BASE: window.location.origin, // Automatically matches current domain/port (Production Ready)
     CURRENCY: '₴',           // UAH currency symbol
     CURRENCY_NAME: 'грн'     // Full currency name
@@ -27,6 +27,33 @@ const ASSETS = {
 
 const TRANSLATIONS = {
     "uk": {
+        // Landing Page
+        "hero_title": "Відчуй швидкість реальності",
+        "hero_text": "Справжні RC-машинки, якими ти керуєш через інтернет. Мінімальна затримка, максимальний драйв.",
+        "btn_start_journey": "Почати подорож",
+        "btn_how_it_works": "Як це працює?",
+        "stats_cars": "Машинок",
+        "stats_stream": "Стрім",
+        "car_default_desc": "FPV машинка",
+        "steps_title": "Твій шлях пілота",
+        "steps_subtitle": "Всього три кроки відокремлюють тебе від старту",
+        "step1_title": "Обери болід",
+        "step1_desc": "В нашому гаражі є все: від швидкісних багі до потужних краулерів для бездоріжжя.",
+        "step2_title": "Підключись",
+        "step2_desc": "Не потрібно нічого встановлювати. Керування відбувається прямо з браузера.",
+        "step3_title": "Тисни на газ!",
+        "step3_desc": "Отримуй відеопотік в реальному часі та керуй клавіатурою (WASD).",
+        "features_title": "Технології",
+        "features_desc": "Ми розробили власну систему передачі відео та команд, яка забезпечує миттєвий відгук навіть через мобільний інтернет.",
+        "feature_webrtc_title": "WebRTC Core",
+        "feature_webrtc_desc": "Пряме Peer-to-Peer з'єднання для мінімальної затримки.",
+        "feature_secure_title": "Secure Link",
+        "feature_secure_desc": "Шифрований канал керування захистить від перехоплення.",
+        "footer_rights": "© 2024 Всі права захищено.",
+        "system_active": "СИСТЕМА АКТИВНА",
+        "latency_ping": "Затримка (Ping)",
+        "video_quality": "Якість відео",
+
         // Auth page
         "app_subtitle": "ПАНЕЛЬ КЕРУВАННЯ",
         "tab_login": "ВХІД",
@@ -51,6 +78,8 @@ const TRANSLATIONS = {
         "btn_login_register": "Вхід / Реєстрація",
 
         // Dashboard
+        "dashboard_title": "Доступні машинки",
+        "dashboard_subtitle": "Оберіть машинку щоб розпочати сесію",
         "balance": "Баланс",
         "top_up": "Поповнити баланс",
         "available_cars": "Доступні машинки",
@@ -62,8 +91,21 @@ const TRANSLATIONS = {
         "status_offline": "ОФЛАЙН",
         "start_session": "Почати сесію",
         "unavailable": "Недоступно",
-        "unavailable": "Недоступно",
+        "active_session_title": "Активна сесія",
+        "active_session_desc": "У вас є активна оренда прямо зараз",
+        "btn_enter_control": "Увійти в керування",
         "reserved": "Зарезервовано",
+
+        // Support Modal
+        "support_title": "Служба підтримки",
+        "support_topic": "Тема звернення",
+        "support_message": "Повідомлення",
+        "support_btn": "Надіслати запит",
+        "support_topic_tech": "Технічна проблема",
+        "support_topic_payment": "Помилка оплати",
+        "support_topic_account": "Вхід та Акаунт",
+        "support_topic_other": "Інше",
+        "placeholder_support_msg": "Детально опишіть ситуацію...",
 
         // Profile
         "profile_title": "Мій Профіль",
@@ -88,6 +130,9 @@ const TRANSLATIONS = {
         // Rental
         "rent_title": "Оренда машинки",
         "select_duration": "Оберіть тривалість",
+        "rent_duration_5": "5 Хвилин",
+        "rent_duration_10": "10 Хвилин",
+        "rent_duration_20": "20 Хвилин",
         "your_balance": "Ваш баланс",
         "confirm_rent": "Підтвердити та підключитись",
         "active_session": "Активна сесія",
@@ -115,7 +160,7 @@ const TRANSLATIONS = {
         // Misc
         "placeholder_email": "user@example.com",
         "placeholder_pass": "••••••••",
-        "placeholder_name": "User Name",
+        "placeholder_name": "Ваше Ім'я",
         "hero_subtitle": "Керуйте FPV дронами дистанційно з професійною точністю",
         "btn_get_started": "РОЗПОЧАТИ",
         "btn_view_fleet": "ОГЛЯД ПРИСТРОЇВ",
@@ -142,6 +187,33 @@ const TRANSLATIONS = {
         "proceed_to_payment": "Перейти до оплати"
     },
     "en": {
+        // Landing Page
+        "hero_title": "Feel the Speed of Reality",
+        "hero_text": "Real RC cars you control over the internet. Minimal latency, maximum drive.",
+        "btn_start_journey": "Start Journey",
+        "btn_how_it_works": "How it works?",
+        "stats_cars": "Cars",
+        "stats_stream": "Stream",
+        "car_default_desc": "FPV Car",
+        "steps_title": "Your Pilot Path",
+        "steps_subtitle": "Only three steps separate you from the start",
+        "step1_title": "Choose Your Bolide",
+        "step1_desc": "Our garage has everything: from high-speed buggies to powerful off-road crawlers.",
+        "step2_title": "Connect",
+        "step2_desc": "No installation required. Control directly from your browser.",
+        "step3_title": "Hit the Gas!",
+        "step3_desc": "Get real-time video feed and control with your keyboard (WASD).",
+        "features_title": "Technologies",
+        "features_desc": "We developed our own video and command transmission system that ensures instant feedback even over mobile internet.",
+        "feature_webrtc_title": "WebRTC Core",
+        "feature_webrtc_desc": "Direct Peer-to-Peer connection for minimal latency.",
+        "feature_secure_title": "Secure Link",
+        "feature_secure_desc": "Encrypted control channel protects against interception.",
+        "footer_rights": "© 2024 All rights reserved.",
+        "system_active": "SYSTEM ACTIVE",
+        "latency_ping": "Latency (Ping)",
+        "video_quality": "Video Quality",
+
         // Auth page
         "app_subtitle": "CONTROL PANEL",
         "tab_login": "LOGIN",
@@ -166,6 +238,8 @@ const TRANSLATIONS = {
         "btn_login_register": "Login / Register",
 
         // Dashboard
+        "dashboard_title": "Available Cars",
+        "dashboard_subtitle": "Select a car to start a session",
         "balance": "Balance",
         "top_up": "Top Up Balance",
         "available_cars": "Available Cars",
@@ -177,7 +251,21 @@ const TRANSLATIONS = {
         "status_offline": "OFFLINE",
         "start_session": "Start Session",
         "unavailable": "Unavailable",
+        "active_session_title": "Active Session",
+        "active_session_desc": "You have an active rental right now",
+        "btn_enter_control": "Enter Control",
         "reserved": "Reserved",
+
+        // Support Modal
+        "support_title": "Support Service",
+        "support_topic": "Subject",
+        "support_message": "Message",
+        "support_btn": "Send Request",
+        "support_topic_tech": "Technical Issue",
+        "support_topic_payment": "Payment Error",
+        "support_topic_account": "Login & Account",
+        "support_topic_other": "Other",
+        "placeholder_support_msg": "Describe the situation in detail...",
 
         // Profile
         "profile_title": "My Profile",
@@ -202,6 +290,9 @@ const TRANSLATIONS = {
         // Rental
         "rent_title": "Rent Car",
         "select_duration": "Select Duration",
+        "rent_duration_5": "5 Minutes",
+        "rent_duration_10": "10 Minutes",
+        "rent_duration_20": "20 Minutes",
         "your_balance": "Your Balance",
         "confirm_rent": "Confirm & Connect",
         "active_session": "Active Session",
