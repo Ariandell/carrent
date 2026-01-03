@@ -111,68 +111,70 @@
                 </div>
 
                 <!-- Language Settings -->
-                <div class="text-xs text-muted uppercase mb-3 font-semibold tracking-wider" data-i18n="lang_title">Мова
-                    / Language</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="AppLang.setLanguage('uk')" id="lang-uk"
-                        class="p-2 rounded-xl border border-[var(--divider)] hover:border-blue-500/50 hover:bg-[var(--input-bg)] transition-all">
-                        <span class="text-sm font-medium" data-i18n="lang_uk">Українська</span>
+                <div class="mb-6">
+                    <div class="text-xs text-muted uppercase mb-3 font-semibold tracking-wider" data-i18n="lang_title">
+                        Мова / Language</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="AppLang.setLanguage('uk')" id="lang-uk"
+                            class="p-2 rounded-xl border border-[var(--divider)] hover:border-blue-500/50 hover:bg-[var(--input-bg)] transition-all">
+                            <span class="text-sm font-medium" data-i18n="lang_uk">Українська</span>
+                        </button>
+                        <button onclick="AppLang.setLanguage('en')" id="lang-en"
+                            class="p-2 rounded-xl border border-[var(--divider)] hover:border-blue-500/50 hover:bg-[var(--input-bg)] transition-all">
+                            <span class="text-sm font-medium" data-i18n="lang_en">English</span>
+                        </button>
+                    </div>
+                </div>
+
+                <p id="profileEmail" class="text-sm text-muted mb-4">...</p>
+
+                <div class="bg-emerald-500/10 rounded-xl p-4 mb-4">
+                    <div class="text-xs text-muted uppercase tracking-wider mb-1" data-i18n="balance">Баланс</div>
+                    <div class="text-2xl font-bold text-emerald-500" id="profileBalance">0 хв</div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="document.getElementById('topUpModal').classList.remove('hidden')"
+                        class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-blue-500/20"
+                        data-i18n="btn_topup_short">
+                        Поповнити
                     </button>
-                    <button onclick="AppLang.setLanguage('en')" id="lang-en"
-                        class="p-2 rounded-xl border border-[var(--divider)] hover:border-blue-500/50 hover:bg-[var(--input-bg)] transition-all">
-                        <span class="text-sm font-medium" data-i18n="lang_en">English</span>
+                    <button onclick="api.logout()"
+                        class="px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 border border-red-500/20 hover:bg-red-500/10 transition-colors"
+                        data-i18n="nav_logout">
+                        Вийти
                     </button>
                 </div>
             </div>
 
-            <p id="profileEmail" class="text-sm text-muted mb-4">...</p>
-
-            <div class="bg-emerald-500/10 rounded-xl p-4 mb-4">
-                <div class="text-xs text-muted uppercase tracking-wider mb-1" data-i18n="balance">Баланс</div>
-                <div class="text-2xl font-bold text-emerald-500" id="profileBalance">0 хв</div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="document.getElementById('topUpModal').classList.remove('hidden')"
-                    class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-blue-500/20"
-                    data-i18n="btn_topup_short">
-                    Поповнити
-                </button>
-                <button onclick="api.logout()"
-                    class="px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 border border-red-500/20 hover:bg-red-500/10 transition-colors"
-                    data-i18n="nav_logout">
-                    Вийти
-                </button>
-            </div>
-        </div>
-
-        <!-- Stats & History -->
-        <div class="md:col-span-2 space-y-6">
-            <!-- Stats -->
-            <div class="card p-6">
-                <h1 class="font-semibold mb-4" data-i18n="stats_title">Статистика</h1>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-black/5 dark:bg-white/5 rounded-xl p-4">
-                        <div class="text-xs text-muted uppercase mb-1" data-i18n="stats_total_sessions">Всього сесій
+            <!-- Stats & History -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- Stats -->
+                <div class="card p-6">
+                    <h1 class="font-semibold mb-4" data-i18n="stats_title">Статистика</h1>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-black/5 dark:bg-white/5 rounded-xl p-4">
+                            <div class="text-xs text-muted uppercase mb-1" data-i18n="stats_total_sessions">Всього сесій
+                            </div>
+                            <div class="text-2xl font-bold" id="totalSessions">0</div>
                         </div>
-                        <div class="text-2xl font-bold" id="totalSessions">0</div>
-                    </div>
-                    <div class="bg-black/5 dark:bg-white/5 rounded-xl p-4">
-                        <div class="text-xs text-muted uppercase mb-1" data-i18n="stats_total_time">Загальний час</div>
-                        <div class="text-2xl font-bold" id="totalTime">0 хв</div>
+                        <div class="bg-black/5 dark:bg-white/5 rounded-xl p-4">
+                            <div class="text-xs text-muted uppercase mb-1" data-i18n="stats_total_time">Загальний час
+                            </div>
+                            <div class="text-2xl font-bold" id="totalTime">0 хв</div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- History -->
-            <div class="card p-6">
-                <h3 class="font-semibold mb-4" data-i18n="history_title">Останні сесії</h3>
-                <div class="space-y-3" id="historyList">
-                    <div class="text-center text-muted py-6" data-i18n="history_empty">Сесій поки немає</div>
+                <!-- History -->
+                <div class="card p-6">
+                    <h3 class="font-semibold mb-4" data-i18n="history_title">Останні сесії</h3>
+                    <div class="space-y-3" id="historyList">
+                        <div class="text-center text-muted py-6" data-i18n="history_empty">Сесій поки немає</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
     <!-- TopUp Modal -->
