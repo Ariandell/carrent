@@ -115,10 +115,12 @@ body {
 
 /* Language Switch Animation */
 body.lang-switching>*:not(script) {
-    filter: blur(8px);
-    opacity: 0.6;
-    transform: scale(0.99);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: blur(2px);
+    opacity: 1;
+    transform: none;
+    pointer-events: none;
+    /* Prevent clicks during transition */
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body>*:not(script) {
