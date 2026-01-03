@@ -3,7 +3,7 @@
  */
 
 const CONFIG = {
-    PROJECT_NAME: "FPV Racer Pro",
+    PROJECT_NAME: "(NAME)",
     APP_VERSION: "1.0.0",    // Used for cache busting
     DEFAULT_LANG: 'en',      // Ukrainian by default
     API_BASE: window.location.origin, // Automatically matches current domain/port (Production Ready)

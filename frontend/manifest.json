@@ -1,6 +1,6 @@
 {
-  "name": "FPV Racer Pro",
-  "short_name": "FPV Racer",
+  "name": "(NAME)",
+  "short_name": "(NAME)",
   "description": "Керуйте FPV дронами дистанційно з професійною точністю",
   "start_url": "/dashboard.html",
   "display": "standalone",
