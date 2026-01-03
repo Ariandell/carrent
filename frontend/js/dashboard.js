@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Show success toast after page loads (delayed to ensure showToast is available)
         setTimeout(() => {
             if (typeof showToast === 'function') {
-                showToast('Оплата успішна! Баланс оновлено.', 'success');
+                showToast(window.t('msg_payment_success'), 'success');
             }
         }, 500);
     }
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const adminLink = document.createElement('a');
                         adminLink.href = 'admin/index.html';
                         adminLink.className = 'block px-4 py-2.5 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors';
-                        adminLink.innerText = 'Адмін';
+                        adminLink.innerText = window.t('nav_admin') || 'Адмін';
                         profileLink.insertAdjacentElement('afterend', adminLink);
                     }
                 }
@@ -112,7 +112,7 @@ async function loadCars() {
         skeletons.forEach(el => el.remove());
 
         if (cars.length === 0) {
-            grid.innerHTML = '<div class="col-span-full text-center text-muted py-12">Немає доступних пристроїв</div>';
+            grid.innerHTML = `<div class="col-span-full text-center text-muted py-12">${window.t('no_cars_available') || 'Немає доступних пристроїв'}</div>`;
             return;
         }
 
@@ -135,7 +135,7 @@ async function loadCars() {
             // Status styling
             const statusColor = isFree ? 'bg-emerald-500' : (isBusy ? 'bg-indigo-500' : 'bg-red-500');
             const statusTextColor = isFree ? 'text-emerald-400' : (isBusy ? 'text-indigo-400' : 'text-red-400');
-            const statusText = isFree ? 'ОНЛАЙН' : (isBusy ? 'ЗАЙНЯТО' : 'ОФЛАЙН');
+            const statusText = isFree ? window.t('status_online') : (isBusy ? window.t('status_busy') : window.t('status_offline'));
 
             // Reservation Info Logic
             let reservationHTML = '';
@@ -145,17 +145,17 @@ async function loadCars() {
                 // Use data attribute strictly for logic
                 busyUntilAttr = `data-busy-until="${car.busy_until}"`;
 
-                const bookedByName = car.booked_by_name || 'Невідомий користувач';
+                const bookedByName = car.booked_by_name || window.t('unknown_user') || 'Невідомий користувач';
 
                 reservationHTML = `
                     <div class="mt-3 p-3 rounded-lg bg-indigo-50 border border-indigo-200 dark:bg-indigo-500/10 dark:border-indigo-500/20 text-xs">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wider">Зарезервовано</span>
+                            <span class="text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wider">${window.t('label_reserved')}</span>
                             <span class="text-indigo-700 dark:text-indigo-300 font-bold truncate max-w-[80px]" title="${bookedByName}">${bookedByName}</span>
                         </div>
                         <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-mono text-sm">
                             <svg class="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span class="countdown-timer" data-until="${car.busy_until}">Розрахунок...</span>
+                            <span class="countdown-timer" data-until="${car.busy_until}">${window.t('label_calculating')}</span>
                         </div>
                     </div>
                 `;
@@ -179,8 +179,8 @@ async function loadCars() {
             }
 
             const btnText = isFree
-                ? '<span>Почати сесію</span> <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>'
-                : (isBusy ? 'Зайнято' : 'Недоступно');
+                ? `<span>${window.t('btn_start_session')}</span> <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>`
+                : (isBusy ? window.t('btn_busy') : window.t('btn_unavailable'));
 
             const btnDisabled = !isFree ? 'disabled' : '';
 
@@ -221,10 +221,10 @@ async function loadCars() {
                     <!-- Bottom Info: Battery + Price -->
                     <div class="absolute bottom-3 right-4 z-20 flex items-center gap-2">
                          <div class="px-2 py-1 rounded-md bg-black/40 backdrop-blur border border-white/10 text-[10px] font-mono text-white/80">
-                            BAT <span id="batt-${car.id}" class="text-white font-bold ml-1">${car.battery_level}%</span>
+                            ${window.t('label_battery')} <span id="batt-${car.id}" class="text-white font-bold ml-1">${car.battery_level}%</span>
                          </div>
                          <div class="px-2 py-1 rounded-md bg-emerald-500/80 backdrop-blur border border-emerald-400/30 text-[10px] font-bold text-white">
-                            ${car.price_per_minute || 1} ₴/хв
+                            ${car.price_per_minute || 1} ${window.t('currency_minute')}
                          </div>
                     </div>
                 </div>
@@ -311,7 +311,7 @@ function updateTimers() {
         const diff = until - now;
 
         if (diff <= 0) {
-            timer.innerText = "Скоро буде";
+            timer.innerText = window.t('label_soon');
             // Optional: trigger reload if it just expired
             return;
         }
@@ -395,9 +395,9 @@ function selectDuration(minutes) {
             costEl.className = 'flex justify-between items-center mb-4 text-sm font-bold text-white';
             document.querySelector('#rentModal .p-6:last-child').insertBefore(costEl, document.querySelector('#rentModal .btn-primary'));
         }
-        costEl.innerHTML = `<span>Вартість</span> <span class="text-emerald-400">${estimatedCost} ₴</span>`;
+        costEl.innerHTML = `<span>${window.t('label_cost')}</span> <span class="text-emerald-400">${estimatedCost} ₴</span>`;
     } else {
-        document.getElementById('estimatedCost').innerHTML = `<span>Вартість</span> <span class="text-emerald-400">${estimatedCost} ₴</span>`;
+        document.getElementById('estimatedCost').innerHTML = `<span>${window.t('label_cost')}</span> <span class="text-emerald-400">${estimatedCost} ₴</span>`;
     }
 }
 
@@ -407,7 +407,7 @@ async function confirmRental() {
     const cost = selectedDurationMinutes * selectedCarPrice;
 
     if (userBalance < cost) {
-        showToast(`Недостатньо коштів! Потрібно: ${cost.toFixed(2)} ₴`, 'error');
+        showToast(`${window.t('err_insufficient_funds')} ${cost.toFixed(2)} ₴`, 'error');
         return;
     }
 
@@ -422,7 +422,7 @@ async function confirmRental() {
             window.location.href = 'control.html?rental_id=' + res.id;
         }
     } catch (e) {
-        showToast("Помилка оренди: " + e.message, 'error');
+        showToast(window.t('err_rent_failed') + " " + e.message, 'error');
     }
 }
 
@@ -458,7 +458,7 @@ async function processPayment() {
             document.getElementById('liqpayForm').submit();
         }
     } catch (e) {
-        showToast("Помилка оплати: " + e.message, 'error');
+        showToast(window.t('err_payment_failed') + " " + e.message, 'error');
     }
 }
 
@@ -474,7 +474,7 @@ async function submitSupport() {
     const message = document.getElementById('supportMessage').value;
 
     if (!message.trim()) {
-        showToast('Будь ласка, введіть повідомлення', 'error');
+        showToast(window.t('val_enter_message'), 'error');
         return;
     }
 
@@ -483,11 +483,11 @@ async function submitSupport() {
             subject: subject,
             message: message
         });
-        showToast('Запит надіслано! Ми зв\'яжемось з вами.', 'success');
+        showToast(window.t('msg_support_sent'), 'success');
         document.getElementById('supportMessage').value = '';
         closeSupportModal();
     } catch (e) {
-        showToast('Помилка надсилання: ' + e.message, 'error');
+        showToast(window.t('err_support_send') + ' ' + e.message, 'error');
     }
 }
 

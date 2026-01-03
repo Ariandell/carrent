@@ -174,11 +174,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     // Validation
     if (!isValidEmail(email)) {
-        showError(window.lang ? window.lang.t('error_invalid_email') || "Invalid Email Format" : "Invalid Email");
+        showError(window.t('val_email_invalid'));
         return;
     }
     if (!password) {
-        showError("Password is required");
+        showError(window.t('val_pass_required'));
         return;
     }
 
@@ -186,7 +186,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     // FIX: target type="submit" to avoid selecting the eye token button
     const btn = e.target.querySelector('button[type="submit"]');
     const originalText = btn.innerText;
-    btn.innerText = window.lang ? window.lang.t('auth_authenticating') : "Authenticating...";
+    btn.innerText = window.t('btn_authenticating');
     btn.disabled = true;
 
     try {
@@ -196,7 +196,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             window.location.href = 'dashboard.html';
         }
     } catch (err) {
-        showError(err.message || (window.lang ? window.lang.t('auth_failed') : "Invalid credentials"));
+        showError(err.message || window.t('err_login_failed'));
         btn.innerText = originalText;
         btn.disabled = false;
     }
@@ -271,36 +271,36 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const strength = calculateStrength(password);
     if (strength.score < 2) {
         // 0=Too Short, 1=Weak, 2=Medium, 3=Strong
-        showError(window.lang ? "Password is too weak" : "Password is too weak");
+        showError(window.t('val_pass_weak'));
         // We'll trust the visual indicator mostly, but prevent "Weak" (Red)
         return;
     }
 
     if (name.length < 2) {
-        showError("Name must be at least 2 characters");
+        showError(window.t('val_name_short'));
         return;
     }
     if (!isValidEmail(email)) {
-        showError("Invalid Email Format");
+        showError(window.t('val_email_invalid'));
         return;
     }
     // Length already checked in calculateStrength/UI but good to double check
     if (password.length < 8) {
-        showError(window.lang ? window.lang.t('error_password_short') || "Password must be at least 8 characters" : "Password > 8 chars required");
+        showError(window.t('val_pass_too_short'));
         return;
     }
 
     // FIX: target type="submit" to avoid selecting other buttons (like the eye icon)
     const btn = e.target.querySelector('button[type="submit"]');
     const originalText = btn.innerText;
-    btn.innerText = window.lang ? window.lang.t('auth_creating') : "Creating Profile...";
+    btn.innerText = window.t('btn_creating');
     btn.disabled = true;
 
     try {
         // Actually call the register API!
         const res = await api.post('/api/auth/register', { name, email, password });
 
-        if (window.showToast) window.showToast("Account user created! Please check email.", "success");
+        if (window.showToast) window.showToast(window.t('msg_account_created'), "success");
 
         // Switch to verification mode
         recoveryData.email = email;
@@ -310,11 +310,11 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         let msg = err.message;
         // Backend returns "Email already registered" (en) or we might need to localize it
         if (msg.includes("Email already registered")) {
-            msg = window.lang ? window.lang.t('error_email_taken') || "Ця пошта вже зареєстрована" : "Email already taken";
+            msg = window.t('err_email_taken');
         } else if (msg.includes("Invalid credentials")) {
-            msg = window.lang ? window.lang.t('auth_failed') || "Невірні дані" : "Invalid credentials";
+            msg = window.t('err_login_failed');
         } else {
-            msg = window.lang ? window.lang.t('reg_failed') || "Registration failed" : msg;
+            msg = window.t('reg_failed') || msg;
         }
 
         showError(msg);
@@ -346,14 +346,14 @@ document.getElementById('forgotForm').addEventListener('submit', async (e) => {
     try {
         await api.post('/api/auth/forgot-password', { email });
         recoveryData.email = email;
-        if (window.showToast) window.showToast(window.lang ? window.lang.t('code_sent') || "Code Sent!" : "Code Sent!", "success");
+        if (window.showToast) window.showToast(window.t('msg_code_sent'), "success");
 
         if (window.showToast) window.showToast(window.lang ? window.lang.t('code_sent') || "Code Sent!" : "Code Sent!", "success");
 
         recoveryData.mode = 'reset';
         switchTab('verify');
     } catch (err) {
-        showError(err.message === "User not found" && window.lang ? window.lang.t('error_user_not_found') : err.message);
+        showError(err.message === "User not found" && window.lang ? window.t('err_user_not_found') : err.message);
     } finally {
         btn.disabled = false;
     }
@@ -374,7 +374,7 @@ document.getElementById('verifyForm').addEventListener('submit', async (e) => {
         const btn = e.target.querySelector('button');
         const originalText = btn.innerText;
         btn.disabled = true;
-        btn.innerText = "Verifying...";
+        btn.innerText = window.t('btn_verifying');
 
         try {
             const res = await api.post('/api/auth/verify-email', {
@@ -404,7 +404,7 @@ document.getElementById('resetForm').addEventListener('submit', async (e) => {
     const password = document.getElementById('resetPass').value;
 
     if (password.length < 8) {
-        showError(window.lang ? window.lang.t('error_password_short') : "Password too short");
+        showError(window.t('val_pass_too_short'));
         return;
     }
 
@@ -418,7 +418,7 @@ document.getElementById('resetForm').addEventListener('submit', async (e) => {
             new_password: password
         });
 
-        if (window.showToast) window.showToast(window.lang ? window.lang.t('pass_updated') || "Password Updated!" : "Password Updated!", "success");
+        if (window.showToast) window.showToast(window.t('msg_pass_updated'), "success");
 
         setTimeout(() => {
             switchTab('login');
