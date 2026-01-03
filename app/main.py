@@ -36,7 +36,7 @@ app.include_router(websockets.router)
 
 @app.get("/")
 def read_root():
-    return RedirectResponse(url="/frontend/auth.html")
+    return RedirectResponse(url="/frontend/index.html")
 
 # Mount frontend files
 from fastapi.staticfiles import StaticFiles
