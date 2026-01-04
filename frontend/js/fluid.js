@@ -76,22 +76,34 @@
         pointer.color = [r, g, b];
     }
 
+    // Helper to get canvas relative coordinates
+    function getPointerPos(event, targetCanvas) {
+        const rect = targetCanvas.getBoundingClientRect();
+        const clientX = event.clientX || (event.touches && event.touches[0].clientX);
+        const clientY = event.clientY || (event.touches && event.touches[0].clientY);
+
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    }
+
     // Mouse Support
     window.addEventListener('mousemove', e => {
+        const pos = getPointerPos(e, canvas);
         pointers[0].moved = pointers[0].down = true;
-        pointers[0].x = e.clientX;
-        pointers[0].y = e.clientY;
+        pointers[0].x = pos.x;
+        pointers[0].y = pos.y;
         updatePointerColor(pointers[0]);
     });
 
     // Touch Support (Mobile)
-    // Touch Support (Mobile)
     window.addEventListener('touchstart', e => {
-        const touch = e.touches[0];
+        const pos = getPointerPos(e, canvas);
         pointers[0].down = true;
         pointers[0].moved = false; // Reset interpolation
-        pointers[0].x = touch.clientX;
-        pointers[0].y = touch.clientY;
+        pointers[0].x = pos.x;
+        pointers[0].y = pos.y;
         // Also reset last positions to prevent jump from previous touch
         lastX = pointers[0].x;
         lastY = pointers[0].y;
@@ -99,10 +111,10 @@
     }, { passive: true });
 
     window.addEventListener('touchmove', e => {
-        const touch = e.touches[0];
+        const pos = getPointerPos(e, canvas);
         pointers[0].moved = pointers[0].down = true;
-        pointers[0].x = touch.clientX;
-        pointers[0].y = touch.clientY;
+        pointers[0].x = pos.x;
+        pointers[0].y = pos.y;
         updatePointerColor(pointers[0]);
     }, { passive: true });
 
