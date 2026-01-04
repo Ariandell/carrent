@@ -12,31 +12,16 @@
     const gl = canvas.getContext('webgl');
     if (!gl) return; // WebGL not supported
 
+    // Configuration
     const config = {
         TEXTURE_DOWNSAMPLE: 1,
-        DENSITY_DISSIPATION: 0.9,
+        DENSITY_DISSIPATION: 0.9, // Fade faster to keep screen clean
         VELOCITY_DISSIPATION: 0.99,
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 20,
         CURL: 25,
         SPLAT_RADIUS: 0.0005,
         SPLAT_FORCE: 6000
-    };
-
-    // Expose control to window
-    window.fluidConfig = {
-        startArming: () => {
-            config.CURL = 60; // More swirl
-            config.VELOCITY_DISSIPATION = 0.995; // Longer trails
-            config.SPLAT_FORCE = 12000; // More chaotic
-            config.DENSITY_DISSIPATION = 0.92; // Thicker smoke
-        },
-        stopArming: () => {
-            config.CURL = 25;
-            config.VELOCITY_DISSIPATION = 0.99;
-            config.SPLAT_FORCE = 6000;
-            config.DENSITY_DISSIPATION = 0.9;
-        }
     };
 
     let pointers = [];

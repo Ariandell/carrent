@@ -179,64 +179,78 @@
         </div>
     </section>
 
-    <!-- SYSTEM INTERFACE (Interactive) -->
-    <section
-        class="py-32 px-6 relative z-10 border-t border-white/10 opacity-20 hover:opacity-100 transition-opacity duration-500">
-        <div class="container mx-auto max-w-5xl">
-            <div class="reveal-text flex flex-col md:flex-row justify-between items-end gap-12">
+    <!-- SYSTEM INITIALIZATION (Reaction Game) -->
+    <section class="py-20 px-6 relative z-10 border-t border-white/10 bg-black">
+        <div class="container mx-auto max-w-3xl text-center">
 
-                <!-- Language Protocol -->
-                <div>
-                    <h3 class="text-xs font-mono opacity-50 uppercase tracking-widest mb-6">Communication Protocol</h3>
-                    <div class="flex gap-4 font-mono text-sm">
-                        <button onclick="setLanguage('uk')"
-                            class="group flex items-center gap-3 opacity-50 hover:opacity-100 transition-opacity text-white">
-                            <span class="w-3 h-3 border border-current rounded-sm flex items-center justify-center">
-                                <span
-                                    class="w-1.5 h-1.5 bg-current opacity-0 group-[.active]:opacity-100 transition-opacity"></span>
-                            </span>
-                            UKR_808
-                        </button>
-                        <button onclick="setLanguage('en')"
-                            class="group flex items-center gap-3 opacity-50 hover:opacity-100 transition-opacity text-white">
-                            <span class="w-3 h-3 border border-current rounded-sm flex items-center justify-center">
-                                <span
-                                    class="w-1.5 h-1.5 bg-current opacity-0 group-[.active]:opacity-100 transition-opacity"></span>
-                            </span>
-                            ENG_INT
-                        </button>
-                    </div>
+            <!-- Game Container -->
+            <div id="neuro-game" class="relative group select-none">
+                <div
+                    class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl opacity-20 blur group-hover:opacity-40 transition duration-1000">
                 </div>
+                <div class="relative bg-neutral-900 border border-white/10 rounded-xl p-8 md:p-12 overflow-hidden">
 
-                <!-- ARMING MODULE -->
-                <!-- A satisfying toggle switch that 'arms' the page visual effects -->
-                <div class="relative">
-                    <div class="absolute -inset-4 bg-red-500/0 md:bg-red-500/0 rounded-xl transition-colors duration-200"
-                        id="arm-glow"></div>
-
+                    <!-- Header -->
                     <div
-                        class="relative bg-neutral-900 border border-white/10 p-6 rounded-xl flex items-center gap-8 shadow-2xl">
-                        <div>
-                            <div class="text-[10px] font-mono opacity-50 tracking-widest mb-1">MASTER ARM</div>
-                            <div class="text-2xl font-bold font-manifesto tracking-tight" id="arm-status">DISARMED</div>
-                        </div>
-
-                        <!-- The Switch -->
-                        <div class="relative w-16 h-24 bg-black rounded-lg border border-white/20 p-1 cursor-pointer"
-                            onclick="toggleArm()">
-                            <!-- Track -->
-                            <div class="absolute inset-x-4 top-2 bottom-2 bg-neutral-800 rounded-sm"></div>
-                            <!-- Lever -->
-                            <div id="arm-lever"
-                                class="absolute w-full h-1/2 left-0 top-1/2 bg-gradient-to-t from-neutral-400 to-neutral-200 rounded shadow-lg transition-transform duration-200 ease-spring border-t border-white/50">
-                                <!-- Stripe -->
-                                <div class="w-full h-1 bg-red-500/50 mt-1"></div>
-                            </div>
+                        class="flex justify-between items-center mb-12 opacity-50 text-xs font-mono tracking-widest uppercase">
+                        <div data-i18n="game_title">NEURAL LINK CALIBRATION</div>
+                        <div class="flex gap-4 z-20">
+                            <button onclick="setLanguage('uk')" class="hover:text-white transition-colors"
+                                :class="{'text-white': currentLang==='uk'}">[UKR]</button>
+                            <button onclick="setLanguage('en')" class="hover:text-white transition-colors"
+                                :class="{'text-white': currentLang==='en'}">[ENG]</button>
                         </div>
                     </div>
-                </div>
 
+                    <!-- Game Area -->
+                    <div id="game-area" class="cursor-pointer py-12" onclick="handleGameClick()">
+                        <!-- STATE 1: IDLE -->
+                        <div id="state-idle" class="transition-opacity duration-300">
+                            <h3 class="text-3xl md:text-5xl font-bold mb-4 font-manifesto tracking-tight"
+                                data-i18n="game_start">TAP TO START</h3>
+                            <p class="text-sm opacity-50 font-mono" data-i18n="game_desc">Test your reaction latency.
+                            </p>
+                        </div>
+
+                        <!-- STATE 2: WAITING (Red) -->
+                        <div id="state-wait"
+                            class="hidden absolute inset-0 flex items-center justify-center bg-red-900/10">
+                            <div class="text-red-500 animate-pulse font-mono tracking-widest" data-i18n="game_wait">WAIT
+                                FOR SIGNAL...</div>
+                        </div>
+
+                        <!-- STATE 3: CLICK (Green) -->
+                        <div id="state-click"
+                            class="hidden absolute inset-0 flex items-center justify-center bg-emerald-500 text-black">
+                            <div class="text-4xl md:text-6xl font-black font-manifesto tracking-tighter"
+                                data-i18n="game_now">NOW!</div>
+                        </div>
+
+                        <!-- STATE 4: RESULT -->
+                        <div id="state-result" class="hidden">
+                            <div class="text-xs font-mono text-emerald-500 mb-2">LATENCY</div>
+                            <div class="text-6xl md:text-8xl font-bold font-manifesto tracking-tighter mb-4"><span
+                                    id="result-ms">0</span><span class="text-2xl opacity-50">ms</span></div>
+                            <div id="result-comment" class="text-sm opacity-60 font-mono uppercase tracking-widest">
+                                Connection Stable</div>
+                            <div class="mt-8 text-xs opacity-30">Tap to retry</div>
+                        </div>
+                    </div>
+
+                    <!-- Decorative Footer -->
+                    <div class="mt-12 flex justify-between items-end border-t border-white/5 pt-6">
+                        <div class="text-[10px] opacity-20 font-mono">
+                            SYNC_RATE: <span id="sync-rate">40Hz</span><br>
+                            PACKET_LOSS: 0.0%
+                        </div>
+                        <div class="h-1 w-24 bg-white/10 rounded-full overflow-hidden">
+                            <div class="h-full bg-emerald-500 w-[80%] animate-pulse"></div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
+
         </div>
     </section>
 
@@ -275,46 +289,99 @@
         });
 
         // Settings Logic
-        // Settings Logic
         function setLanguage(lang) {
             if (window.AppLang && window.AppLang.setLanguage) {
                 window.AppLang.setLanguage(lang);
             } else {
                 localStorage.setItem('user_lang', lang);
-                localStorage.setItem('app_lang', lang);
-                localStorage.setItem('lang', lang);
+                localStorage.setItem('app_lang', lang); // Compatibility
+                localStorage.setItem('lang', lang);    // Compatibility
                 location.reload();
             }
         }
 
-        // Arming Logic
-        let isArmed = false;
-        function toggleArm() {
-            isArmed = !isArmed;
-            const lever = document.getElementById('arm-lever');
-            const status = document.getElementById('arm-status');
-            const glow = document.getElementById('arm-glow');
+        function setTheme(theme) {
+            const html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            window.dispatchEvent(new Event('themeChanged'));
+        }
 
-            if (isArmed) {
-                // ARM
-                lever.style.transform = 'translateY(-100%) rotateX(180deg)'; // Flip up
-                status.innerText = 'ARMED';
-                status.classList.add('text-red-500', 'animate-pulse');
-                glow.classList.replace('bg-red-500/0', 'bg-red-500/20'); // Subtle ambient glow
+        // Initialize Theme on Load
+        (function () {
+            // Force Dark Theme
+            setTheme('dark');
+        })();
 
-                // Intensify effects
-                if (window.fluidConfig) {
-                    window.fluidConfig.startArming();
-                }
-            } else {
-                // DISARM
-                lever.style.transform = 'translateY(0) rotateX(0deg)'; // Flip down
-                status.innerText = 'DISARMED';
-                status.classList.remove('text-red-500', 'animate-pulse');
-                glow.classList.replace('bg-red-500/20', 'bg-red-500/0');
+        // --- NEURAL LINK GAME LOGIC ---
+        let gameState = 'idle'; // idle, waiting, clickable, result
+        let startTime = 0;
+        let timeoutId = null;
 
-                if (window.fluidConfig) {
-                    window.fluidConfig.stopArming();
+        function handleGameClick() {
+            const idle = document.getElementById('state-idle');
+            const wait = document.getElementById('state-wait');
+            const click = document.getElementById('state-click');
+            const result = document.getElementById('state-result');
+            const resultMs = document.getElementById('result-ms');
+            const resultComment = document.getElementById('result-comment');
+            const syncRate = document.getElementById('sync-rate');
+
+            if (gameState === 'idle' || gameState === 'result') {
+                // START GAME
+                gameState = 'waiting';
+                idle.classList.add('hidden');
+                result.classList.add('hidden');
+                wait.classList.remove('hidden');
+
+                // Random delay 2-5 seconds
+                const delay = 2000 + Math.random() * 3000;
+
+                timeoutId = setTimeout(() => {
+                    gameState = 'clickable';
+                    wait.classList.add('hidden');
+                    click.classList.remove('hidden');
+                    startTime = Date.now();
+                }, delay);
+
+            } else if (gameState === 'waiting') {
+                // FALSE START (Clicked too early)
+                clearTimeout(timeoutId);
+                gameState = 'result';
+                wait.classList.add('hidden');
+                result.classList.remove('hidden');
+                resultMs.innerText = "FAIL";
+                resultComment.innerText = "SIGNAL SYNC FAILED";
+
+            } else if (gameState === 'clickable') {
+                // SUCCESS
+                const totalTime = Date.now() - startTime;
+                gameState = 'result';
+                click.classList.add('hidden');
+                result.classList.remove('hidden');
+
+                // Animate count up
+                resultMs.innerText = totalTime;
+
+                // Comment
+                const comments = {
+                    good: window.AppLang?.t('game_result_good') || "SYNC EXCELLENT",
+                    ok: window.AppLang?.t('game_result_ok') || "CONNECTION STABLE",
+                    bad: window.AppLang?.t('game_result_bad') || "HIGH LATENCY DETECTED"
+                };
+
+                if (totalTime < 200) {
+                    resultComment.innerText = comments.good;
+                    resultComment.className = "text-sm opacity-100 font-mono text-emerald-500 uppercase tracking-widest";
+                    syncRate.innerText = "120Hz";
+                } else if (totalTime < 400) {
+                    resultComment.innerText = comments.ok;
+                    resultComment.className = "text-sm opacity-60 font-mono text-white uppercase tracking-widest";
+                    syncRate.innerText = "60Hz";
+                } else {
+                    resultComment.innerText = comments.bad;
+                    resultComment.className = "text-sm opacity-60 font-mono text-red-500 uppercase tracking-widest";
+                    syncRate.innerText = "30Hz";
                 }
             }
         }
