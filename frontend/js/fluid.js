@@ -15,7 +15,7 @@
     // Configuration
     const config = {
         TEXTURE_DOWNSAMPLE: 1,
-        DENSITY_DISSIPATION: 0.86, // Fade faster to keep screen clean
+        DENSITY_DISSIPATION: 0.9, // Fade faster to keep screen clean
         VELOCITY_DISSIPATION: 0.99,
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 20,
@@ -67,20 +67,33 @@
     // Since this canvas is z-index 9999, we need to manually forward clicks?
     // CSS 'pointer-events: none' solves this. But then we can't listen to events ON the canvas.
     // Solution: Listen on WINDOW.
+    // Color Update Logic
+    function updatePointerColor(pointer) {
+        const t = Date.now() / 500;
+        const r = Math.sin(t) * 1.5 + 1.5;
+        const g = Math.sin(t + 2.0) * 1.5 + 1.5;
+        const b = Math.sin(t + 4.0) * 1.5 + 1.5;
+        pointer.color = [r, g, b];
+    }
+
+    // Mouse Support
     window.addEventListener('mousemove', e => {
         pointers[0].moved = pointers[0].down = true;
         pointers[0].x = e.clientX;
         pointers[0].y = e.clientY;
-
-        // Iridescent Color Cycling
-        // We want RBG values > 1.0 for HDR glow
-        const t = Date.now() / 500;
-        // Colors: Cyan -> Magenta -> Yellow
-        const r = Math.sin(t) * 1.5 + 1.5; // 0..3
-        const g = Math.sin(t + 2.0) * 1.5 + 1.5;
-        const b = Math.sin(t + 4.0) * 1.5 + 1.5;
-        pointers[0].color = [r, g, b];
+        updatePointerColor(pointers[0]);
     });
+
+    // Touch Support (Mobile)
+    window.addEventListener('touchmove', e => {
+        // We DO NOT preventDefault() because we want the user to scroll.
+        // The smoke will just follow the scroll finger.
+        const touch = e.touches[0];
+        pointers[0].moved = pointers[0].down = true;
+        pointers[0].x = touch.clientX;
+        pointers[0].y = touch.clientY;
+        updatePointerColor(pointers[0]);
+    }, { passive: true }); // Passive allows scrolling to stay smooth
 
     // --- SHADERS ---
     const baseVertexShader = compileShader(gl.VERTEX_SHADER, `
