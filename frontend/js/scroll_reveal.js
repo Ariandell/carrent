@@ -89,9 +89,9 @@ function initGravityTypography() {
                 const seed = parseFloat(char.dataset.seed);
 
                 // LOGIC:
-                // > 0.8 (Entering from bottom): Scattered, transparent
-                // 0.4 - 0.6 (Center): Clean
-                // < 0.2 (Leaving to top): Floating up
+                // > 0.85 (Enters from bottom): Scattered, transparent.
+                // 0.25 - 0.75 (Wide Readability Zone): Perfectly static.
+                // < 0.25 (Leaving top): Floats up into space.
 
                 let x = 0;
                 let y = 0;
@@ -100,26 +100,29 @@ function initGravityTypography() {
                 let blur = 0;
 
                 // 1. ENTERING (Bottom)
-                if (normPos > 0.6) {
-                    const t = (normPos - 0.6) / 0.4; // 0 to 1
+                if (normPos > 0.75) {
+                    const t = (normPos - 0.75) / 0.25; // 0 to 1
 
                     // Scatter downwards and outwards
-                    x = (seed - 0.5) * 100 * t;
-                    y = t * 200; // Fly in from below
-                    r = (seed - 0.5) * 90 * t;
-                    opacity = 1 - t;
-                    blur = t * 10;
+                    x = (seed - 0.5) * 150 * t;
+                    y = t * 150; // Fly in from below
+                    r = (seed - 0.5) * 60 * t;
+                    opacity = 1 - t; // Fade in
+                    blur = t * 12;
                 }
                 // 2. LEAVING (Top)
-                else if (normPos < 0.4) {
-                    const t = (0.4 - normPos) / 0.4; // 0 to 1 as it goes up
+                else if (normPos < 0.25) {
+                    const t = (0.25 - normPos) / 0.25; // 0 to 1 as it goes up
 
-                    // Float up (Anti-gravity)
-                    y = -t * 300 * (0.8 + seed); // Different speeds
-                    x = (seed - 0.5) * 50 * t; // Slight drift
-                    opacity = 1 - (t * 1.5); // Fade out
-                    r = (seed - 0.5) * 20 * t;
-                    blur = t * 5;
+                    // Float up (Anti-gravity) - Stronger lift off
+                    // Non-linear easeIn for "detachment" feel
+                    const easeT = t * t;
+
+                    y = -easeT * 400 * (0.5 + seed); // Fly UP fast
+                    x = (seed - 0.5) * 100 * easeT; // Drift sideways
+                    opacity = 1 - (t * 0.8); // Fade out slowly
+                    r = (seed - 0.5) * 45 * easeT; // Gentle spin
+                    blur = t * 4; // Slight blur
                 }
 
                 // Apply
