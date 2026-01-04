@@ -45,6 +45,50 @@ html {
     transition: color 0.5s ease;
 }
 
+/* --- SELECTION STYLES --- */
+::selection {
+    background: var(--accent-color);
+    /* Emerald or Theme color */
+    color: #ffffff;
+    /* Default readable on emerald */
+}
+
+/* Specific override for Light Mode if needed for contrast */
+[data-theme="light"] ::selection {
+    background: #000000;
+    /* Black selection in high-contrast light mode */
+    color: #ffffff;
+}
+
+/* Or if user prefers standard blue selection in light mode */
+/* 
+[data-theme="light"] ::selection {
+   background: rgba(59, 130, 246, 0.5);
+   color: #000000;
+} 
+*/
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    /* Subtle border color */
+    border-radius: 4px;
+    background-color: var(--text-secondary);
+    /* Fallback */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-primary);
+}
+
 body {
     background: transparent;
     /* Allow sparks to show */
