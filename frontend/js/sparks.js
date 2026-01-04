@@ -5,52 +5,38 @@
     let canvas = document.createElement('canvas');
     let ctx = canvas.getContext('2d');
 
-    // Fixed canvas covers viewport
-    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;background:transparent;';
+    // Fixed canvas covers viewport - STRICTLY BACKGROUND
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1;background:transparent;';
     document.body.prepend(canvas);
 
     let particles = [];
     let width, height;
 
-    // Mouse tracking
-    let mouse = { x: null, y: null, radius: 300 };
+    // Theme awareness
+    let particleColor = "255, 255, 255"; // RGB string for easy alpha manipulation
 
+    function updateThemeColors() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        if (isLight) {
+            particleColor = "0, 0, 0";
+        } else {
+            particleColor = "255, 255, 255";
+        }
+    }
+
+    // Listen for custom event from index.html
+    window.addEventListener('themeChanged', updateThemeColors);
+
+    // Resize & Init
     function resize() {
         width = window.innerWidth;
         height = window.innerHeight;
         canvas.width = width;
         canvas.height = height;
+        updateThemeColors(); // Check theme on resize too
         initParticles();
     }
-
     window.addEventListener('resize', resize);
-    window.addEventListener('mousemove', (e) => {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-    });
-    window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
-
-    // Theme awareness
-    let particleColor = "rgba(255, 255, 255, ";
-    let shadowColor = "white";
-
-    function updateThemeColors() {
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        if (isLight) {
-            particleColor = "rgba(0, 0, 0, "; // Black particles
-            shadowColor = "rgba(0,0,0,0.2)";
-        } else {
-            particleColor = "rgba(255, 255, 255, "; // White particles
-            shadowColor = "white";
-        }
-    }
-
-    window.addEventListener('themeChanged', () => {
-        updateThemeColors();
-    });
-
-    // Initial check
-    updateThemeColors();
 
     class Particle {
         constructor() {
@@ -61,76 +47,36 @@
             this.x = Math.random() * width;
             this.y = Math.random() * height;
 
-            // "Endel" style: Slightly more visible now
-            this.size = Math.random() < 0.95 ? Math.random() * 2 + 1 : Math.random() * 3 + 2;
+            // Depth Simulation: Z-axis (0 to 1, where 1 is close, 0 is far)
+            this.z = Math.random();
 
-            // Movement
-            this.vx = (Math.random() - 0.5) * 0.5;
-            this.vy = (Math.random() - 0.5) * 0.5;
+            // Size depends on Z (closer = bigger)
+            // Range: 0.5px (far) to 2.5px (close)
+            this.size = (this.z * 2) + 0.5;
 
-            this.originalVx = this.vx;
-            this.originalVy = this.vy;
+            // Speed depends on Z (closer = faster parallax)
+            const speedMultiplier = (this.z * 0.5) + 0.2;
+            this.vx = (Math.random() - 0.5) * speedMultiplier;
+            this.vy = (Math.random() - 0.5) * speedMultiplier;
 
-            // Higher Alpha for visibility
-            this.alpha = Math.random() * 0.6 + 0.3;
-            this.targetAlpha = this.alpha;
-
-            // Pulsing effect
-            this.pulseSpeed = Math.random() * 0.02 + 0.005;
-            this.pulseOffset = Math.random() * Math.PI * 2;
+            // Opacity depends on Z (closer = brighter)
+            // Range: 0.1 (far) to 0.6 (close)
+            this.baseAlpha = (this.z * 0.5) + 0.1;
+            this.floatOffset = Math.random() * 100;
         }
 
         draw() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            // Use global theme color
-            ctx.fillStyle = particleColor + this.alpha + ")";
-
-            // Only shadow in dark mode for glow, light mode cleaner
-            if (shadowColor === "white") {
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = shadowColor;
-            } else {
-                ctx.shadowBlur = 0;
-            }
-
+            ctx.fillStyle = `rgba(${particleColor}, ${this.baseAlpha})`;
             ctx.fill();
-            ctx.shadowBlur = 0;
         }
 
         update() {
-            // Ambient Pulse
-            this.pulseOffset += this.pulseSpeed;
-            // Base alpha + Sine wave modification
-            this.alpha = Math.max(0, Math.min(1, this.targetAlpha + Math.sin(this.pulseOffset) * 0.15));
-
-            // Mouse Interaction: Subtle "Magnetic" drift, not strong repulsion
-            if (mouse.x != null) {
-                let dx = mouse.x - this.x;
-                let dy = mouse.y - this.y;
-                let distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < mouse.radius) {
-                    const forceDirectionX = dx / distance;
-                    const forceDirectionY = dy / distance;
-                    // Invert force for "Attraction" or keep positive for "Repulsion"
-                    // Endel feels like "flow around". Let's do subtle repulsion.
-                    const force = (mouse.radius - distance) / mouse.radius;
-                    const strength = 0.5; // Stronger local effect, but smooth return
-
-                    this.vx -= forceDirectionX * force * strength * 0.05;
-                    this.vy -= forceDirectionY * force * strength * 0.05;
-                }
-            }
-
             this.x += this.vx;
             this.y += this.vy;
 
-            // Damping (Return to ambient speed)
-            this.vx += (this.originalVx - this.vx) * 0.05;
-            this.vy += (this.originalVy - this.vy) * 0.05;
-
-            // Screen Wrapping
+            // Simple wrapping
             if (this.x < -50) this.x = width + 50;
             if (this.x > width + 50) this.x = -50;
             if (this.y < -50) this.y = height + 50;
@@ -142,9 +88,11 @@
 
     function initParticles() {
         particles = [];
-        // Higher density (was 15000)
-        const densityDivisor = 8000;
+        // Much lower density for "classy" look
+        // 1 particle per 25000 pixels
+        const densityDivisor = 25000;
         const particleCount = (width * height) / densityDivisor;
+
         for (let i = 0; i < particleCount; i++) {
             particles.push(new Particle());
         }
@@ -156,6 +104,7 @@
         requestAnimationFrame(animate);
     }
 
+    // Init
     resize();
     animate();
 

@@ -249,10 +249,12 @@
 
         // Settings Logic
         function setLanguage(lang) {
-            if (window.changeLanguage) {
-                window.changeLanguage(lang);
+            if (window.AppLang && window.AppLang.setLanguage) {
+                window.AppLang.setLanguage(lang);
             } else {
                 localStorage.setItem('user_lang', lang);
+                localStorage.setItem('app_lang', lang); // Compatibility
+                localStorage.setItem('lang', lang);    // Compatibility
                 location.reload();
             }
         }
@@ -263,6 +265,12 @@
             localStorage.setItem('theme', theme);
             window.dispatchEvent(new Event('themeChanged'));
         }
+
+        // Initialize Theme on Load
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark for manifesto
+            setTheme(savedTheme);
+        })();
     </script>
 
 </body>
