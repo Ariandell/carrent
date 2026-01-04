@@ -40,33 +40,48 @@ function initGravityTypography() {
         }
 
         splitText() {
-            // 1. Get raw text validation
-            // If the element has children (like translation replacements), we need to be careful.
-            // But we assume .gravity-text is a leaf node container for text.
+            // 1. Clear content
             const rawText = this.el.textContent;
             this.el.innerHTML = '';
             this.chars = [];
 
-            // 2. Wrap each char
-            // Using Array.from to handle unicode properly
-            const charsArray = Array.from(rawText);
+            // 2. Split by spaces to preserve words
+            // We use a regex to capture spaces so we can reconstruct the layout
+            const words = rawText.split(/(\s+)/);
 
-            charsArray.forEach((char, i) => {
-                const span = document.createElement('span');
-                span.textContent = char;
-                span.style.display = 'inline-block';
-                span.style.transition = 'transform 0.1s linear, opacity 0.1s linear';
-                span.style.willChange = 'transform, opacity';
-
-                if (char === ' ') {
-                    span.innerHTML = '&nbsp;';
+            words.forEach(wordStr => {
+                if (wordStr.trim().length === 0) {
+                    // It's whitespace
+                    const space = document.createElement('span');
+                    space.innerHTML = '&nbsp;';
+                    // Spaces don't need physics usually, or they can just sit there
+                    this.el.appendChild(space);
+                    return;
                 }
 
-                // Random seed for this char (consistent for this instance)
-                span.dataset.seed = Math.random();
+                // Create a wrapper for the word to keep it together
+                const wordSpan = document.createElement('span');
+                wordSpan.style.display = 'inline-block';
+                wordSpan.style.whiteSpace = 'nowrap'; // Prevent breaking inside the word
 
-                this.el.appendChild(span);
-                this.chars.push(span);
+                // Now split the word into chars
+                const charsInWord = Array.from(wordStr);
+
+                charsInWord.forEach(char => {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    span.style.display = 'inline-block';
+                    span.style.transition = 'transform 0.1s linear, opacity 0.1s linear';
+                    span.style.willChange = 'transform, opacity';
+
+                    // Random seed for this char
+                    span.dataset.seed = Math.random();
+
+                    wordSpan.appendChild(span);
+                    this.chars.push(span);
+                });
+
+                this.el.appendChild(wordSpan);
             });
         }
 

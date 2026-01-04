@@ -60,7 +60,25 @@ const fragmentShaderSource = `
         vec2 uv0 = uv;
 
         // --- 1. DARK GLASS PRISM ---
-        float d = sdTriangle(uv * 2.5, 1.0);
+        // Pass UV * 2.5 is okay, but we want it aspect-ratio aware so it doesn't stretch
+        vec2 prismUV = uv;
+        prismUV.x *= u_resolution.x / u_resolution.y; // Correct aspect ratio for shape calculation?
+        // Actually, uv is already corrected by dividing by u_resolution.y in main() line 59:
+        // vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
+        // This makes Y range [-1, 1] and X range [-ratio, ratio].
+        // So a triangle defined in this space is already isotropic (not stretched).
+        
+        // HOWEVER, if the screen is very tall (mobile), X range is small (e.g. [-0.5, 0.5]).
+        // The triangle might be clipped if it's too wide.
+        
+        // Let's scale the prism down on mobile (if Aspect Ratio < 1)
+        float ar = u_resolution.x / u_resolution.y;
+        float scale = 2.5;
+        if (ar < 1.0) {
+            scale = 4.0; // Make it appear smaller (inverse scale)
+        }
+
+        float d = sdTriangle(uv * scale, 1.0);
         
         // Edge: Thin, sharp white line
         float edge = smoothstep(0.04, 0.0, abs(d)); 
