@@ -14,12 +14,12 @@
 
     // Configuration
     const config = {
-        TEXTURE_DOWNSAMPLE: 1, // Full resolution quality
-        DENSITY_DISSIPATION: 0.98, // Slow fade
-        VELOCITY_DISSIPATION: 0.99,
+        TEXTURE_DOWNSAMPLE: 1,
+        DENSITY_DISSIPATION: 0.97, // Fade slightly fast to avoid screen clutter, but slow enough to see curls
+        VELOCITY_DISSIPATION: 0.98,
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 20,
-        CURL: 30, // Swirly smoke
+        CURL: 55, // High vorticity for "liquid" dispersal
         SPLAT_RADIUS: 0.00025, // Micro-fine
         SPLAT_FORCE: 6000
     };
@@ -311,18 +311,6 @@
     const extFloatLinear = gl.getExtension('OES_texture_float_linear');
     const extHalfFloat = gl.getExtension('OES_texture_half_float');
     const extHalfFloatLinear = gl.getExtension('OES_texture_half_float_linear');
-
-    // Configuration
-    const config = {
-        TEXTURE_DOWNSAMPLE: 1,
-        DENSITY_DISSIPATION: 0.97, // Fade slightly fast to avoid screen clutter, but slow enough to see curls
-        VELOCITY_DISSIPATION: 0.98,
-        PRESSURE_DISSIPATION: 0.8,
-        PRESSURE_ITERATIONS: 20,
-        CURL: 55, // High vorticity for "liquid" dispersal
-        SPLAT_RADIUS: 0.00025,
-        SPLAT_FORCE: 6000
-    };
 
     if (!extFloat || !extFloatLinear) {
         if (extHalfFloat && extHalfFloatLinear) {
