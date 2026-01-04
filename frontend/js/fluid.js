@@ -6,7 +6,7 @@
 
 (function () {
     const canvas = document.createElement('canvas');
-    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;opacity:0.6;'; // High z-index but clicks pass through
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;mix-blend-mode:screen;'; // Screen blend for transparency
     document.body.appendChild(canvas);
 
     const gl = canvas.getContext('webgl');
