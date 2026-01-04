@@ -1,261 +1,369 @@
 <!DOCTYPE html>
-<html lang="uk" class="dark">
+<html lang="uk" class="dark scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-config="PROJECT_NAME">FPV Racer - Access Control</title>
-    <link rel="icon" href="favicon.svg" type="image/svg+xml">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="js/tailwind_config.js"></script>
-    <link href="./css/antigravity.css?v=102" rel="stylesheet">
-    <script src="js/config.js?v=99"></script>
+    <!-- Prevent Caching -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind_config.js"></script>
+    <link href="./css/antigravity.css?v=103" rel="stylesheet">
+
+    <!-- Core Config -->
+    <script src="js/config.js?v=99"></script>
     <script src="js/lang.js?v=100"></script>
+
+    <!-- Visual Engines (Matched with Landing) -->
+    <script src="js/scroll_reveal.js?v=1"></script>
+    <script src="js/prism.js?v=2" defer></script>
+    <script src="js/fluid.js?v=1" defer></script>
 </head>
 
 <body
-    class="overflow-hidden selection:bg-neutral-500 selection:text-white flex items-center justify-center min-h-screen">
+    class="overflow-hidden selection:bg-neutral-500 selection:text-white flex flex-col items-center justify-center min-h-screen relative">
 
-    <!-- Background Layer -->
-    <div id="bg-layer" class="fixed inset-0 bg-[#050505] -z-20"></div>
+    <!-- Background Layer (Matched with Landing) -->
+    <div id="bg-layer" class="fixed inset-0 z-0 bg-[#050505]"></div>
+    <!-- Note: Fluid/Prism scripts will inject canvases here automatically -->
 
-    <!-- Sparks Engine -->
-    <canvas id="sparks-canvas" class="fixed inset-0 z-0 pointer-events-none"></canvas>
-
-    <!-- Return Home -->
+    <!-- Return Home (Minimalist) -->
     <a href="index.html"
-        class="absolute top-8 left-8 text-xs font-mono opacity-50 hover:opacity-100 transition-opacity z-50 flex items-center gap-2">
-        <span>&larr;</span> <span data-i18n="back_home">RETURN TO BASE</span>
+        class="absolute top-8 left-8 text-[10px] font-mono opacity-40 hover:opacity-100 transition-opacity z-50 flex items-center gap-2 uppercase tracking-widest cursor-pointer">
+        <span>[ BACK_TO_REALITY ]</span>
     </a>
 
-    <!-- Main Auth Container (HUD Style) -->
-    <div id="auth-card" class="relative z-10 w-full max-w-md mx-6">
+    <!-- Main Container -->
+    <main class="relative z-10 w-full max-w-lg px-6 flex flex-col items-center">
 
-        <!-- Decorative Glow -->
-        <div class="absolute -inset-10 bg-blue-500/5 blur-3xl rounded-full pointer-events-none animate-pulse"></div>
+        <!-- Header: Manifesto Typography -->
+        <div class="text-center mb-12 reveal-text">
+            <h1 class="font-manifesto text-6xl md:text-8xl leading-[0.85] tracking-tighter mb-4">
+                <div class="gravity-text">PILOT</div>
+                <div class="opacity-50 gravity-text">ACCESS</div>
+            </h1>
+            <p class="text-xs font-mono opacity-50 tracking-[0.2em] uppercase" data-i18n="app_subtitle">
+                SECURE NEURAL LINK V2.0
+            </p>
+        </div>
 
-        <!-- Glass Panel -->
-        <div class="glass-panel p-8 md:p-12 rounded-3xl border border-white/10 relative overflow-hidden">
+        <!-- Auth Card: Technical HUD Style -->
+        <div id="auth-card" class="w-full relative group reveal-text delay-200">
 
-            <!-- Scanning Line Effect -->
+            <!-- Decorative Corners (Viewfinder) -->
             <div
-                class="absolute inset-0 z-0 pointer-events-none bg-gradient-to-b from-transparent via-white/5 to-transparent h-[200%] w-full animate-scan opacity-30">
+                class="absolute -top-4 -left-4 w-8 h-8 border-t border-l border-white/20 opacity-50 transition-all duration-500 group-hover:w-12 group-hover:h-12 group-hover:opacity-100 group-hover:border-blue-500">
+            </div>
+            <div
+                class="absolute -bottom-4 -right-4 w-8 h-8 border-b border-r border-white/20 opacity-50 transition-all duration-500 group-hover:w-12 group-hover:h-12 group-hover:opacity-100 group-hover:border-blue-500">
             </div>
 
-            <!-- Header -->
-            <div class="relative z-10 text-center mb-10">
+            <!-- Glass Container -->
+            <div class="glass-panel p-1 bg-black/40 backdrop-blur-xl border border-white/10 overflow-hidden relative">
+
+                <!-- Scanning Line (Subtle) -->
                 <div
-                    class="inline-flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5 mb-6">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-[10px] font-mono tracking-widest opacity-60 uppercase"
-                        data-i18n="system_status">System Online</span>
+                    class="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-blue-500/5 to-transparent h-[200%] w-full animate-scan opacity-20">
                 </div>
-                <h1 class="text-4xl md:text-5xl font-bold font-manifesto tracking-tight mb-2">
-                    ACCESS<br><span class="opacity-50">CONTROL</span>
-                </h1>
-            </div>
 
-            <!-- Custom Tabs (Technical Toggles) -->
-            <div class="relative z-10 flex p-1 bg-black/20 rounded-xl border border-white/5 mb-8" id="tabs-container">
-                <button onclick="switchTab('login')" id="tab-login"
-                    class="flex-1 py-3 text-xs font-bold font-mono uppercase tracking-widest rounded-lg transition-all duration-300 hover:bg-white/5 text-white">
-                    Login
-                </button>
-                <button onclick="switchTab('register')" id="tab-register"
-                    class="flex-1 py-3 text-xs font-bold font-mono uppercase tracking-widest rounded-lg transition-all duration-300 hover:bg-white/5 text-white/50">
-                    Register
-                </button>
+                <!-- Inner Content Padding -->
+                <div class="p-8 md:p-10 relative z-10">
 
-                <!-- Active Indicator (Handled by simple class toggling in JS or manual CSS if needed, but simple hover/active classes work best for cleanliness) -->
-            </div>
-
-            <!-- Forms Container -->
-            <div class="relative z-10">
-
-                <!-- Login Form -->
-                <form id="loginForm" class="space-y-5 transition-opacity duration-300">
-                    <div class="group">
-                        <label class="block text-[10px] font-mono opacity-50 mb-2 uppercase tracking-widest"
-                            data-i18n="label_callsign">Callsign ID</label>
-                        <input type="email" id="email"
-                            class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none focus:bg-black/40 transition-all placeholder-white/20"
-                            placeholder="PILOT_ID" required>
-                    </div>
-                    <div class="group">
-                        <label class="block text-[10px] font-mono opacity-50 mb-2 uppercase tracking-widest"
-                            data-i18n="label_security_key">Security Key</label>
-                        <div class="relative">
-                            <input type="password" id="password"
-                                class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none focus:bg-black/40 transition-all placeholder-white/20"
-                                placeholder="••••••••" required>
+                    <!-- Tab Switcher (Integrated Tech Look) -->
+                    <div class="flex justify-between items-center mb-8 border-b border-white/5 pb-4"
+                        id="tabs-container">
+                        <div class="flex gap-4">
+                            <button onclick="switchTab('login')" id="tab-login"
+                                class="text-xs font-bold font-mono tracking-widest uppercase hover:text-white transition-colors text-white border-b-2 border-blue-500 pb-4 -mb-4.5">
+                                [ LOGIN ]
+                            </button>
+                            <button onclick="switchTab('register')" id="tab-register"
+                                class="text-xs font-bold font-mono tracking-widest uppercase hover:text-white transition-colors text-white/40 pb-4 -mb-4.5">
+                                [ REGISTER ]
+                            </button>
+                        </div>
+                        <!-- Status Dot -->
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-[9px] font-mono opacity-40">NET_ACTIVE</span>
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center text-[10px] font-mono opacity-60">
-                        <label class="flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
-                            <input type="checkbox" class="accent-white rounded bg-transparent border-white/20">
-                            <span data-i18n="auto_connect">Stay Connected</span>
-                        </label>
-                        <a href="#" onclick="switchTab('forgot'); return false;"
-                            class="hover:text-white transition-colors uppercase tracking-widest"
-                            data-i18n="lost_key">Lost Key?</a>
+                    <!-- Forms -->
+                    <div class="relative min-h-[320px]"> <!-- Fixed min-height to prevent layout jumps -->
+
+                        <!-- Login Form -->
+                        <form id="loginForm"
+                            class="space-y-6 absolute inset-0 transition-all duration-500 ease-out transform translate-x-0 opacity-100">
+                            <div class="group relative">
+                                <input type="email" id="email"
+                                    class="peer w-full bg-transparent border-b border-white/20 py-4 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Email" required>
+                                <label for="email"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Callsign / Email
+                                </label>
+                            </div>
+
+                            <div class="group relative">
+                                <input type="password" id="password"
+                                    class="peer w-full bg-transparent border-b border-white/20 py-4 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Password" required>
+                                <label for="password"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Security Key
+                                </label>
+                            </div>
+
+                            <div class="flex justify-between items-center pt-2">
+                                <label class="flex items-center gap-2 cursor-pointer group/chk">
+                                    <div
+                                        class="w-4 h-4 border border-white/20 flex items-center justify-center group-hover/chk:border-blue-500 transition-colors">
+                                        <input type="checkbox" class="accordion-checkbox hidden">
+                                        <!-- Custom Checkbox Check -->
+                                        <div
+                                            class="w-2 h-2 bg-blue-500 opacity-0 checkbox-indicator transition-opacity">
+                                        </div>
+                                    </div>
+                                    <span
+                                        class="text-[10px] font-mono opacity-50 group-hover/chk:text-white transition-colors uppercase tracking-wider"
+                                        data-i18n="auto_connect">Stay Linked</span>
+                                </label>
+                                <a href="#" onclick="switchTab('forgot'); return false;"
+                                    class="text-[10px] font-mono text-blue-500/80 hover:text-blue-400 uppercase tracking-wider transition-colors"
+                                    data-i18n="lost_key">
+                                    > Recover Key
+                                </a>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full relative overflow-hidden group/btn bg-white text-black py-4 font-bold tracking-[0.2em] text-xs uppercase hover:bg-blue-500 hover:text-white transition-all duration-300"
+                                data-i18n="btn_login">
+                                <span class="relative z-10">Initialize Link</span>
+                                <div
+                                    class="absolute inset-0 transform scale-x-0 group-hover/btn:scale-x-100 origin-left transition-transform duration-300 bg-blue-600">
+                                </div>
+                            </button>
+                        </form>
+
+                        <!-- Register Form -->
+                        <form id="registerForm"
+                            class="space-y-6 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none">
+                            <div class="group relative">
+                                <input type="text" id="regName"
+                                    class="peer w-full bg-transparent border-b border-white/20 py-3 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Name" required>
+                                <label for="regName"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Pilot Handle
+                                </label>
+                            </div>
+
+                            <div class="group relative">
+                                <input type="email" id="regEmail"
+                                    class="peer w-full bg-transparent border-b border-white/20 py-3 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Email" required>
+                                <label for="regEmail"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Callsign / Email
+                                </label>
+                            </div>
+
+                            <div class="group relative">
+                                <input type="password" id="regPass"
+                                    class="peer w-full bg-transparent border-b border-white/20 py-3 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Pass" required>
+                                <label for="regPass"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Create Key
+                                </label>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full relative overflow-hidden group/btn bg-white text-black py-4 font-bold tracking-[0.2em] text-xs uppercase hover:bg-emerald-500 hover:text-white transition-all duration-300 mt-2"
+                                data-i18n="btn_register">
+                                <span class="relative z-10">Establish Link</span>
+                            </button>
+
+                            <div class="text-[9px] text-center opacity-30 font-mono uppercase">
+                                Protocol Terms Apply
+                            </div>
+                        </form>
+
+                        <!-- Forgot Password Form -->
+                        <form id="forgotForm"
+                            class="space-y-8 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none flex flex-col justify-center">
+                            <div class="text-center">
+                                <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2 text-blue-500">RECOVERY
+                                    // MODE</h3>
+                                <p class="text-[10px] font-mono opacity-50 uppercase">Signal Lost? Re-establish
+                                    connection.</p>
+                            </div>
+
+                            <div class="group relative">
+                                <input type="email" id="forgotEmail"
+                                    class="peer w-full bg-transparent border-b border-white/20 py-4 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Email" required>
+                                <label for="forgotEmail"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Target Email
+                                </label>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full btn-minimal border border-white/20 hover:bg-white hover:text-black py-3 font-bold tracking-widest text-xs uppercase transition-all"
+                                data-i18n="btn_send_code">
+                                Transmit Code
+                            </button>
+                            <button type="button" onclick="switchTab('login')"
+                                class="w-full text-[10px] font-mono opacity-50 hover:opacity-100 uppercase tracking-widest transition-opacity">
+                                < Cancel Sequence </button>
+                        </form>
+
+                        <!-- Verify Code Form -->
+                        <form id="verifyForm"
+                            class="space-y-8 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none flex flex-col justify-center">
+                            <div class="text-center">
+                                <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2 text-emerald-500">
+                                    VERIFICATION // REQUIRED</h3>
+                                <p class="text-[10px] font-mono opacity-50 uppercase">Input the 6-digit confirmation
+                                    sequence.</p>
+                            </div>
+
+                            <div class="group relative">
+                                <input type="text" id="verifyCode" maxlength="6"
+                                    class="peer w-full bg-transparent border-b border-white/20 py-4 text-2xl text-center font-mono text-white placeholder-transparent focus:border-emerald-500 focus:outline-none transition-colors tracking-[0.5em]"
+                                    placeholder="000000" required>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full btn-minimal border border-emerald-500/50 text-emerald-500 hover:bg-emerald-500 hover:text-black py-3 font-bold tracking-widest text-xs uppercase transition-all"
+                                data-i18n="btn_verify">
+                                Confirm Sequence
+                            </button>
+                            <button type="button" onclick="switchTab('login')"
+                                class="w-full text-[10px] font-mono opacity-50 hover:opacity-100 uppercase tracking-widest transition-opacity">
+                                < Abort </button>
+                        </form>
+
+                        <!-- Reset Password Form -->
+                        <form id="resetForm"
+                            class="space-y-8 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none flex flex-col justify-center">
+                            <div class="text-center">
+                                <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2 text-blue-500">NEW //
+                                    KEY</h3>
+                            </div>
+
+                            <div class="group relative">
+                                <input type="password" id="resetPass"
+                                    class="peer w-full bg-transparent border-b border-white/20 py-4 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="New Pass" required>
+                                <label for="resetPass"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Set New Security Key
+                                </label>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full btn-minimal bg-white text-black hover:bg-gray-200 py-3 font-bold tracking-widest text-xs uppercase transition-all"
+                                data-i18n="btn_reset">
+                                Update Key
+                            </button>
+                        </form>
+
                     </div>
+                </div>
+            </div>
 
-                    <button type="submit"
-                        class="w-full btn-minimal bg-white text-black hover:bg-gray-200 hover:text-black border-transparent mt-4 font-bold tracking-widest"
-                        data-i18n="btn_login">
-                        INITIALIZE LINK
-                    </button>
-                </form>
-
-                <!-- Register Form -->
-                <form id="registerForm" class="space-y-5 hidden transition-opacity duration-300">
-                    <div class="group">
-                        <label class="block text-[10px] font-mono opacity-50 mb-2 uppercase tracking-widest"
-                            data-i18n="label_pilot_name">Pilot Handle</label>
-                        <input type="text" id="regName"
-                            class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none transition-all placeholder-white/20"
-                            placeholder="MAVERICK" required>
-                    </div>
-                    <div class="group">
-                        <label class="block text-[10px] font-mono opacity-50 mb-2 uppercase tracking-widest"
-                            data-i18n="label_callsign">Callsign (Email)</label>
-                        <input type="email" id="regEmail"
-                            class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none transition-all placeholder-white/20"
-                            placeholder="PILOT@NET" required>
-                    </div>
-                    <div class="group">
-                        <label class="block text-[10px] font-mono opacity-50 mb-2 uppercase tracking-widest"
-                            data-i18n="label_security_key">Create Key</label>
-                        <input type="password" id="regPass"
-                            class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none transition-all placeholder-white/20"
-                            placeholder="••••••••" required>
-                    </div>
-
-                    <div class="text-[10px] text-center opacity-40 font-mono" data-i18n="terms">
-                        Protocol initialization implies acceptance of terms.
-                    </div>
-
-                    <button type="submit"
-                        class="w-full btn-minimal bg-white text-black hover:bg-gray-200 hover:text-black border-transparent mt-4 font-bold tracking-widest"
-                        data-i18n="btn_register">
-                        ESTABLISH LINK
-                    </button>
-                </form>
-
-                <!-- Forgot Password -->
-                <form id="forgotForm" class="space-y-6 hidden transition-opacity duration-300 text-center">
-                    <div>
-                        <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2">RECOVERY MODE</h3>
-                        <p class="text-xs font-mono opacity-50">Enter your callsign to reset credentials.</p>
-                    </div>
-                    <input type="email" id="forgotEmail"
-                        class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none transition-all placeholder-white/20"
-                        placeholder="PILOT@NET" required>
-
-                    <button type="submit"
-                        class="w-full btn-minimal bg-white text-black hover:bg-gray-200 border-transparent font-bold tracking-widest"
-                        data-i18n="btn_send_code">TRANSMIT CODE</button>
-
-                    <button type="button" onclick="switchTab('login')"
-                        class="text-[10px] font-mono opacity-50 hover:opacity-100 uppercase tracking-widest transition-opacity mt-4">
-                        &larr; ABORT RECOVERY
-                    </button>
-                </form>
-
-                <!-- Verify Code -->
-                <form id="verifyForm" class="space-y-6 hidden transition-opacity duration-300 text-center">
-                    <div>
-                        <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2">VERIFICATION</h3>
-                        <p class="text-xs font-mono opacity-50">Enter the 6-digit sequence.</p>
-                    </div>
-                    <input type="text" id="verifyCode"
-                        class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-2xl font-mono text-center tracking-[0.5em] focus:border-white/50 focus:outline-none transition-all placeholder-white/10"
-                        placeholder="000000" maxlength="6" required>
-
-                    <button type="submit"
-                        class="w-full btn-minimal bg-white text-black hover:bg-gray-200 border-transparent font-bold tracking-widest"
-                        data-i18n="btn_verify">CONFIRM SEQUENCE</button>
-
-                    <button type="button" onclick="switchTab('login')"
-                        class="text-[10px] font-mono opacity-50 hover:opacity-100 uppercase tracking-widest transition-opacity mt-4">
-                        &larr; ABORT
-                    </button>
-                </form>
-
-                <!-- Reset Password -->
-                <form id="resetForm" class="space-y-6 hidden transition-opacity duration-300 text-center">
-                    <div>
-                        <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2">NEW SECURITY KEY</h3>
-                    </div>
-                    <input type="password" id="resetPass"
-                        class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none transition-all placeholder-white/20"
-                        placeholder="NEW PASSWORD" required>
-
-                    <button type="submit"
-                        class="w-full btn-minimal bg-white text-black hover:bg-gray-200 border-transparent font-bold tracking-widest"
-                        data-i18n="btn_reset">UPDATE KEY</button>
-                </form>
-
+            <!-- Bottom Technical Data -->
+            <div class="flex justify-between mt-4 px-2 opacity-30">
+                <div class="text-[9px] font-mono">SYS_ID: 884-29</div>
+                <div class="text-[9px] font-mono">ENCRYPTION: AES-256</div>
             </div>
         </div>
 
-        <!-- Footer Info -->
-        <div class="mt-8 text-center">
-            <div class="text-[10px] font-mono opacity-20 uppercase tracking-widest">
-                SECURE ACCESS • v2.4.0 • ENCRYPTED
-            </div>
-        </div>
-    </div>
+    </main>
 
-    <!-- Script Deps -->
+    <!-- Dependencies -->
     <script src="js/api.js?v=13"></script>
-    <!-- Use sparks for background -->
-    <script src="js/sparks.js?v=203"></script>
-    <!-- Reuse auth logic -->
-    <script src="js/auth.js?v=999"></script>
+    <script src="js/auth.js?v=1000"></script>
+
     <script>
-        // Inline styles for tab switching to match the HUD feel
+        // Checkbox Logic (Custom UI)
+        document.querySelectorAll('input[type="checkbox"]').forEach(i => {
+            i.addEventListener('change', (e) => {
+                const indicator = e.target.parentElement.querySelector('.checkbox-indicator');
+                if (indicator) indicator.style.opacity = e.target.checked ? '1' : '0';
+            });
+        });
+
+        // Tab Switching Logic (Simpler, Class-Based)
+        // We override the old logic to adapt to new structure
         function switchTab(tabId) {
-            // Hide all forms
-            ['loginForm', 'registerForm', 'forgotForm', 'verifyForm', 'resetForm'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
+            const forms = ['loginForm', 'registerForm', 'forgotForm', 'verifyForm', 'resetForm'];
+
+            // 1. Reset all forms
+            forms.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+
+                // Move out of view and hide
+                el.style.transform = 'translateX(20px)';
+                el.style.opacity = '0';
+                el.style.pointerEvents = 'none';
+                // el.classList.add('hidden'); // We rely on opacity/pointer-events for smooth anim
             });
 
-            // If switching to login or register, handle the toggle style
+            // 2. Activate Target
+            let targetId = tabId + 'Form';
+
+            // Map generic tabs to form IDs
+            if (tabId === 'login') targetId = 'loginForm';
+            if (tabId === 'register') targetId = 'registerForm';
+            if (tabId === 'forgot') targetId = 'forgotForm';
+            if (tabId === 'verify') targetId = 'verifyForm';
+            if (tabId === 'reset') targetId = 'resetForm';
+
+            const target = document.getElementById(targetId);
+            if (target) {
+                setTimeout(() => {
+                    target.style.transform = 'translateX(0)';
+                    target.style.opacity = '1';
+                    target.style.pointerEvents = 'auto';
+                }, 50); // Slight delay for exit anim
+            }
+
+            // 3. Update Header Tabs (Only for login/reg)
+            const tabContainer = document.getElementById('tabs-container');
             if (tabId === 'login' || tabId === 'register') {
-                document.getElementById('tabs-container').classList.remove('hidden');
+                tabContainer.classList.remove('opacity-0', 'pointer-events-none');
 
                 const loginBtn = document.getElementById('tab-login');
                 const regBtn = document.getElementById('tab-register');
 
                 if (tabId === 'login') {
-                    loginBtn.classList.remove('text-white/50');
-                    loginBtn.classList.add('text-white', 'bg-white/10');
-                    regBtn.classList.add('text-white/50');
-                    regBtn.classList.remove('text-white', 'bg-white/10');
-                    // Show login form
-                    document.getElementById('loginForm').classList.remove('hidden');
+                    loginBtn.classList.remove('text-white/40', 'border-transparent');
+                    loginBtn.classList.add('text-white', 'border-blue-500');
+                    regBtn.classList.add('text-white/40', 'border-transparent');
+                    regBtn.classList.remove('text-white', 'border-blue-500');
                 } else {
-                    regBtn.classList.remove('text-white/50');
-                    regBtn.classList.add('text-white', 'bg-white/10');
-                    loginBtn.classList.add('text-white/50');
-                    loginBtn.classList.remove('text-white', 'bg-white/10');
-                    // Show register form
-                    document.getElementById('registerForm').classList.remove('hidden');
+                    regBtn.classList.remove('text-white/40', 'border-transparent');
+                    regBtn.classList.add('text-white', 'border-blue-500');
+                    loginBtn.classList.add('text-white/40', 'border-transparent');
+                    loginBtn.classList.remove('text-white', 'border-blue-500');
                 }
             } else {
-                // For other forms (forgot, etc), hide the main tabs
-                document.getElementById('tabs-container').classList.add('hidden');
-                if (tabId === 'forgot') document.getElementById('forgotForm').classList.remove('hidden');
-                // Other forms are handled by auth.js logic typically, but if we need manual switch:
+                // If in recovery, fade out tabs visually
+                tabContainer.classList.add('opacity-0', 'pointer-events-none');
             }
         }
 
-        // Initialize defaults
+        // Initial State
         switchTab('login');
     </script>
 </body>
