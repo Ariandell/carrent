@@ -30,6 +30,28 @@
     });
     window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
 
+    // Theme awareness
+    let particleColor = "rgba(255, 255, 255, ";
+    let shadowColor = "white";
+
+    function updateThemeColors() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        if (isLight) {
+            particleColor = "rgba(0, 0, 0, "; // Black particles
+            shadowColor = "rgba(0,0,0,0.2)";
+        } else {
+            particleColor = "rgba(255, 255, 255, "; // White particles
+            shadowColor = "white";
+        }
+    }
+
+    window.addEventListener('themeChanged', () => {
+        updateThemeColors();
+    });
+
+    // Initial check
+    updateThemeColors();
+
     class Particle {
         constructor() {
             this.init();
@@ -61,10 +83,17 @@
         draw() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            // Pure White for maximum contrast
-            ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "white";
+            // Use global theme color
+            ctx.fillStyle = particleColor + this.alpha + ")";
+
+            // Only shadow in dark mode for glow, light mode cleaner
+            if (shadowColor === "white") {
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = shadowColor;
+            } else {
+                ctx.shadowBlur = 0;
+            }
+
             ctx.fill();
             ctx.shadowBlur = 0;
         }

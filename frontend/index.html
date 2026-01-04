@@ -171,57 +171,44 @@
 
     <!-- SYSTEM INITIALIZATION (Native Controls) -->
     <section class="py-32 px-6 relative z-10 border-t border-white/5">
-        <div class="container mx-auto max-w-4xl text-center md:text-left">
+        <div class="container mx-auto max-w-5xl md:text-left">
             <div class="reveal-text">
-                <h3 class="text-sm font-mono text-gray-500 uppercase tracking-widest mb-12">System Configuration</h3>
+                <h3 class="text-sm font-mono text-gray-500 uppercase tracking-widest mb-16">System Configuration</h3>
 
-                <div class="space-y-16">
-                    <!-- Language -->
-                    <div>
-                        <div class="text-4xl md:text-6xl font-bold mb-4 tracking-tighter">
-                            SELECT LANGUAGE
-                        </div>
-                        <div
-                            class="flex flex-col md:flex-row gap-8 md:gap-16 text-2xl md:text-3xl font-mono text-gray-500 cursor-pointer select-none">
-                            <div onclick="setLanguage('uk')"
-                                class="hover:text-white hover:scale-105 transition-all duration-300 group flex items-center gap-4">
-                                <span
-                                    class="w-3 h-3 rounded-full bg-transparent border border-gray-500 group-hover:bg-white transition-colors"></span>
-                                UKRAINIAN
-                            </div>
-                            <div onclick="setLanguage('en')"
-                                class="hover:text-white hover:scale-105 transition-all duration-300 group flex items-center gap-4">
-                                <span
-                                    class="w-3 h-3 rounded-full bg-transparent border border-gray-500 group-hover:bg-white transition-colors"></span>
-                                ENGLISH
-                            </div>
-                        </div>
-                    </div>
+                <div class="text-3xl md:text-5xl font-bold leading-relaxed tracking-tight">
+                    <p class="mb-12">
+                        System interface is ready. <br>
+                        Execute commands in
+                        <button onclick="setLanguage('uk')"
+                            class="inline-flex items-center justify-center px-6 py-2 mx-2 rounded-full border border-white/20 hover:bg-white hover:text-black transition-all duration-300 text-2xl align-middle group">
+                            <span
+                                class="w-2 h-2 rounded-full bg-emerald-500 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                            UKRAINIAN
+                        </button>
+                        or
+                        <button onclick="setLanguage('en')"
+                            class="inline-flex items-center justify-center px-6 py-2 mx-2 rounded-full border border-white/20 hover:bg-white hover:text-black transition-all duration-300 text-2xl align-middle group">
+                            <span
+                                class="w-2 h-2 rounded-full bg-emerald-500 mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                            ENGLISH
+                        </button>.
+                    </p>
 
-                    <!-- Theme -->
-                    <div>
-                        <div class="text-4xl md:text-6xl font-bold mb-4 tracking-tighter">
-                            VISUAL SPECTRUM
-                        </div>
-                        <div
-                            class="flex flex-col md:flex-row gap-8 md:gap-16 text-2xl md:text-3xl font-mono text-gray-500 cursor-pointer select-none">
-                            <div onclick="setTheme('dark')"
-                                class="hover:text-white hover:scale-105 transition-all duration-300 group flex items-center gap-4">
-                                <span
-                                    class="w-3 h-3 rounded-full bg-transparent border border-gray-500 group-hover:bg-white transition-colors"></span>
-                                DEEP SPACE (DARK)
-                            </div>
-                            <div onclick="setTheme('light')"
-                                class="hover:text-black hover:bg-white px-4 -ml-4 rounded-lg transition-all duration-300 group flex items-center gap-4">
-                                <!-- Inverted hover for Light mode text to match the requested creative feel -->
-                                <span
-                                    class="w-3 h-3 rounded-full bg-transparent border border-gray-500 group-hover:bg-black transition-colors"></span>
-                                LABORATORY (LIGHT)
-                            </div>
-                        </div>
-                    </div>
+                    <p>
+                        Visual rendering set to
+                        <button onclick="setTheme('dark')"
+                            class="inline-flex items-center justify-center px-6 py-2 mx-2 rounded-full border border-white/20 bg-black text-white hover:border-white transition-all duration-300 text-2xl align-middle shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                            DEEP SPACE
+                        </button>
+                        mode. <br>
+                        Switch to
+                        <button onclick="setTheme('light')"
+                            class="inline-flex items-center justify-center px-6 py-2 mx-2 rounded-full border border-white/20 bg-white text-black hover:scale-105 transition-all duration-300 text-2xl align-middle shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                            LABORATORY
+                        </button>
+                        spectrum for high contrast.
+                    </p>
                 </div>
-
             </div>
         </div>
     </section>
