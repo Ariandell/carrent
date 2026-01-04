@@ -86,10 +86,58 @@
         }
     }
 
+    // --- MOUSE TRAIL ("Petrol" Effect) ---
+    const mouse = { x: -1000, y: -1000 };
+    let trail = [];
+
+    window.addEventListener('mousemove', e => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+
+        // Spawn trail point
+        // Throttle slightly naturally by event firing rate? 
+        // Actually typically it fires enough. We might want to add interpolation if it's too jerky.
+        // For "subtle", just adding points is fine.
+        trail.push(new TrailPoint(mouse.x, mouse.y));
+    });
+
+    class TrailPoint {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.age = 0;
+            this.life = 60; // Frames to live (approx 1 sec)
+            this.size = Math.random() * 20 + 10; // Soft large blob
+            // Random start hue for that "oil" variety
+            this.hue = (Date.now() / 10) % 360;
+        }
+
+        update() {
+            this.age++;
+            // Drift slightly?
+            this.y -= 0.5;
+
+            // Iridescence: Cycle hue rapidly as it ages
+            this.hue += 5;
+        }
+
+        draw(ctx) {
+            const progress = this.age / this.life;
+            const opacity = (1 - progress) * 0.15; // VERY subtle (0.15 max)
+
+            if (opacity <= 0) return;
+
+            ctx.beginPath();
+            // Petrol colors: Cyan, Magenta, Purple, Gold. 
+            // Full HSL spectrum covers this if we have saturation.
+            ctx.fillStyle = `hsla(${this.hue}, 80%, 60%, ${opacity})`;
+            ctx.arc(this.x, this.y, this.size * (1 - progress * 0.5), 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
     function initParticles() {
         particles = [];
-        // Much lower density for "classy" look
-        // 1 particle per 25000 pixels
         const densityDivisor = 25000;
         const particleCount = (width * height) / densityDivisor;
 
@@ -100,7 +148,31 @@
 
     function animate() {
         ctx.clearRect(0, 0, width, height);
+
+        // Draw Ambient Dust
         particles.forEach(p => p.update());
+
+        // Draw Petrol Trail
+        // Filter out dead points
+        trail = trail.filter(p => p.age < p.life);
+
+        // Use blending for "glow" look
+        ctx.save();
+        // 'screen' or 'overlay' makes it look light and vibrant on dark bg
+        // 'difference' or 'exclusion' makes it look weirdly oil-like on white.
+        // Let's stick to normal or screen for safety across themes. 
+        // Actually, user said "oil spilled on sun".
+        ctx.globalCompositeOperation = 'screen';
+        // We need blur for the "soft" feel
+        ctx.filter = 'blur(8px)';
+
+        trail.forEach(p => {
+            p.update();
+            p.draw(ctx);
+        });
+
+        ctx.restore();
+
         requestAnimationFrame(animate);
     }
 

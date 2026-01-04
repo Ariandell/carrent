@@ -84,11 +84,12 @@ const fragmentShaderSource = `
         // Domain Warping for "Liquid" look:
         // Instead of distorting the shape, we distort the COORDINATES used for color
         // This keeps the beam shape clean but makes the inside look like oil.
-        float noiseVal = noise(uv * 4.0 + vec2(u_time * 0.5, 0.0));
+        float noiseVal = noise(uv * 4.0 + vec2(u_time * 0.2, 0.0)); // Slower noise
         
         // Color depends on Angle + Noise - Time
         // This moves the colors outward and swirls them
-        float colorIndex = (angle * 2.0) + (noiseVal * 0.5) - (u_time * 0.2);
+        // SLOWED DOWN: u_time * 0.05 (was 0.2)
+        float colorIndex = (angle * 2.0) + (noiseVal * 0.5) - (u_time * 0.05);
         
         vec3 spectrum = palette(colorIndex);
         
