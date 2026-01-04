@@ -6,7 +6,7 @@
     let ctx = canvas.getContext('2d');
 
     // Fixed canvas covers viewport
-    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-2;background:transparent;';
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;background:transparent;';
     document.body.prepend(canvas);
 
     let particles = [];

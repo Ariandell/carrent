@@ -23,18 +23,29 @@
 }
 
 html {
-    background: var(--bg-core);
+    /* Background handled by #bg-layer */
     scroll-behavior: smooth;
     color: var(--text-primary);
-    transition: background-color 0.5s ease, color 0.5s ease;
+    transition: color 0.5s ease;
 }
 
 body {
-    background: var(--bg-core);
+    background: transparent;
+    /* Allow sparks to show */
     color: var(--text-primary);
     font-family: 'Inter', sans-serif;
     overflow-x: hidden;
-    /* Optional: Custom cursor */
+}
+
+#bg-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: var(--bg-core);
+    transition: background-color 0.5s ease;
 }
 
 /* --- KINETIC TYPOGRAPHY UTILS --- */

@@ -15,7 +15,7 @@
     <script src="js/scroll_reveal.js?v=1"></script>
 </head>
 
-<body class="bg-[#050505] text-white overflow-x-hidden selection:bg-white selection:text-black">
+<body class="text-white overflow-x-hidden selection:bg-white selection:text-black">
 
     <!-- Fixed Header (Minimalist) -->
     <header class="fixed top-0 left-0 w-full z-50 mix-blend-difference pointer-events-none">
@@ -169,37 +169,65 @@
         </div>
     </section>
 
-    <!-- SETTINGS HUD (Fixed Bottom Right) -->
-    <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 items-end mix-blend-difference">
+    <!-- SYSTEM INITIALIZATION (Native Controls) -->
+    <section class="py-32 px-6 relative z-10 border-t border-white/5">
+        <div class="container mx-auto max-w-4xl text-center md:text-left">
+            <div class="reveal-text">
+                <h3 class="text-sm font-mono text-gray-500 uppercase tracking-widest mb-12">System Configuration</h3>
 
-        <!-- Language Switcher (Vertical HUD style) -->
-        <div class="flex flex-col gap-1 items-end">
-            <div class="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-1">System Lang</div>
-            <div class="flex border border-white/20 rounded-lg overflow-hidden backdrop-blur-sm">
-                <button onclick="setLanguage('en')"
-                    class="px-3 py-1 text-xs hover:bg-white hover:text-black transition-colors border-r border-white/10 font-mono">EN</button>
-                <button onclick="setLanguage('uk')"
-                    class="px-3 py-1 text-xs hover:bg-white hover:text-black transition-colors font-mono">UA</button>
+                <div class="space-y-16">
+                    <!-- Language -->
+                    <div>
+                        <div class="text-4xl md:text-6xl font-bold mb-4 tracking-tighter">
+                            SELECT LANGUAGE
+                        </div>
+                        <div
+                            class="flex flex-col md:flex-row gap-8 md:gap-16 text-2xl md:text-3xl font-mono text-gray-500 cursor-pointer select-none">
+                            <div onclick="setLanguage('uk')"
+                                class="hover:text-white hover:scale-105 transition-all duration-300 group flex items-center gap-4">
+                                <span
+                                    class="w-3 h-3 rounded-full bg-transparent border border-gray-500 group-hover:bg-white transition-colors"></span>
+                                UKRAINIAN
+                            </div>
+                            <div onclick="setLanguage('en')"
+                                class="hover:text-white hover:scale-105 transition-all duration-300 group flex items-center gap-4">
+                                <span
+                                    class="w-3 h-3 rounded-full bg-transparent border border-gray-500 group-hover:bg-white transition-colors"></span>
+                                ENGLISH
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Theme -->
+                    <div>
+                        <div class="text-4xl md:text-6xl font-bold mb-4 tracking-tighter">
+                            VISUAL SPECTRUM
+                        </div>
+                        <div
+                            class="flex flex-col md:flex-row gap-8 md:gap-16 text-2xl md:text-3xl font-mono text-gray-500 cursor-pointer select-none">
+                            <div onclick="setTheme('dark')"
+                                class="hover:text-white hover:scale-105 transition-all duration-300 group flex items-center gap-4">
+                                <span
+                                    class="w-3 h-3 rounded-full bg-transparent border border-gray-500 group-hover:bg-white transition-colors"></span>
+                                DEEP SPACE (DARK)
+                            </div>
+                            <div onclick="setTheme('light')"
+                                class="hover:text-black hover:bg-white px-4 -ml-4 rounded-lg transition-all duration-300 group flex items-center gap-4">
+                                <!-- Inverted hover for Light mode text to match the requested creative feel -->
+                                <span
+                                    class="w-3 h-3 rounded-full bg-transparent border border-gray-500 group-hover:bg-black transition-colors"></span>
+                                LABORATORY (LIGHT)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
-
-        <!-- Theme Toggle (Visual ONLY for Landing, or functional override) -->
-        <div class="flex flex-col gap-1 items-end mt-4">
-            <div class="text-[10px] uppercase tracking-widest text-gray-500 font-mono mb-1">Visor Mode</div>
-            <button onclick="toggleThemeOverride()" id="themeToggleBtn"
-                class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
-                    </path>
-                </svg>
-            </button>
-        </div>
-
-    </div>
+    </section>
 
     <!-- FOOTER -->
-    <footer class="py-12 border-t border-white/5 relative z-10 bg-black">
+    <footer class="py-12 relative z-10">
         <div
             class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
             <div class="font-bold tracking-tight text-gray-400 mb-4 md:mb-0" data-config="PROJECT_NAME">ANTIGRAVITY
@@ -232,9 +260,8 @@
             } catch (e) { }
         });
 
-        // Settings HUD Logic
+        // Settings Logic
         function setLanguage(lang) {
-            // Use existing lang.js logic if available, or manual for landing
             if (window.changeLanguage) {
                 window.changeLanguage(lang);
             } else {
@@ -243,22 +270,10 @@
             }
         }
 
-        function toggleThemeOverride() {
+        function setTheme(theme) {
             const html = document.documentElement;
-            // The landing page CSS forces dark via variables on :root. 
-            // We can override this by adding a class 'light-mode-override' to body 
-            // and defining that in CSS, OR just toggle data-theme if we update CSS to respect it.
-
-            // Current CSS implementation:
-            // :root { --bg-core: #050505; ... } -> Forces Dark
-            // We need to support flipping this.
-
-            const isDark = html.getAttribute('data-theme') !== 'light';
-            const newTheme = isDark ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-
-            // Trigger visual update for particles
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
             window.dispatchEvent(new Event('themeChanged'));
         }
     </script>
