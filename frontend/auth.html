@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-config="PROJECT_NAME">FPV Racer - Account</title>
+    <title data-config="PROJECT_NAME">FPV Racer - Access</title>
+
     <!-- Prevent Caching -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -13,16 +14,62 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/tailwind_config.js"></script>
-    <link href="./css/antigravity.css?v=106" rel="stylesheet">
+    <link href="./css/antigravity.css?v=107" rel="stylesheet">
 
     <!-- Core Config -->
     <script src="js/config.js?v=99"></script>
     <script src="js/lang.js?v=100"></script>
 
-    <!-- Visual Engines (Sci-Fi) -->
-    <script src="js/scroll_reveal.js?v=1"></script>
+    <!-- Visual Engines -->
     <script src="js/prism.js?v=2" defer></script>
     <script src="js/fluid.js?v=1" defer></script>
+
+    <style>
+        /* Gravity Text Animation Styles */
+        .char-wrapper {
+            display: inline-block;
+            position: relative;
+            white-space: pre;
+        }
+
+        /* Fly Out Animation */
+        @keyframes gravityFlyOut {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) rotate(0deg);
+                filter: blur(0px);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) rotate(var(--r));
+                filter: blur(10px);
+            }
+        }
+
+        /* Fly In Animation */
+        @keyframes gravityFlyIn {
+            0% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) rotate(var(--r));
+                filter: blur(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(0, 0) rotate(0deg);
+                filter: blur(0px);
+            }
+        }
+
+        .fly-out {
+            animation: gravityFlyOut 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .fly-in {
+            animation: gravityFlyIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+    </style>
 </head>
 
 <body
@@ -33,28 +80,29 @@
 
     <!-- Return Home -->
     <a href="index.html"
-        class="absolute top-8 left-8 text-[10px] font-mono opacity-40 hover:opacity-100 transition-opacity z-50 flex items-center gap-2 uppercase tracking-widest cursor-pointer">
+        class="absolute top-8 left-8 text-[10px] font-mono opacity-40 hover:opacity-100 transition-opacity z-50 flex items-center gap-2 uppercase tracking-widest cursor-pointer text-white">
         <span>&larr; BACK</span>
     </a>
 
     <!-- Main Container -->
     <main class="relative z-10 w-full max-w-lg px-6 flex flex-col items-center">
 
-        <!-- Header: Manifesto but Serious -->
-        <div class="text-center mb-12 reveal-text">
-            <h1 class="font-manifesto text-6xl md:text-8xl leading-[0.85] tracking-tighter mb-4">
-                <div class="gravity-text">ACCOUNT</div>
-                <div class="opacity-50 gravity-text">ACCESS</div>
+        <!-- Header: Dynamic Gravity Text -->
+        <div class="text-center mb-16 h-32 flex flex-col justify-end pb-4"> <!-- Fixed height to prevent jumps -->
+            <h1 id="dynamic-header"
+                class="font-manifesto text-6xl md:text-8xl leading-[0.85] tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 h-[1.1em] flex items-center justify-center overflow-visible">
+                <!-- Text injected by JS -->
             </h1>
-            <p class="text-[10px] font-mono opacity-50 tracking-[0.2em] uppercase" data-i18n="app_subtitle">
-                SECURE AUTHENTICATION v2.4
+            <p id="dynamic-sub"
+                class="text-[10px] font-mono opacity-50 tracking-[0.3em] uppercase mt-4 transition-opacity duration-300">
+                <!-- Subtitle -->
             </p>
         </div>
 
-        <!-- Auth Card: Restored Viewfinder Style -->
-        <div id="auth-card" class="w-full relative group reveal-text delay-200">
+        <!-- Auth Card -->
+        <div id="auth-card" class="w-full relative group">
 
-            <!-- Viewfinder Corners (Restored) -->
+            <!-- Viewfinder Corners -->
             <div
                 class="absolute -top-4 -left-4 w-8 h-8 border-t border-l border-white/20 opacity-50 transition-all duration-500 group-hover:w-12 group-hover:h-12 group-hover:opacity-100 group-hover:border-blue-500">
             </div>
@@ -65,7 +113,7 @@
             <!-- Glass Panel -->
             <div class="glass-panel p-1 bg-black/40 backdrop-blur-xl border border-white/10 overflow-hidden relative">
 
-                <!-- Scanning Line (Restored) -->
+                <!-- Scanning Line -->
                 <div
                     class="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-blue-500/5 to-transparent h-[200%] w-full animate-scan opacity-20">
                 </div>
@@ -73,8 +121,8 @@
                 <!-- Inner Content -->
                 <div class="p-8 md:p-10 relative z-10">
 
-                    <!-- Technical Tab Switcher (Original Layout, Serious Text) -->
-                    <div class="flex justify-between items-center mb-8 border-b border-white/5 pb-4"
+                    <!-- Technical Tab Switcher (Nav Only) -->
+                    <div class="flex justify-between items-center mb-10 border-b border-white/5 pb-4"
                         id="tabs-container">
                         <div class="flex gap-4">
                             <button onclick="switchTab('login')" id="tab-login"
@@ -86,7 +134,6 @@
                                 REGISTER
                             </button>
                         </div>
-                        <!-- Status Dot (Subtle) -->
                         <div class="flex items-center gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span class="text-[9px] font-mono opacity-40">SECURE</span>
@@ -96,9 +143,9 @@
                     <!-- Forms -->
                     <div class="relative min-h-[320px]">
 
-                        <!-- Login Form (Serious Copy) -->
+                        <!-- Login Form -->
                         <form id="loginForm"
-                            class="space-y-6 absolute inset-0 transition-all duration-500 ease-out transform translate-x-0 opacity-100">
+                            class="space-y-6 absolute inset-0 transition-opacity duration-300 opacity-100">
                             <div class="group relative">
                                 <input type="email" id="email"
                                     class="peer w-full bg-transparent border-b border-white/20 py-4 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
@@ -124,7 +171,6 @@
                                     <div
                                         class="w-4 h-4 border border-white/20 flex items-center justify-center group-hover/chk:border-blue-500 transition-colors">
                                         <input type="checkbox" class="accordion-checkbox hidden">
-                                        <!-- Custom Checkbox Check -->
                                         <div
                                             class="w-2 h-2 bg-blue-500 opacity-0 checkbox-indicator transition-opacity">
                                         </div>
@@ -150,9 +196,9 @@
                             </button>
                         </form>
 
-                        <!-- Register Form (Serious Copy) -->
+                        <!-- Register Form -->
                         <form id="registerForm"
-                            class="space-y-6 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none">
+                            class="space-y-6 absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none">
                             <div class="group relative">
                                 <input type="text" id="regName"
                                     class="peer w-full bg-transparent border-b border-white/20 py-3 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
@@ -192,11 +238,10 @@
 
                         <!-- Forgot Password Form -->
                         <form id="forgotForm"
-                            class="space-y-8 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none flex flex-col justify-center">
-                            <div class="text-center">
-                                <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2 text-blue-500">RECOVERY
-                                </h3>
-                                <p class="text-[10px] font-mono opacity-50 uppercase">Enter email to restore access.</p>
+                            class="space-y-8 absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none flex flex-col justify-center">
+                            <!-- Header handled by Dynamic Header now, simplified content here -->
+                            <div class="text-center opacity-60 text-xs font-mono mb-4">
+                                Enter your email below to receive a secure recovery code.
                             </div>
 
                             <div class="group relative">
@@ -205,27 +250,26 @@
                                     placeholder="Email" required>
                                 <label for="forgotEmail"
                                     class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
-                                    Email Address
+                                    Target Email
                                 </label>
                             </div>
 
                             <button type="submit"
                                 class="w-full btn-minimal border border-white/20 hover:bg-white hover:text-black py-3 font-bold tracking-widest text-xs uppercase transition-all"
                                 data-i18n="btn_send_code">
-                                Send Code
+                                TRANSMIT CODE
                             </button>
                             <button type="button" onclick="switchTab('login')"
                                 class="w-full text-[10px] font-mono opacity-50 hover:opacity-100 uppercase tracking-widest transition-opacity">
-                                < Cancel </button>
+                                < CANCEL </button>
                         </form>
 
                         <!-- Verify Code Form -->
                         <form id="verifyForm"
-                            class="space-y-8 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none flex flex-col justify-center">
-                            <div class="text-center">
-                                <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2 text-emerald-500">
-                                    VERIFICATION</h3>
-                                <p class="text-[10px] font-mono opacity-50 uppercase">Check your email for code.</p>
+                            class="space-y-8 absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none flex flex-col justify-center">
+                            <!-- Header handled by Dynamic Header -->
+                            <div class="text-center opacity-60 text-xs font-mono mb-4">
+                                Authentication code sent. Please Verify.
                             </div>
 
                             <div class="group relative">
@@ -237,20 +281,14 @@
                             <button type="submit"
                                 class="w-full btn-minimal border border-emerald-500/50 text-emerald-500 hover:bg-emerald-500 hover:text-black py-3 font-bold tracking-widest text-xs uppercase transition-all"
                                 data-i18n="btn_verify">
-                                Confirm
+                                CONFIRM IDENTITY
                             </button>
-                            <button type="button" onclick="switchTab('login')"
-                                class="w-full text-[10px] font-mono opacity-50 hover:opacity-100 uppercase tracking-widest transition-opacity">
-                                < Cancel </button>
                         </form>
 
                         <!-- Reset Password Form -->
                         <form id="resetForm"
-                            class="space-y-8 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none flex flex-col justify-center">
-                            <div class="text-center">
-                                <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2 text-blue-500">NEW
-                                    PASSWORD</h3>
-                            </div>
+                            class="space-y-8 absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none flex flex-col justify-center">
+                            <!-- Header handled by Dynamic Header -->
 
                             <div class="group relative">
                                 <input type="password" id="resetPass"
@@ -258,14 +296,14 @@
                                     placeholder="New Pass" required>
                                 <label for="resetPass"
                                     class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
-                                    Set Password
+                                    New Security Key
                                 </label>
                             </div>
 
                             <button type="submit"
                                 class="w-full btn-minimal bg-white text-black hover:bg-gray-200 py-3 font-bold tracking-widest text-xs uppercase transition-all"
                                 data-i18n="btn_reset">
-                                Update
+                                UPDATE KEY
                             </button>
                         </form>
 
@@ -284,9 +322,99 @@
 
     <!-- Dependencies -->
     <script src="js/api.js?v=13"></script>
-    <script src="js/auth.js?v=1002"></script>
+    <script src="js/auth.js?v=1003"></script>
 
     <script>
+        // --- Gravity Text Engine ---
+        class GravityText {
+            constructor(el) {
+                this.el = el;
+                this.currentText = "";
+                this.isAnimating = false;
+            }
+
+            setText(newText, subtitle = "") {
+                if (this.currentText === newText) return;
+
+                const oldChars = Array.from(this.el.children);
+                const newChars = newText.split('').map(char => {
+                    const span = document.createElement('span');
+                    span.textContent = char === " " ? "\u00A0" : char;
+                    span.className = 'char-wrapper fly-in';
+
+                    // Randomize fly-in angle
+                    const tx = (Math.random() - 0.5) * 100 + 'px';
+                    const ty = (Math.random() - 0.5) * 100 - 50 + 'px'; // Tend to fall from top
+                    const r = (Math.random() - 0.5) * 90 + 'deg';
+
+                    span.style.setProperty('--tx', tx);
+                    span.style.setProperty('--ty', ty);
+                    span.style.setProperty('--r', r);
+
+                    // Stagger animation
+                    span.style.animationDelay = Math.random() * 0.2 + 's';
+
+                    return span;
+                });
+
+                // Animate Out Old
+                oldChars.forEach(span => {
+                    span.classList.remove('fly-in');
+                    span.classList.add('fly-out');
+
+                    // Randomize fly-out direction (Explode out)
+                    const tx = (Math.random() - 0.5) * 150 + 'px';
+                    const ty = (Math.random() - 0.5) * 150 + 'px';
+                    const r = (Math.random() - 0.5) * 120 + 'deg';
+
+                    span.style.setProperty('--tx', tx);
+                    span.style.setProperty('--ty', ty);
+                    span.style.setProperty('--r', r);
+
+                    // Cleanup
+                    setTimeout(() => {
+                        if (span.parentNode === this.el) this.el.removeChild(span);
+                    }, 600);
+                });
+
+                // Append New (Safe clear NOT needed because we rely on absolute positioning or flow? 
+                // Ah, 'char-wrapper' is inline-block. We need to clear OLD ones from layout flow immediately?
+                // No, to have them coexist for a split second, dynamic header needs absolute layering OR 
+                // we assume old ones are being hidden via opacity fast enough.
+                // Better approach: Clear content immediately? No, visual glitch.
+                // BEST: We clear HTML, then append new ones? No, old ones disappear instantly.
+                // SOLUTION: Use absolute positioning for the 'leaving' letters so they don't break layout of 'entering' letters.
+
+                oldChars.forEach(span => {
+                    // Lock position
+                    const rect = span.getBoundingClientRect();
+                    const parentRect = this.el.getBoundingClientRect();
+
+                    span.style.position = 'absolute';
+                    span.style.left = (rect.left - parentRect.left) + 'px';
+                    span.style.top = (rect.top - parentRect.top) + 'px';
+                    span.style.width = rect.width + 'px';
+                });
+
+                // Now append new ones to the main flow
+                newChars.forEach(span => this.el.appendChild(span));
+
+                this.currentText = newText;
+
+                // Update Subtitle
+                const subEl = document.getElementById('dynamic-sub');
+                if (subEl) {
+                    subEl.style.opacity = 0;
+                    setTimeout(() => {
+                        subEl.textContent = subtitle;
+                        subEl.style.opacity = 0.5;
+                    }, 300);
+                }
+            }
+        }
+
+        const headerEngine = new GravityText(document.getElementById('dynamic-header'));
+
         // Checkbox Logic
         document.querySelectorAll('input[type="checkbox"]').forEach(i => {
             i.addEventListener('change', (e) => {
@@ -295,22 +423,45 @@
             });
         });
 
-        // Tab Switching Logic (Original Sci-Fi)
+        // Tab Switching Logic
         function switchTab(tabId) {
             const forms = ['loginForm', 'registerForm', 'forgotForm', 'verifyForm', 'resetForm'];
 
-            // 1. Hide all
+            // 1. Header Update (Gravity Effect)
+            let headerText = "LOGIN";
+            let subText = "AUTHENTICATION REQUIRED";
+
+            if (tabId === 'login') {
+                headerText = "LOGIN";
+                subText = "AUTHENTICATION REQUIRED";
+            }
+            if (tabId === 'register') {
+                headerText = "REGISTER";
+                subText = "NEW PILOT REGISTRATION";
+            }
+            if (tabId === 'forgot') {
+                headerText = "RECOVERY";
+                subText = "SIGNAL RESTORATION";
+            }
+            if (tabId === 'verify') {
+                headerText = "VERIFY";
+                subText = "IDENTITY CONFIRMATION";
+            }
+            if (tabId === 'reset') {
+                headerText = "SECURITY";
+                subText = "KEY REGENERATION";
+            }
+
+            headerEngine.setText(headerText, subText);
+
+            // 2. Hide all forms
             forms.forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
-
-                // Slide out
-                el.style.transform = 'translateX(20px)';
-                el.style.opacity = '0';
-                el.style.pointerEvents = 'none';
+                el.classList.add('opacity-0', 'pointer-events-none');
             });
 
-            // 2. Show Target
+            // 3. Show Target
             let targetId = tabId + 'Form';
             if (tabId === 'login') targetId = 'loginForm';
             if (tabId === 'register') targetId = 'registerForm';
@@ -320,14 +471,10 @@
 
             const target = document.getElementById(targetId);
             if (target) {
-                setTimeout(() => {
-                    target.style.transform = 'translateX(0)';
-                    target.style.opacity = '1';
-                    target.style.pointerEvents = 'auto';
-                }, 50);
+                target.classList.remove('opacity-0', 'pointer-events-none');
             }
 
-            // 3. Update Header Tabs
+            // 4. Update Header Tabs visual state
             const tabContainer = document.getElementById('tabs-container');
             if (tabId === 'login' || tabId === 'register') {
                 tabContainer.classList.remove('opacity-0', 'pointer-events-none');
@@ -351,7 +498,9 @@
             }
         }
 
-        switchTab('login');
+        // Initial setup
+        // Need to wait for fonts maybe? or just init
+        setTimeout(() => switchTab('login'), 100);
     </script>
 </body>
 
