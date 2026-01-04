@@ -1,115 +1,77 @@
-// Physics-based Sparks Engine - Virtual Scroll Edition
+// Physics-based Sparks Engine - Deep Space / Data Flow Edition
 (function () {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     let canvas = document.createElement('canvas');
     let ctx = canvas.getContext('2d');
 
-    // Fixed canvas covers viewport, but we render relative to scroll
-    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-2;';
+    // Fixed canvas covers viewport
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-2;background:transparent;';
     document.body.prepend(canvas);
 
     let particles = [];
-    let width, height; // Viewport dimensions
-    let worldHeight;   // Full document height
-    let scrollY = 0;
+    let width, height;
 
-    // Mouse in WORLD coordinates
-    let mouse = { x: null, y: null, radius: 250 };
+    // Mouse tracking
+    let mouse = { x: null, y: null, radius: 300 };
 
     function resize() {
         width = window.innerWidth;
         height = window.innerHeight;
-        // Calculate total scrollable height
-        worldHeight = Math.max(
-            document.body.scrollHeight,
-            document.documentElement.scrollHeight,
-            document.body.offsetHeight,
-            document.documentElement.offsetHeight,
-            document.body.clientHeight,
-            document.documentElement.clientHeight
-        );
-
         canvas.width = width;
         canvas.height = height;
-
         initParticles();
     }
 
-    // Update scroll position for render loop
-    function updateScroll() {
-        scrollY = window.scrollY || window.pageYOffset;
-    }
-
     window.addEventListener('resize', resize);
-    window.addEventListener('scroll', updateScroll);
-
     window.addEventListener('mousemove', (e) => {
-        // e.pageX/Y includes scroll, so they are World Coordinates
-        mouse.x = e.pageX;
-        mouse.y = e.pageY;
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
     });
-
-    window.addEventListener('mouseout', () => {
-        mouse.x = null;
-        mouse.y = null;
-    });
-
-    function getThemeColor() {
-        const style = getComputedStyle(document.documentElement);
-        const color = style.getPropertyValue('--primary').trim();
-        return color || '#3b82f6';
-    }
+    window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
 
     class Particle {
         constructor() {
-            this.init(true);
+            this.init();
         }
 
-        init(randomY = false) {
+        init() {
             this.x = Math.random() * width;
+            this.y = Math.random() * height;
 
-            // Spawn anywhere in WORLD height
-            this.y = randomY ? Math.random() * worldHeight : worldHeight + 10;
+            // "Endel" style: Very small, sharp dots
+            this.size = Math.random() < 0.95 ? Math.random() * 1.5 + 0.5 : Math.random() * 2 + 1;
 
-            this.size = Math.random() < 0.9 ? Math.random() * 2 + 0.5 : Math.random() * 4 + 2;
-
-            this.vx = (Math.random() - 0.5) * 0.5;
-            this.vy = -(Math.random() * 0.5 + 0.2);
+            // Very slow, ambient movement
+            this.vx = (Math.random() - 0.5) * 0.2;
+            this.vy = (Math.random() - 0.5) * 0.2;
 
             this.originalVx = this.vx;
             this.originalVy = this.vy;
 
-            this.friction = 0.96;
-            this.color = getThemeColor();
-            this.alpha = this.size > 2 ? 0.1 + Math.random() * 0.2 : 0.3 + Math.random() * 0.5;
+            this.alpha = Math.random() * 0.5 + 0.1;
+            this.targetAlpha = this.alpha;
+
+            // Pulsing effect
+            this.pulseSpeed = Math.random() * 0.02 + 0.005;
+            this.pulseOffset = Math.random() * Math.PI * 2;
         }
 
         draw() {
-            // Virtual Scroll Translation
-            const screenY = this.y - scrollY;
-
-            // Optimization: Don't draw if off-screen
-            if (screenY < -50 || screenY > height + 50) return;
-
             ctx.beginPath();
-            ctx.arc(this.x, screenY, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.globalAlpha = this.alpha;
-
-            if (this.size > 2) {
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = this.color;
-            }
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            // White/Grey particles for high contrast on black
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
             ctx.fill();
-            ctx.globalAlpha = 1;
-            ctx.shadowBlur = 0;
         }
 
         update() {
-            // Physics calculated in WORLD space
+            // Ambient Pulse
+            this.pulseOffset += this.pulseSpeed;
+            // Base alpha + Sine wave modification
+            this.alpha = Math.max(0, Math.min(1, this.targetAlpha + Math.sin(this.pulseOffset) * 0.15));
 
-            // Mouse Repulsion (World Space Check)
+            // Mouse Interaction: Subtle "Magnetic" drift, not strong repulsion
             if (mouse.x != null) {
                 let dx = mouse.x - this.x;
                 let dy = mouse.y - this.y;
@@ -118,33 +80,28 @@
                 if (distance < mouse.radius) {
                     const forceDirectionX = dx / distance;
                     const forceDirectionY = dy / distance;
+                    // Invert force for "Attraction" or keep positive for "Repulsion"
+                    // Endel feels like "flow around". Let's do subtle repulsion.
                     const force = (mouse.radius - distance) / mouse.radius;
-                    // Drastically reduced strength for "barely noticeable" effect
-                    const strength = 0.05;
+                    const strength = 0.5; // Stronger local effect, but smooth return
 
-                    this.vx -= forceDirectionX * force * strength;
-                    this.vy -= forceDirectionY * force * strength;
+                    this.vx -= forceDirectionX * force * strength * 0.05;
+                    this.vy -= forceDirectionY * force * strength * 0.05;
                 }
             }
 
             this.x += this.vx;
             this.y += this.vy;
 
-            this.vx += (this.originalVx - this.vx) * 0.02;
-            this.vy += (this.originalVy - this.vy) * 0.02;
+            // Damping (Return to ambient speed)
+            this.vx += (this.originalVx - this.vx) * 0.05;
+            this.vy += (this.originalVy - this.vy) * 0.05;
 
-            // Screen Wrapping in WORLD space
-            if (this.y < -50) this.init(false); // Respawn at very bottom of document? 
-            // Better: Respawn at bottom of WORLD
-
-            // Correction: If particles float UP, they will eventually leave the top of the DOCUMENT (y < 0).
-            // We want them to circle back to the bottom of the DOCUMENT.
-            if (this.y < 0) {
-                this.y = worldHeight;
-                this.x = Math.random() * width;
-            }
-            if (this.x > width + 50) this.x = -50;
+            // Screen Wrapping
             if (this.x < -50) this.x = width + 50;
+            if (this.x > width + 50) this.x = -50;
+            if (this.y < -50) this.y = height + 50;
+            if (this.y > height + 50) this.y = -50;
 
             this.draw();
         }
@@ -152,48 +109,19 @@
 
     function initParticles() {
         particles = [];
-        // Density based on WORLD area
-        // (width * worldHeight)
-        // INCREASED divisor to reduce count (was ~12000-15000)
-        const densityDivisor = window.innerWidth < 768 ? 25000 : 20000;
-        const particleCount = (width * worldHeight) / densityDivisor;
-
-        // Cap max particles for performance on very long pages
-        const safeCount = Math.min(particleCount, 200);
-
-        for (let i = 0; i < safeCount; i++) {
+        // Sparse density (Minimalist)
+        const particleCount = (width * height) / 15000;
+        for (let i = 0; i < particleCount; i++) {
             particles.push(new Particle());
         }
     }
 
     function animate() {
         ctx.clearRect(0, 0, width, height);
-
-        for (let i = 0; i < particles.length; i++) {
-            particles[i].update();
-        }
+        particles.forEach(p => p.update());
         requestAnimationFrame(animate);
     }
 
-    // Helper: Update particles if document height changes significantly (e.g. content load)
-    const observer = new ResizeObserver(() => {
-        let newWorldHeight = document.body.scrollHeight;
-        if (Math.abs(newWorldHeight - worldHeight) > 100) {
-            // Only resize if significantly different to avoid jitter
-            // Or update worldHeight var without re-initing particles (but density changes)
-            // Simple approach: just update var limits of wrapping
-            worldHeight = newWorldHeight;
-        }
-    });
-    observer.observe(document.body);
-
-    window.addEventListener('themeChanged', () => {
-        const newColor = getThemeColor();
-        particles.forEach(p => p.color = newColor);
-    });
-
-    // Start
-    updateScroll();
     resize();
     animate();
 
