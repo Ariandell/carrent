@@ -115,52 +115,62 @@
             <!-- Tech Specs - Redesigned (Sci-Fi Dashboard) -->
             <div class="space-y-16">
                 <!-- Spec 1: Latency -->
-                <div class="reveal-text group cursor-default">
+                <div class="reveal-text group cursor-default scroll-trigger" data-color="blue">
                     <div class="flex items-baseline gap-2 md:gap-4">
                         <div
-                            class="text-6xl md:text-9xl font-bold font-manifesto tracking-tight group-hover:text-blue-500 transition-colors duration-500">
+                            class="text-6xl md:text-9xl font-bold font-manifesto tracking-tight group-hover:text-blue-500 group-data-[active=true]:text-blue-500 transition-colors duration-500">
                             30</div>
-                        <div class="text-xl md:text-3xl font-mono text-blue-500 opacity-80">ms</div>
+                        <div
+                            class="text-xl md:text-3xl font-mono opacity-80 group-hover:text-blue-500 group-data-[active=true]:text-blue-500 transition-colors duration-500">
+                            ms</div>
                     </div>
-                    <div class="h-px w-12 bg-current opacity-30 my-4 group-hover:w-full transition-all duration-700">
+                    <div
+                        class="h-px w-12 bg-current opacity-30 my-4 group-hover:w-full group-data-[active=true]:w-full transition-all duration-700">
                     </div>
                     <div class="text-xs md:text-sm font-mono uppercase tracking-widest opacity-60 flex justify-between">
                         <span data-i18n="spec_latency">Ultra Low Latency</span>
-                        <span class="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500">[SYNCED]</span>
+                        <span
+                            class="opacity-0 group-hover:opacity-100 group-data-[active=true]:opacity-100 transition-opacity text-blue-500 group-data-[active=true]:text-blue-500">[SYNCED]</span>
                     </div>
                 </div>
 
                 <!-- Spec 2: Quality -->
-                <div class="reveal-text group cursor-default delay-100">
+                <div class="reveal-text group cursor-default delay-100 scroll-trigger" data-color="purple">
                     <div class="flex items-baseline gap-2 md:gap-4">
                         <div
-                            class="text-6xl md:text-9xl font-bold font-manifesto tracking-tight group-hover:text-purple-500 transition-colors duration-500">
+                            class="text-6xl md:text-9xl font-bold font-manifesto tracking-tight group-hover:text-purple-500 group-data-[active=true]:text-purple-500 transition-colors duration-500">
                             1080</div>
-                        <div class="text-xl md:text-3xl font-mono text-purple-500 opacity-80">p</div>
+                        <div
+                            class="text-xl md:text-3xl font-mono opacity-80 group-hover:text-purple-500 group-data-[active=true]:text-purple-500 transition-colors duration-500">
+                            p</div>
                     </div>
-                    <div class="h-px w-12 bg-current opacity-30 my-4 group-hover:w-full transition-all duration-700">
+                    <div
+                        class="h-px w-12 bg-current opacity-30 my-4 group-hover:w-full group-data-[active=true]:w-full transition-all duration-700">
                     </div>
                     <div class="text-xs md:text-sm font-mono uppercase tracking-widest opacity-60 flex justify-between">
                         <span data-i18n="spec_video">HD Video Stream</span>
                         <span
-                            class="opacity-0 group-hover:opacity-100 transition-opacity text-purple-500">[NATIVE]</span>
+                            class="opacity-0 group-hover:opacity-100 group-data-[active=true]:opacity-100 transition-opacity text-purple-500 group-data-[active=true]:text-purple-500">[NATIVE]</span>
                     </div>
                 </div>
 
                 <!-- Spec 3: Units -->
-                <div class="reveal-text group cursor-default delay-200">
+                <div class="reveal-text group cursor-default delay-200 scroll-trigger" data-color="emerald">
                     <div class="flex items-baseline gap-2 md:gap-4">
                         <div
-                            class="text-6xl md:text-9xl font-bold font-manifesto tracking-tight group-hover:text-emerald-500 transition-colors duration-500">
+                            class="text-6xl md:text-9xl font-bold font-manifesto tracking-tight group-hover:text-emerald-500 group-data-[active=true]:text-emerald-500 transition-colors duration-500">
                             50</div>
-                        <div class="text-xl md:text-3xl font-mono text-emerald-500 opacity-80">+</div>
+                        <div
+                            class="text-xl md:text-3xl font-mono opacity-80 group-hover:text-emerald-500 group-data-[active=true]:text-emerald-500 transition-colors duration-500">
+                            +</div>
                     </div>
-                    <div class="h-px w-12 bg-current opacity-30 my-4 group-hover:w-full transition-all duration-700">
+                    <div
+                        class="h-px w-12 bg-current opacity-30 my-4 group-hover:w-full group-data-[active=true]:w-full transition-all duration-700">
                     </div>
                     <div class="text-xs md:text-sm font-mono uppercase tracking-widest opacity-60 flex justify-between">
                         <span data-i18n="spec_units">Active Units</span>
                         <span
-                            class="opacity-0 group-hover:opacity-100 transition-opacity text-emerald-500">[ONLINE]</span>
+                            class="opacity-0 group-hover:opacity-100 group-data-[active=true]:opacity-100 transition-opacity text-emerald-500 group-data-[active=true]:text-emerald-500">[ONLINE]</span>
                     </div>
                 </div>
             </div>
@@ -301,8 +311,30 @@
             localStorage.setItem('theme', theme);
             window.dispatchEvent(new Event('themeChanged'));
         }
+        // Initialize Theme on Load
         (function () {
+            // Force Dark Theme
             setTheme('dark');
+
+            // Scroll Trigger Logic for Tech Specs
+            const observerOptions = {
+                root: null,
+                rootMargin: '-40% 0px -40% 0px', // Active only when in middle 20% of screen
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    // Toggle data-active attribute
+                    if (entry.isIntersecting) {
+                        entry.target.setAttribute('data-active', 'true');
+                    } else {
+                        entry.target.removeAttribute('data-active');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.scroll-trigger').forEach(el => observer.observe(el));
         })();
 
 
