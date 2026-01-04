@@ -72,20 +72,21 @@ let currentFilter = 'all';
 function setFilter(filter) {
     currentFilter = filter;
 
-    // Update UI
+    // Update UI - using simple classes that work with Tailwind dark mode
     const btnAll = document.getElementById('filterAll');
     const btnAvail = document.getElementById('filterAvailable');
 
+    // Active button style
+    const activeClass = 'px-5 py-2 rounded-lg text-sm font-bold transition-all bg-white dark:bg-white/10 text-neutral-900 dark:text-white shadow-sm';
+    // Inactive button style  
+    const inactiveClass = 'px-5 py-2 rounded-lg text-sm font-bold transition-all text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white';
+
     if (filter === 'all') {
-        btnAll.className = 'btn-primary px-3 py-1.5 text-sm rounded-lg transition-all';
-        btnAll.classList.remove('opacity-60', 'btn-secondary');
-
-        btnAvail.className = 'btn-secondary px-3 py-1.5 text-sm rounded-lg opacity-60 transition-all';
+        btnAll.className = activeClass;
+        btnAvail.className = inactiveClass;
     } else {
-        btnAvail.className = 'btn-primary px-3 py-1.5 text-sm rounded-lg transition-all';
-        btnAvail.classList.remove('opacity-60', 'btn-secondary');
-
-        btnAll.className = 'btn-secondary px-3 py-1.5 text-sm rounded-lg opacity-60 transition-all';
+        btnAvail.className = activeClass;
+        btnAll.className = inactiveClass;
     }
 
     loadCars();
