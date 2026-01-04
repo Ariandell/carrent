@@ -15,12 +15,12 @@
     // Configuration
     const config = {
         TEXTURE_DOWNSAMPLE: 1,
-        DENSITY_DISSIPATION: 0.98, // Slow fade for "Aurora" effect
-        VELOCITY_DISSIPATION: 0.99, // Keep momentum
+        DENSITY_DISSIPATION: 0.86, // Fade faster to keep screen clean
+        VELOCITY_DISSIPATION: 0.99,
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 20,
-        CURL: 25, // Gentle swirl (was 55)
-        SPLAT_RADIUS: 0.0005, // Visible fine line
+        CURL: 25,
+        SPLAT_RADIUS: 0.0005,
         SPLAT_FORCE: 6000
     };
 

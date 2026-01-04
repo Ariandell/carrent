@@ -54,6 +54,32 @@ const TRANSLATIONS = {
         "latency_ping": "Затримка (Ping)",
         "video_quality": "Якість відео",
 
+        // Manifesto / Landing v2
+        "manifesto_hero_1": "РЕАЛЬНІСТЬ.",
+        "manifesto_hero_2": "ПІД КОНТРОЛЕМ.",
+        "manifesto_hero_desc": "Керуйте справжніми машинами через інтернет. <br>Нульова затримка. Повне занурення.",
+        "manifesto_btn": "Запустити Двигун",
+        "manifesto_scroll": "Гортай Вниз",
+
+        "manifesto_dist_1": "ВІДСТАНЬ —",
+        "manifesto_dist_2": "ЦЕ ІЛЮЗІЯ.",
+        "manifesto_dist_desc": "Підключайтесь до кабіни за тисячі кілометрів миттєво. Світ менший, ніж здається.",
+
+        "manifesto_speed_1": "ШВИДКІСТЬ —",
+        "manifesto_speed_2": "ЦЕ ВІДЧУТТЯ.",
+        "manifesto_speed_desc": "Відчуйте крутний момент. Почуйте мотори. Наш WebRTC протокол передає сирий драйв миттєво.",
+
+        "manifesto_control_1": "КОНТРОЛЬ",
+        "manifesto_control_2": "АБСОЛЮТНИЙ.",
+        "manifesto_control_desc": "Точне керування. HD Відео. Це не гра. Це реальність, перевинайдена.",
+
+        "spec_latency": "Ультра-низька затримка",
+        "spec_video": "HD Відеопотік",
+        "spec_units": "Активних Юнітів",
+
+        "car_unit": "UNIT-01",
+        "car_class": "Клас A / FPV Ровер",
+
         // Auth page
         "app_subtitle": "ПАНЕЛЬ КЕРУВАННЯ",
         "tab_login": "ВХІД",
@@ -213,6 +239,32 @@ const TRANSLATIONS = {
         "system_active": "SYSTEM ACTIVE",
         "latency_ping": "Latency (Ping)",
         "video_quality": "Video Quality",
+
+        // Manifesto / Landing v2
+        "manifesto_hero_1": "REALITY.",
+        "manifesto_hero_2": "CONTROLLED.",
+        "manifesto_hero_desc": "Drive real physical machines over the internet. <br>Zero latency. Infinite immersion.",
+        "manifesto_btn": "Start Engine",
+        "manifesto_scroll": "Scroll to Dive",
+
+        "manifesto_dist_1": "DISTANCE IS",
+        "manifesto_dist_2": "AN ILLUSION.",
+        "manifesto_dist_desc": "Connect to a cockpit thousands of kilometers away in milliseconds. The world is smaller than you think.",
+
+        "manifesto_speed_1": "SPEED IS",
+        "manifesto_speed_2": "A FEELING.",
+        "manifesto_speed_desc": "Feel the torque. Hear the motors. Our proprietary WebRTC protocol delivers raw feedback instantenously.",
+
+        "manifesto_control_1": "CONTROL IS",
+        "manifesto_control_2": "ABSOLUTE.",
+        "manifesto_control_desc": "Precision steering. HD Video. It's not a game. It's reality, repurposed.",
+
+        "spec_latency": "Ultra Low Latency",
+        "spec_video": "HD Video Stream",
+        "spec_units": "Active Units",
+
+        "car_unit": "UNIT-01",
+        "car_class": "Class A / FPV Rover",
 
         // Auth page
         "app_subtitle": "CONTROL PANEL",
