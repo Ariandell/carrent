@@ -3,24 +3,30 @@
 
 /* --- THEME VARIABLES --- */
 :root {
-    /* FORCED DARK THEME for Landing Page Vibe */
+    /* DEFAULT (Manifesto Dark) */
     --bg-core: #050505;
     --text-primary: #ffffff;
     --text-secondary: #888888;
-    --primary: #ffffff; /* Monochrome primary */
-    
-    /* Subtle Accent */
-    --accent: #3b82f6; 
-
-    /* Glass */
+    --primary: #ffffff;
     --glass-bg: rgba(20, 20, 20, 0.6);
     --glass-border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] {
+    /* MANIFESTO LIGHT (High Contrast White) */
+    --bg-core: #ffffff;
+    --text-primary: #000000;
+    --text-secondary: #555555;
+    --primary: #000000;
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 html {
     background: var(--bg-core);
     scroll-behavior: smooth;
     color: var(--text-primary);
+    transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 body {
@@ -47,9 +53,17 @@ body {
 }
 
 /* Staggered delays if needed via nth-child, or utility classes */
-.delay-100 { transition-delay: 0.1s; }
-.delay-200 { transition-delay: 0.2s; }
-.delay-300 { transition-delay: 0.3s; }
+.delay-100 {
+    transition-delay: 0.1s;
+}
+
+.delay-200 {
+    transition-delay: 0.2s;
+}
+
+.delay-300 {
+    transition-delay: 0.3s;
+}
 
 /* Massive Typography */
 .font-manifesto {
@@ -62,10 +76,11 @@ body {
 
 /* Minimalist Button */
 .btn-minimal {
-    border: 1px solid rgba(255,255,255,0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
     padding: 1rem 2rem;
-    border-radius: 9999px; /* Pill */
+    border-radius: 9999px;
+    /* Pill */
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     font-weight: 500;
     letter-spacing: 0.05em;

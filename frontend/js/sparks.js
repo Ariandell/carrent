@@ -39,17 +39,18 @@
             this.x = Math.random() * width;
             this.y = Math.random() * height;
 
-            // "Endel" style: Very small, sharp dots
-            this.size = Math.random() < 0.95 ? Math.random() * 1.5 + 0.5 : Math.random() * 2 + 1;
+            // "Endel" style: Slightly more visible now
+            this.size = Math.random() < 0.95 ? Math.random() * 2 + 1 : Math.random() * 3 + 2;
 
-            // Very slow, ambient movement
-            this.vx = (Math.random() - 0.5) * 0.2;
-            this.vy = (Math.random() - 0.5) * 0.2;
+            // Movement
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = (Math.random() - 0.5) * 0.5;
 
             this.originalVx = this.vx;
             this.originalVy = this.vy;
 
-            this.alpha = Math.random() * 0.5 + 0.1;
+            // Higher Alpha for visibility
+            this.alpha = Math.random() * 0.6 + 0.3;
             this.targetAlpha = this.alpha;
 
             // Pulsing effect
@@ -60,9 +61,12 @@
         draw() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            // White/Grey particles for high contrast on black
+            // Pure White for maximum contrast
             ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "white";
             ctx.fill();
+            ctx.shadowBlur = 0;
         }
 
         update() {
@@ -109,8 +113,9 @@
 
     function initParticles() {
         particles = [];
-        // Sparse density (Minimalist)
-        const particleCount = (width * height) / 15000;
+        // Higher density (was 15000)
+        const densityDivisor = 8000;
+        const particleCount = (width * height) / densityDivisor;
         for (let i = 0; i < particleCount; i++) {
             particles.push(new Particle());
         }
