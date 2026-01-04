@@ -318,7 +318,21 @@
         let startTime = 0;
         let timeoutId = null;
 
-        function handleGameClick() {
+        function handleGameClick(e) {
+            // Prevent double firing if using multiple listeners
+            // If it's a touch event, stop mouse emulation
+            if (e && e.type === 'touchstart') {
+                // Only prevent default if we are IN the game area to avoid scrolling lock?
+                // Actually we want to prevent default to stop zoom/scroll while tapping fast
+                // But user might want to scroll past.
+                // Let's just prevent ghost clicks.
+                e.preventDefault();
+            }
+            if (e && e.type === 'mousedown' && e.detail > 1) {
+                // Prevent double click selection
+                e.preventDefault();
+            }
+
             const idle = document.getElementById('state-idle');
             const wait = document.getElementById('state-wait');
             const click = document.getElementById('state-click');
