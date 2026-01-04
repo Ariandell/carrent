@@ -20,7 +20,7 @@
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 20,
         CURL: 30, // Swirly smoke
-        SPLAT_RADIUS: 0.004, // Much harder/smaller brush
+        SPLAT_RADIUS: 0.001, // 20% size
         SPLAT_FORCE: 6000
     };
 
@@ -352,7 +352,7 @@
 
     // --- MAIN LOOP ---
     function update() {
-        const dt = 0.016;
+        const dt = 0.025; // 40% faster physics (was 0.016)
 
         gl.viewport(0, 0, canvas.width, canvas.height);
 
