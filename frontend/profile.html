@@ -306,11 +306,11 @@
                     document.getElementById('liqpaySignature').value = res.signature;
                     document.getElementById('liqpayForm').submit();
                 } else {
-                    alert('Помилка ініціалізації оплати');
+                    showToast('Помилка ініціалізації оплати', 'error');
                 }
             } catch (e) {
                 console.error('Payment error:', e);
-                alert('Помилка оплати: ' + e.message);
+                showToast('Помилка оплати: ' + e.message, 'error');
             }
         }
 
@@ -353,20 +353,11 @@
                     // Update image to new URL + random param to burst cache
                     img.src = data.url + '?t=' + new Date().getTime();
                     img.style.opacity = '1';
-
-                    if (window.showToast) {
-                        showToast('Аватар успішно оновлено', 'success');
-                    } else {
-                        alert('Аватар оновлено!');
-                    }
+                    showToast('Аватар успішно оновлено', 'success');
 
                 } catch (e) {
                     console.error(e);
-                    if (window.showToast) {
-                        showToast(e.message, 'error');
-                    } else {
-                        alert("Помилка завантаження: " + e.message);
-                    }
+                    showToast('Помилка завантаження: ' + e.message, 'error');
                     document.getElementById('profileAvatar').style.opacity = '1';
                 }
             }
