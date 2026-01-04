@@ -85,15 +85,31 @@
     });
 
     // Touch Support (Mobile)
+    // Touch Support (Mobile)
+    window.addEventListener('touchstart', e => {
+        const touch = e.touches[0];
+        pointers[0].down = true;
+        pointers[0].moved = false; // Reset interpolation
+        pointers[0].x = touch.clientX;
+        pointers[0].y = touch.clientY;
+        // Also reset last positions to prevent jump from previous touch
+        lastX = pointers[0].x;
+        lastY = pointers[0].y;
+        updatePointerColor(pointers[0]);
+    }, { passive: true });
+
     window.addEventListener('touchmove', e => {
-        // We DO NOT preventDefault() because we want the user to scroll.
-        // The smoke will just follow the scroll finger.
         const touch = e.touches[0];
         pointers[0].moved = pointers[0].down = true;
         pointers[0].x = touch.clientX;
         pointers[0].y = touch.clientY;
         updatePointerColor(pointers[0]);
-    }, { passive: true }); // Passive allows scrolling to stay smooth
+    }, { passive: true });
+
+    window.addEventListener('touchend', e => {
+        pointers[0].down = false;
+        pointers[0].moved = false;
+    });
 
     // --- SHADERS ---
     const baseVertexShader = compileShader(gl.VERTEX_SHADER, `
