@@ -20,7 +20,7 @@
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 20,
         CURL: 30, // Swirly smoke
-        SPLAT_RADIUS: 0.001, // 20% size
+        SPLAT_RADIUS: 0.00025, // Micro-fine
         SPLAT_FORCE: 6000
     };
 
@@ -48,13 +48,12 @@
 
     canvas.addEventListener('mousemove', e => {
         // ... (This listener on canvas is blocked by pointer-events: none, so redundant but harmless)
+        // Just update position, interpolation happens in update loop
         pointers[0].moved = pointers[0].down = true;
-        pointers[0].dx = (e.offsetX - pointers[0].x) * 10.0;
-        pointers[0].dy = (e.offsetY - pointers[0].y) * 10.0;
         pointers[0].x = e.offsetX;
         pointers[0].y = e.offsetY;
 
-        // Iridescent Color Cycling (Pearl)
+        // Iridescent Color Cycling
         // High Lightness (mostly white base), shifting hue
         const t = Date.now() / 1000;
         const r = Math.sin(t) * 0.5 + 0.5;
@@ -70,12 +69,10 @@
     // Solution: Listen on WINDOW.
     window.addEventListener('mousemove', e => {
         pointers[0].moved = pointers[0].down = true;
-        pointers[0].dx = (e.clientX - pointers[0].x) * 5.0;
-        pointers[0].dy = (e.clientY - pointers[0].y) * 5.0;
         pointers[0].x = e.clientX;
         pointers[0].y = e.clientY;
 
-        // Iridescent: Pearl White Base + subtle shifts
+        // Iridescent Color Cycling
         // We want RBG values > 1.0 for HDR glow
         const t = Date.now() / 500;
         // Colors: Cyan -> Magenta -> Yellow
@@ -350,6 +347,42 @@
         }
     }
 
+    function multipleSplats(amount) {
+        for (let i = 0; i < amount; i++) {
+            const color = [Math.random() * 10, Math.random() * 10, Math.random() * 10];
+            const x = canvas.width * Math.random();
+            const y = canvas.height * Math.random();
+            const dx = 1000 * (Math.random() - 0.5);
+            const dy = 1000 * (Math.random() - 0.5);
+            splat(x, y, dx, dy, color);
+        }
+    }
+
+    function splat(x, y, dx, dy, color) {
+        gl.useProgram(splatProgram.program);
+        gl.uniform1i(splatProgram.uniforms.uTarget, 0);
+        gl.uniform1f(splatProgram.uniforms.aspectRatio, canvas.width / canvas.height);
+        gl.uniform2f(splatProgram.uniforms.point, x / canvas.width, 1.0 - y / canvas.height);
+        gl.uniform3f(splatProgram.uniforms.color, dx, dy, 1.0);
+        gl.uniform1f(splatProgram.uniforms.radius, config.SPLAT_RADIUS);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, velocity.read.tex);
+        blit(velocity.write.fbo);
+        velocity.swap();
+
+        gl.uniform1i(splatProgram.uniforms.uTarget, 0);
+        gl.uniform3fv(splatProgram.uniforms.color, color);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, density.read.tex);
+        blit(density.write.fbo);
+        density.swap();
+    }
+
+    let lastX = 0;
+    let lastY = 0;
+
     // --- MAIN LOOP ---
     function update() {
         const dt = 0.025; // 40% faster physics (was 0.016)
@@ -378,29 +411,33 @@
         blit(density.write.fbo);
         density.swap();
 
-        // Splats
+        // Splats (Interpolated)
         if (pointers[0].moved) {
-            gl.useProgram(splatProgram.program);
-            gl.uniform1i(splatProgram.uniforms.uTarget, 0);
-            gl.uniform1f(splatProgram.uniforms.aspectRatio, canvas.width / canvas.height);
-            gl.uniform2f(splatProgram.uniforms.point, pointers[0].x / canvas.width, 1.0 - pointers[0].y / canvas.height);
-            gl.uniform3f(splatProgram.uniforms.color, pointers[0].dx, pointers[0].dy, 1.0); // Velocity splat
-            gl.uniform1f(splatProgram.uniforms.radius, config.SPLAT_RADIUS);
+            const dx = pointers[0].x - lastX;
+            const dy = pointers[0].y - lastY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
 
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, velocity.read.tex);
-            blit(velocity.write.fbo);
-            velocity.swap();
+            // Only interpolate if distance is reasonable (avoid jumps on init/tab switch)
+            if (dist < 800 && dist > 0) {
+                const steps = Math.ceil(dist / 5); // Splat every 5 pixels
+                for (let i = 0; i < steps; i++) {
+                    const t = (i + 1) / steps;
+                    const x = lastX + dx * t;
+                    const y = lastY + dy * t;
+                    // Velocity is constant along the line for this frame
+                    splat(x, y, dx * 5.0, dy * 5.0, pointers[0].color);
+                }
+            } else {
+                // Single splat (first move or jump)
+                splat(pointers[0].x, pointers[0].y, dx * 5.0, dy * 5.0, pointers[0].color);
+            }
 
-            gl.uniform1i(splatProgram.uniforms.uTarget, 0);
-            gl.uniform3fv(splatProgram.uniforms.color, pointers[0].color); // Density color splat
-
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, density.read.tex);
-            blit(density.write.fbo);
-            density.swap();
-
-            pointers[0].moved = false; // Processed
+            lastX = pointers[0].x;
+            lastY = pointers[0].y;
+            pointers[0].moved = false;
+        } else {
+            // Keep last pos updated even if not technically 'moved' (for subtle idle drift if implemented later)
+            // But here we just relying on the flag.
         }
 
         // Curl
