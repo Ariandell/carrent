@@ -86,73 +86,110 @@
         }
     }
 
-    // --- MOUSE TRAIL ("Pearl Smoke" Effect) ---
+    // --- MOUSE TRAIL ("Fluid Pearl" Effect) ---
     const mouse = { x: -1000, y: -1000, lastX: -1000, lastY: -1000 };
     let trail = [];
 
     window.addEventListener('mousemove', e => {
-        mouse.lastX = mouse.x === -1000 ? e.clientX : mouse.x;
-        mouse.lastY = mouse.y === -1000 ? e.clientY : mouse.y;
+        // Init logic
+        if (mouse.x === -1000) {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            mouse.lastX = e.clientX;
+            mouse.lastY = e.clientY;
+        }
+
+        mouse.lastX = mouse.x;
+        mouse.lastY = mouse.y;
         mouse.x = e.clientX;
         mouse.y = e.clientY;
 
-        // Calculate velocity for "push" effect
+        // INTERPOLATION: Fill gaps between frames for smooth line
         const dx = mouse.x - mouse.lastX;
         const dy = mouse.y - mouse.lastY;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        // Only spawn if moving
-        if (dist > 2) {
-            // Spawn smoke
-            trail.push(new SmokeParticle(mouse.x, mouse.y, dx * 0.1, dy * 0.1));
+        // Spawn particles along the path
+        const steps = Math.max(1, Math.floor(dist / 5)); // Every 5px
+
+        for (let i = 0; i < steps; i++) {
+            const t = i / steps;
+            const x = mouse.lastX + dx * t;
+            const y = mouse.lastY + dy * t;
+
+            // Add momentum spread
+            const spreadX = (Math.random() - 0.5) * 2;
+            const spreadY = (Math.random() - 0.5) * 2;
+
+            trail.push(new PearlParticle(x, y, spreadX, spreadY));
         }
     });
 
-    class SmokeParticle {
+    class PearlParticle {
         constructor(x, y, vx, vy) {
             this.x = x;
             this.y = y;
-            this.vx = vx * 0.5; // Inertia
-            this.vy = vy * 0.5;
+            // Physics: Very slow drift, mostly stays in place (air drag)
+            this.vx = vx * 0.2;
+            this.vy = vy * 0.2;
+
             this.age = 0;
-            this.life = 100; // Longer life (smoke lingers)
-            this.size = Math.random() * 30 + 20; // Start large
-            // Pearl Colors: High Lightness (85-95%), Low-Mid Saturation
-            this.hue = (Date.now() / 20) % 360;
+            this.life = 120; // 2 seconds (lingers)
+            this.size = 15; // Start small-ish
+            this.maxSize = 50; // Expand huge
+
+            // Initial Phase for color cycle
+            this.phase = Math.random() * Math.PI * 2;
         }
 
         update() {
             this.age++;
 
-            // Physics: Expand and Slow down
+            // Drift
             this.x += this.vx;
             this.y += this.vy;
+            // Drag
+            this.vx *= 0.98;
+            this.vy *= 0.98;
 
-            this.vx *= 0.95; // Friction
-            this.vy *= 0.95;
-
-            this.size += 0.3; // Expand like smoke
-
-            // Subtle drift up
+            // Buoyancy (very slight up)
             this.y -= 0.1;
 
-            // Iridescence flow
-            this.hue += 1.0;
+            // Expansion (Fluid diffusion)
+            this.size += (this.maxSize - this.size) * 0.02;
         }
 
         draw(ctx) {
             const progress = this.age / this.life;
-            const opacity = (1 - progress) * 0.08; // VERY faint (0.08 max)
+            if (progress >= 1) return;
 
-            if (opacity <= 0) return;
+            // Smooth fade out
+            const alpha = (1 - Math.pow(progress, 3)) * 0.12; // Start at 0.12 opacity, cubic fade
+
+            // iridescent Color Calculation
+            // We want that "Oil on Water" look: Cyan -> Pink -> Gold -> Blue
+            // Map progress to color spectrum
+
+            // Pearl Palette
+            // 0.0 - 0.3: Cyan/Blue
+            // 0.3 - 0.6: Pink/Magenta
+            // 0.6 - 1.0: Gold/Orange
+
+            // We can use sine waves for smooth transitions
+            // H: Soft shift from 200 (Blue) to 340 (Pink) to 40 (Gold)
+            // Or just a cycling hue based on Phase + Age
+
+            const hue = 200 + (progress * 200); // 200->400 (Blue -> Pink -> Gold)
+            const sat = 80;
+            const light = 85;
 
             ctx.beginPath();
-            // Gradient for soft smoke edge
+
+            // Soft Radial Gradient for "Puff" look
             const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
-            // Core: White/Pearly
-            grad.addColorStop(0, `hsla(${this.hue}, 60%, 95%, ${opacity})`);
-            // Edge: Colored Tint (Petrol)
-            grad.addColorStop(1, `hsla(${this.hue + 40}, 80%, 85%, 0)`);
+            grad.addColorStop(0, `hsla(${hue}, ${sat}%, 95%, ${alpha})`); // Core is white-ish
+            grad.addColorStop(0.5, `hsla(${hue}, ${sat}%, ${light}%, ${alpha * 0.5})`);
+            grad.addColorStop(1, `hsla(${hue + 30}, ${sat}%, ${light}%, 0)`); // Edge fades out
 
             ctx.fillStyle = grad;
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
