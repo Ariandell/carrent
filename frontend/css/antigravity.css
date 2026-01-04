@@ -2,71 +2,99 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
 
 /* --- THEME VARIABLES --- */
+/* LIGHT MODE BY DEFAULT (no class required) */
 :root {
-    /* DEFAULT (Manifesto Dark) */
+    --bg-core: #f5f5f5;
+    --text-primary: #171717;
+    --text-secondary: #525252;
+    --primary: #000000;
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.08);
+
+    /* Interaction Colors */
+    --hover-text: #ffffff;
+    --hover-bg: #000000;
+    --accent-color: #059669;
+    /* Emerald 600 */
+
+    /* Component Colors */
+    --card-bg: #ffffff;
+    --divider: #e5e5e5;
+    --input-bg: #f5f5f5;
+}
+
+/* DARK MODE (when .dark class is on html) */
+.dark {
     --bg-core: #050505;
     --text-primary: #ffffff;
-    --text-secondary: #888888;
+    --text-secondary: #a3a3a3;
     --primary: #ffffff;
-    --glass-bg: rgba(20, 20, 20, 0.6);
-    --glass-border: 1px solid rgba(255, 255, 255, 0.05);
+    --glass-bg: rgba(20, 20, 20, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.08);
 
     /* Interaction Colors */
     --hover-text: #050505;
-    /* Dark text on hover */
     --hover-bg: #ffffff;
-    /* White bg on hover */
     --accent-color: #34d399;
-    /* Emerald 400 equivalent */
+    /* Emerald 400 */
+
+    /* Component Colors */
+    --card-bg: #111111;
+    --divider: rgba(255, 255, 255, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.05);
 }
 
+/* Legacy data-theme support for compatibility */
 [data-theme="light"] {
-    /* MANIFESTO LIGHT (High Contrast White) */
-    --bg-core: #ffffff;
-    --text-primary: #000000;
-    --text-secondary: #555555;
+    --bg-core: #f5f5f5;
+    --text-primary: #171717;
+    --text-secondary: #525252;
     --primary: #000000;
     --glass-bg: rgba(255, 255, 255, 0.8);
-    --glass-border: 1px solid rgba(0, 0, 0, 0.1);
-
-    /* Interaction Colors (Inverted for Light Mode) */
+    --glass-border: rgba(0, 0, 0, 0.08);
     --hover-text: #ffffff;
-    /* White text on hover */
     --hover-bg: #000000;
-    /* Black bg on hover */
     --accent-color: #059669;
-    /* Emerald 600 equivalent (darker for white bg) */
+    --card-bg: #ffffff;
+    --divider: #e5e5e5;
+    --input-bg: #f5f5f5;
+}
+
+[data-theme="dark"] {
+    --bg-core: #050505;
+    --text-primary: #ffffff;
+    --text-secondary: #a3a3a3;
+    --primary: #ffffff;
+    --glass-bg: rgba(20, 20, 20, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --hover-text: #050505;
+    --hover-bg: #ffffff;
+    --accent-color: #34d399;
+    --card-bg: #111111;
+    --divider: rgba(255, 255, 255, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.05);
 }
 
 html {
-    /* Background handled by #bg-layer */
     scroll-behavior: smooth;
     color: var(--text-primary);
-    transition: color 0.5s ease;
+    background: var(--bg-core);
+    transition: color 0.3s ease, background 0.3s ease;
+}
+
+body {
+    background: var(--bg-core);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
 }
 
 /* --- SELECTION STYLES --- */
 ::selection {
     background: var(--accent-color);
-    /* Emerald or Theme color */
-    color: #ffffff;
-    /* Default readable on emerald */
-}
-
-/* Specific override for Light Mode if needed for contrast */
-[data-theme="light"] ::selection {
-    background: #000000;
-    /* Black selection in high-contrast light mode */
     color: #ffffff;
 }
-
-/* Or if user prefers standard blue selection in light mode */
-/* 
-[data-theme="light"] ::selection {
-   background: rgba(59, 130, 246, 0.5);
-   color: #000000;
-} 
-*/
 
 /* Scrollbar Customization */
 ::-webkit-scrollbar {
@@ -78,40 +106,76 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--glass-border);
-    /* Subtle border color */
-    border-radius: 4px;
     background-color: var(--text-secondary);
-    /* Fallback */
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background-color: var(--text-primary);
 }
 
-body {
-    background: transparent;
-    /* Allow sparks to show */
-    color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
-}
-
+/* --- BG LAYER (For pages that use it) --- */
 #bg-layer {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    /* Deeper than sparks (z-index: -1) */
     z-index: -2;
     background: var(--bg-core);
-    transition: background-color 0.5s ease;
+    transition: background-color 0.3s ease;
+}
+
+/* --- COMMON COMPONENTS --- */
+
+/* Cards */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--divider);
+    border-radius: 1rem;
+}
+
+/* Navigation Glass */
+.nav-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--divider);
+}
+
+/* Text Utilities */
+.text-muted {
+    color: var(--text-secondary);
+}
+
+.icon-muted {
+    color: var(--text-secondary);
+}
+
+/* Buttons */
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.btn-secondary {
+    background: var(--input-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--divider);
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: var(--divider);
 }
 
 /* --- KINETIC TYPOGRAPHY UTILS --- */
 
-/* Base class for reveal elements */
 .reveal-text {
     opacity: 0;
     transform: translateY(30px);
@@ -124,7 +188,6 @@ body {
     transform: translateY(0);
 }
 
-/* Staggered delays if needed via nth-child, or utility classes */
 .delay-100 {
     transition-delay: 0.1s;
 }
@@ -144,9 +207,8 @@ body {
     line-height: 0.9;
 }
 
-/* --- COMPONENTS --- */
+/* --- SPECIAL COMPONENTS --- */
 
-/* Minimalist Button */
 .btn-minimal {
     border: 1px solid currentColor;
     color: inherit;
@@ -172,7 +234,7 @@ body {
 .glass-panel {
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
-    border: var(--glass-border);
+    border: 1px solid var(--glass-border);
 }
 
 /* Embedded Text Interactions */
@@ -194,14 +256,6 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Special Case: Language Selectors (Accent Color) */
-.interactive-text.lang-select:hover {
-    color: var(--hover-text);
-    /* Optional: If we want colored text instead of black/white block, can override here.
-       But for Manifesto style, black/white blocks are stronger. 
-       Let's stick to the block reveal as defined above. */
-}
-
 @keyframes scan {
     0% {
         transform: translateY(-50%);
@@ -214,4 +268,25 @@ body {
 
 .animate-scan {
     animation: scan 4s linear infinite;
+}
+
+/* Fade In Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.2s ease-out;
 }
