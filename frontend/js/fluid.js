@@ -15,12 +15,12 @@
     // Configuration
     const config = {
         TEXTURE_DOWNSAMPLE: 1,
-        DENSITY_DISSIPATION: 0.97, // Fade slightly fast to avoid screen clutter, but slow enough to see curls
-        VELOCITY_DISSIPATION: 0.98,
+        DENSITY_DISSIPATION: 0.98, // Slow fade for "Aurora" effect
+        VELOCITY_DISSIPATION: 0.99, // Keep momentum
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 20,
-        CURL: 55, // High vorticity for "liquid" dispersal
-        SPLAT_RADIUS: 0.00025, // Micro-fine
+        CURL: 25, // Gentle swirl (was 55)
+        SPLAT_RADIUS: 0.0005, // Visible fine line
         SPLAT_FORCE: 6000
     };
 
@@ -406,17 +406,7 @@
         gl.uniform1i(advectionProgram.uniforms.uSource, 1);
         gl.uniform1f(advectionProgram.uniforms.dissipation, config.DENSITY_DISSIPATION);
 
-        // Configuration
-        const config = {
-            TEXTURE_DOWNSAMPLE: 1,
-            DENSITY_DISSIPATION: 0.92, // Faster fade (was 0.97)
-            VELOCITY_DISSIPATION: 0.95, // Lose momentum faster
-            PRESSURE_DISSIPATION: 0.8,
-            PRESSURE_ITERATIONS: 20,
-            CURL: 20, // Less aggressive swirling (was 55)
-            SPLAT_RADIUS: 0.00025,
-            SPLAT_FORCE: 6000
-        };
+
 
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, density.read.tex);
