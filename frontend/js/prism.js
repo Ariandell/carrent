@@ -26,17 +26,15 @@ const fragmentShaderSource = `
     uniform vec2 u_resolution;
     uniform float u_time;
 
-    // Spectral Palette (Apple-like / Endel-like fluid colors)
+    // Fluid Color Palette (Oil/Liquid style)
     vec3 palette( in float t ) {
-        // High saturation, fluid brightness
         vec3 a = vec3(0.5, 0.5, 0.5);
         vec3 b = vec3(0.5, 0.5, 0.5);
         vec3 c = vec3(1.0, 1.0, 1.0);
-        vec3 d = vec3(0.00, 0.33, 0.67); // RGB shift
+        vec3 d = vec3(0.00, 0.33, 0.67);
         return a + b*cos( 6.28318*(c*t+d) );
     }
 
-    // SDF for Equilateral Triangle
     float sdTriangle( in vec2 p, in float r ) {
         const float k = sqrt(3.0);
         p.x = abs(p.x) - 1.0;
@@ -46,76 +44,85 @@ const fragmentShaderSource = `
         return -length(p)*sign(p.y);
     }
 
-    // 2D Rotation
-    mat2 rot(float a) {
-        float s = sin(a);
-        float c = cos(a);
-        return mat2(c, -s, s, c);
-    }
-
     void main() {
-        // Normalize UV
         vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
         vec2 uv0 = uv;
 
-        // --- PRISM GEOMETRY ---
-        // Slowly rotating prism in center
-        vec2 prismUV = uv * rot(u_time * 0.1);
-        float d = sdTriangle(prismUV * 2.5, 1.0); // Scale up triangle
+        // --- 1. PRISM (STATIC GLASS) ---
+        // No rotation. Just a stable, dark glass triangle.
+        float d = sdTriangle(uv * 2.5, 1.0);
         
-        // Define the Prism Appearance (Dark, Glassy edges)
-        float prismAlpha = smoothstep(0.01, 0.0, d); // 1.0 inside triangle, 0.0 outside
-        float edgeGlow = smoothstep(0.02, 0.01, abs(d)) * 0.5; // Thin glow on edge
+        // Glass appearance: Dark body, bright edges
+        float prismAlpha = smoothstep(0.01, 0.0, d); 
+        float edgeGlow = smoothstep(0.03, 0.0, abs(d)) * 0.8; 
         
-        // --- BEAM GEOMETRY ---
-        // Beam originates from center, spreads to the right
-        // Log-polar coords for "fan" shape
+        // Interior Refraction hints (subtle brightness variation inside)
+        float refraction = 0.0;
+        if (d < 0.0) {
+            refraction = sin(uv.x * 10.0 + uv.y * 10.0) * 0.05; 
+        }
+
+        // --- 2. ENTRY BEAM (Pure White) ---
+        // Coming from left (-x) hitting center (0,0)
+        // Thin line, slightly glowing
+        float beamY = abs(uv.y - 0.05); // Offset slightly to hit side? No, pure center hit is classic
+        // Actually, classic Pink Floyd is coming from mid-left, hitting left face.
+        // Let's do simple: line from x=-2.0 to x=0.0
+        float entryMask = smoothstep(0.02, 0.0, abs(uv.y + uv.x * 0.3)); // Angel entry
+        entryMask *= smoothstep(0.1, 0.0, uv.x + 0.3); // Cut off at prism face approx
+        
+        // --- 3. FLUID SPECTRA (Liquid Exit) ---
+        // Fan to the right
         float angle = atan(uv.y, uv.x);
         float radius = length(uv);
         
-        // Restrict beam to right side (-PI/6 to +PI/6 approx)
-        // Add "fluid" waviness to the angle calculation
-        float wave = sin(radius * 3.0 - u_time * 2.0) * 0.1;
-        float beamWidth = 0.5; // Spread of the beam
+        // Liquid Distortion
+        // Instead of straight rays, we distort the 'angle' lookup with sine waves
+        float liquid = sin(radius * 4.0 - u_time * 1.5) 
+                     + sin(uv.y * 10.0 + u_time) 
+                     + sin((uv.x + uv.y) * 5.0);
+                     
+        float spreadOpacity = smoothstep(0.0, 1.0, uv.x); // Only right side
         
-        // Mask for the beam cone
-        float beamMask = smoothstep(beamWidth, 0.0, abs(angle + wave * 0.5));
+        // The "Color" coord based on angle + liquid distortion
+        float colorPos = angle * 2.0 + liquid * 0.1 - u_time * 0.2;
+        vec3 spectrum = palette(colorPos);
         
-        // Only show beam strictly to the right (x > 0 roughly) with soft fade near center
-        beamMask *= smoothstep(0.1, 0.5, uv.x);
-
-        // --- SPECTRAL COLOR ---
-        // Map color to the angle within the beam + time
-        float colorPos = (angle / beamWidth) + u_time * 0.2;
-        vec3 beamColor = palette(colorPos);
+        // Limits of the fan (Confinement)
+        float fanMask = smoothstep(0.8, 0.0, abs(angle)); // Within ~45 degrees
+        fanMask *= smoothstep(0.2, 0.5, uv.x); // Fade in after prism
         
-        // Add "God ray" streaks (noise lines)
-        float streaks = sin(angle * 40.0 + u_time) * 0.5 + 0.5;
-        beamColor += streaks * 0.2;
+        // Soften and fluidize the fan mask itself
+        float flowMask = fanMask * (0.8 + 0.2 * sin(radius * 10.0 - u_time * 2.0));
 
         // --- COMPOSITION ---
-        vec3 finalColor = vec3(0.0);
-        float finalAlpha = 0.0;
+        vec3 col = vec3(0.0);
+        float alpha = 0.0;
 
-        // 1. Draw Beam
-        finalColor += beamColor;
-        finalAlpha += beamMask * 1.5; // Intensity
-        
-        // 2. Draw Prism (subtract/occlude beam behind it, or tint it?)
-        // Let's make the prism dark (blocking the beam where it overlaps)
-        // But add the edge glow
-        
-        // If pixel is inside prism...
+        // Add Entry Beam
+        col += vec3(1.0) * entryMask * 2.0; // Bright white
+        alpha += entryMask;
+
+        // Add Spectrum (Behind Prism mostly, but flows out)
+        col += spectrum * flowMask * 1.5;
+        alpha += flowMask;
+
+        // Draw Prism on top
         if (d < 0.0) {
-           finalColor = vec3(0.05); // Dark glass
-           finalAlpha = 0.9;        // High opacity
-           finalColor += vec3(1.0) * edgeGlow; // White edges
+            // Inside glass
+            vec3 glassColor = vec3(0.02) + edgeGlow;
+            col = mix(col, glassColor, 0.95); // High opacity blocking
+            alpha = max(alpha, 0.9); // Ensure physical presence
         } else {
-           // Outside prism: Just the beam
-           finalAlpha *= smoothstep(1.5, 0.0, radius); // Vignette fade out
+            // Edge glow only outside
+             col += vec3(1.0) * edgeGlow * 0.5;
+             alpha += edgeGlow * 0.5;
         }
 
-        gl_FragColor = vec4(finalColor, finalAlpha);
+        // Vignette edges of screen
+        alpha *= smoothstep(1.8, 0.5, length(uv));
+
+        gl_FragColor = vec4(col, alpha);
     }
 `;
 
