@@ -406,6 +406,18 @@
         gl.uniform1i(advectionProgram.uniforms.uSource, 1);
         gl.uniform1f(advectionProgram.uniforms.dissipation, config.DENSITY_DISSIPATION);
 
+        // Configuration
+        const config = {
+            TEXTURE_DOWNSAMPLE: 1,
+            DENSITY_DISSIPATION: 0.92, // Faster fade (was 0.97)
+            VELOCITY_DISSIPATION: 0.95, // Lose momentum faster
+            PRESSURE_DISSIPATION: 0.8,
+            PRESSURE_ITERATIONS: 20,
+            CURL: 20, // Less aggressive swirling (was 55)
+            SPLAT_RADIUS: 0.00025,
+            SPLAT_FORCE: 6000
+        };
+
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, density.read.tex);
         blit(density.write.fbo);
@@ -425,12 +437,8 @@
                     const x = lastX + dx * t;
                     const y = lastY + dy * t;
 
-                    // Add Turbulence/Noise to velocity
-                    // This breaks the "perfect straight line" and initiates curls immediately
-                    const noiseX = (Math.random() - 0.5) * 800;
-                    const noiseY = (Math.random() - 0.5) * 800;
-
-                    splat(x, y, dx * 5.0 + noiseX, dy * 5.0 + noiseY, pointers[0].color);
+                    // Linear interpolation without noise for smoothness
+                    splat(x, y, dx * 5.0, dy * 5.0, pointers[0].color);
                 }
             } else {
                 // Single splat (first move or jump)
