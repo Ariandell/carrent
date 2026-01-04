@@ -298,6 +298,7 @@
     const vorticityProgram = createProgram(vorticityShader);
     const pressureProgram = createProgram(pressureShader);
     const gradSubtractProgram = createProgram(gradientSubtractShader);
+    const copyProgram = createProgram(copyShader);
 
     // --- FBOs ---
     function createFBO(w, h, type = gl.FLOAT) {
@@ -468,8 +469,8 @@
         velocity.swap();
 
         // DISPLAY
-        gl.useProgram(copyShader);
-        gl.uniform1i(gl.getUniformLocation(copyShader, 'uTexture'), 0);
+        gl.useProgram(copyProgram.program);
+        gl.uniform1i(copyProgram.uniforms.uTexture, 0);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, density.read.tex);
         // Blit to screen
