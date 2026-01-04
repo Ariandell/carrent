@@ -350,12 +350,22 @@ function openRentModal(id, name) {
 
     selectDuration(10); // Reset to default
     document.getElementById('rentCarName').innerText = name;
-    document.getElementById('modalBalance').innerText = `${userBalance} ₴`;
-    document.getElementById('rentModal').classList.remove('hidden');
+    const modalBalanceEl = document.getElementById('modalBalance');
+    if (modalBalanceEl) modalBalanceEl.innerText = `${userBalance} ₴`;
+
+    const el = document.getElementById('rentModal');
+    if (el) {
+        el.style.display = 'flex';
+        requestAnimationFrame(() => el.classList.add('active'));
+    }
 }
 
 function closeRentModal() {
-    document.getElementById('rentModal').classList.add('hidden');
+    const el = document.getElementById('rentModal');
+    if (el) {
+        el.classList.remove('active');
+        setTimeout(() => el.style.display = 'none', 300);
+    }
     selectedCarId = null;
 }
 
@@ -429,10 +439,20 @@ async function confirmRental() {
 
 // === Top Up Modal ===
 function openTopUpModal() {
-    document.getElementById('topUpModal').classList.remove('hidden');
+    const el = document.getElementById('topUpModal');
+    if (el) {
+        el.style.display = 'flex';
+        requestAnimationFrame(() => el.classList.add('active'));
+    }
     selectAmount(100); // Default
 }
-function closeTopUpModal() { document.getElementById('topUpModal').classList.add('hidden'); }
+function closeTopUpModal() {
+    const el = document.getElementById('topUpModal');
+    if (el) {
+        el.classList.remove('active');
+        setTimeout(() => el.style.display = 'none', 300);
+    }
+}
 
 function selectAmount(amount) {
     selectedTopUpAmount = amount;
@@ -465,10 +485,18 @@ async function processPayment() {
 
 // === Support Modal ===
 function openSupportModal() {
-    document.getElementById('supportModal').classList.remove('hidden');
+    const el = document.getElementById('supportModal');
+    if (el) {
+        el.style.display = 'flex';
+        requestAnimationFrame(() => el.classList.add('active'));
+    }
 }
 function closeSupportModal() {
-    document.getElementById('supportModal').classList.add('hidden');
+    const el = document.getElementById('supportModal');
+    if (el) {
+        el.classList.remove('active');
+        setTimeout(() => el.style.display = 'none', 300);
+    }
 }
 async function submitSupport() {
     const subject = document.getElementById('supportSubject').value;
