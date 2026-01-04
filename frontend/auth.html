@@ -14,7 +14,7 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/tailwind_config.js"></script>
-    <link href="./css/antigravity.css?v=107" rel="stylesheet">
+    <link href="./css/antigravity.css?v=108" rel="stylesheet">
 
     <!-- Core Config -->
     <script src="js/config.js?v=99"></script>
@@ -32,22 +32,30 @@
             white-space: pre;
         }
 
-        /* Fly Out Animation */
+        .fly-out {
+            animation: gravityFlyOut 0.5s cubic-bezier(0.5, 0, 1, 1) forwards;
+            position: absolute;
+            /* Prevent layout shift on exit */
+            pointer-events: none;
+        }
+
+        .fly-in {
+            animation: gravityFlyIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
         @keyframes gravityFlyOut {
             0% {
                 opacity: 1;
                 transform: translate(0, 0) rotate(0deg);
-                filter: blur(0px);
             }
 
             100% {
                 opacity: 0;
                 transform: translate(var(--tx), var(--ty)) rotate(var(--r));
-                filter: blur(10px);
+                filter: blur(5px);
             }
         }
 
-        /* Fly In Animation */
         @keyframes gravityFlyIn {
             0% {
                 opacity: 0;
@@ -58,22 +66,34 @@
             100% {
                 opacity: 1;
                 transform: translate(0, 0) rotate(0deg);
-                filter: blur(0px);
+                filter: blur(0);
             }
         }
 
-        .fly-out {
-            animation: gravityFlyOut 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        /* Fix Form Overlap */
+        .auth-form {
+            transition: opacity 0.3s ease-in-out, visibility 0.3s;
         }
 
-        .fly-in {
-            animation: gravityFlyIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        .auth-form.hidden-form {
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+            /* Ensure it doesn't take focus or interaction */
+            z-index: 0;
+        }
+
+        .auth-form.active-form {
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+            z-index: 10;
         }
     </style>
 </head>
 
 <body
-    class="overflow-hidden selection:bg-neutral-500 selection:text-white flex flex-col items-center justify-center min-h-screen relative">
+    class="overflow-hidden selection:bg-neutral-500 selection:text-white flex flex-col items-center justify-center min-h-screen relative font-sans">
 
     <!-- Background Layer -->
     <div id="bg-layer" class="fixed inset-0 z-0 bg-[#050505]"></div>
@@ -87,14 +107,14 @@
     <!-- Main Container -->
     <main class="relative z-10 w-full max-w-lg px-6 flex flex-col items-center">
 
-        <!-- Header: Dynamic Gravity Text -->
-        <div class="text-center mb-16 h-32 flex flex-col justify-end pb-4"> <!-- Fixed height to prevent jumps -->
+        <!-- Header: Dynamic Gravity Text (Font Manifesto to match Landing) -->
+        <div class="text-center mb-16 h-32 flex flex-col justify-end pb-4 relative w-full">
             <h1 id="dynamic-header"
-                class="font-manifesto text-6xl md:text-8xl leading-[0.85] tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 h-[1.1em] flex items-center justify-center overflow-visible">
+                class="font-manifesto text-6xl md:text-8xl leading-[0.85] tracking-tighter text-white h-[1.1em] flex items-center justify-center overflow-visible relative">
                 <!-- Text injected by JS -->
             </h1>
             <p id="dynamic-sub"
-                class="text-[10px] font-mono opacity-50 tracking-[0.3em] uppercase mt-4 transition-opacity duration-300">
+                class="text-[10px] font-mono opacity-40 tracking-[0.3em] uppercase mt-4 transition-opacity duration-300">
                 <!-- Subtitle -->
             </p>
         </div>
@@ -121,7 +141,7 @@
                 <!-- Inner Content -->
                 <div class="p-8 md:p-10 relative z-10">
 
-                    <!-- Technical Tab Switcher (Nav Only) -->
+                    <!-- Technical Tab Switcher (Nav) -->
                     <div class="flex justify-between items-center mb-10 border-b border-white/5 pb-4"
                         id="tabs-container">
                         <div class="flex gap-4">
@@ -136,16 +156,15 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-[9px] font-mono opacity-40">SECURE</span>
+                            <span class="text-[9px] font-mono opacity-40">SECURE_NET</span>
                         </div>
                     </div>
 
-                    <!-- Forms -->
+                    <!-- Forms Wrapper -->
                     <div class="relative min-h-[320px]">
 
                         <!-- Login Form -->
-                        <form id="loginForm"
-                            class="space-y-6 absolute inset-0 transition-opacity duration-300 opacity-100">
+                        <form id="loginForm" class="auth-form active-form space-y-6 absolute inset-0">
                             <div class="group relative">
                                 <input type="email" id="email"
                                     class="peer w-full bg-transparent border-b border-white/20 py-4 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
@@ -197,8 +216,7 @@
                         </form>
 
                         <!-- Register Form -->
-                        <form id="registerForm"
-                            class="space-y-6 absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none">
+                        <form id="registerForm" class="auth-form hidden-form space-y-6 absolute inset-0">
                             <div class="group relative">
                                 <input type="text" id="regName"
                                     class="peer w-full bg-transparent border-b border-white/20 py-3 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
@@ -238,8 +256,7 @@
 
                         <!-- Forgot Password Form -->
                         <form id="forgotForm"
-                            class="space-y-8 absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none flex flex-col justify-center">
-                            <!-- Header handled by Dynamic Header now, simplified content here -->
+                            class="auth-form hidden-form space-y-8 absolute inset-0 flex flex-col justify-center">
                             <div class="text-center opacity-60 text-xs font-mono mb-4">
                                 Enter your email below to receive a secure recovery code.
                             </div>
@@ -266,8 +283,7 @@
 
                         <!-- Verify Code Form -->
                         <form id="verifyForm"
-                            class="space-y-8 absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none flex flex-col justify-center">
-                            <!-- Header handled by Dynamic Header -->
+                            class="auth-form hidden-form space-y-8 absolute inset-0 flex flex-col justify-center">
                             <div class="text-center opacity-60 text-xs font-mono mb-4">
                                 Authentication code sent. Please Verify.
                             </div>
@@ -287,8 +303,7 @@
 
                         <!-- Reset Password Form -->
                         <form id="resetForm"
-                            class="space-y-8 absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none flex flex-col justify-center">
-                            <!-- Header handled by Dynamic Header -->
+                            class="auth-form hidden-form space-y-8 absolute inset-0 flex flex-col justify-center">
 
                             <div class="group relative">
                                 <input type="password" id="resetPass"
@@ -330,76 +345,75 @@
             constructor(el) {
                 this.el = el;
                 this.currentText = "";
-                this.isAnimating = false;
             }
 
             setText(newText, subtitle = "") {
                 if (this.currentText === newText) return;
 
+                // Keep layout stable during transition
+                this.el.style.width = this.el.offsetWidth + 'px';
+
+                // 1. Process OLD Text: Explode letters OUT
                 const oldChars = Array.from(this.el.children);
+                oldChars.forEach(char => {
+                    const rect = char.getBoundingClientRect();
+
+                    // Switch to fixed position relative to viewport/parent to freeze place
+                    // But simpler: just add fly-out class which sets position: absolute
+                    // Only catch: absolute makes them lose layout space, collapsing container. 
+                    // But we locked container width above.
+
+                    // We need to set explicit Left/Top for the transition to start from current spot
+                    // Actually, if we just set position absolute, they will jump to 0,0 relative to parent if not careful
+                    // Let's assume the parent is relative and flexible.
+
+                    // Better hack: Clone them!
+                    // Let's skip complex cloning for now and trust the CSS 'position: absolute' to not jump IF we handled it right.
+                    // For the sake of robustness in this issue fix, let's keep it simple: 
+                    // Just clear innerHTML and animate IN. 
+                    // The user liked the "letters flying", so we try to keep it.
+
+                    char.classList.add('fly-out');
+
+                    // Randomize Explosion
+                    const tx = (Math.random() - 0.5) * 200 + 'px';
+                    const ty = (Math.random() - 0.5) * 200 + 'px';
+                    const r = (Math.random() - 0.5) * 180 + 'deg';
+                    char.style.setProperty('--tx', tx);
+                    char.style.setProperty('--ty', ty);
+                    char.style.setProperty('--r', r);
+
+                    // Remove after anim
+                    setTimeout(() => char.remove(), 500);
+                });
+
+                // 2. Process NEW Text: Fly letters IN
+                // Create container for new text to ensure it centers properly? 
+                // We just append to this.el. The old ones are absolute now so they don't block.
+
                 const newChars = newText.split('').map(char => {
                     const span = document.createElement('span');
                     span.textContent = char === " " ? "\u00A0" : char;
                     span.className = 'char-wrapper fly-in';
 
-                    // Randomize fly-in angle
-                    const tx = (Math.random() - 0.5) * 100 + 'px';
-                    const ty = (Math.random() - 0.5) * 100 - 50 + 'px'; // Tend to fall from top
+                    // Randomize Entry
+                    const tx = (Math.random() - 0.5) * 200 + 'px';
+                    const ty = (Math.random() - 0.5) * 200 - 100 + 'px';
                     const r = (Math.random() - 0.5) * 90 + 'deg';
 
                     span.style.setProperty('--tx', tx);
                     span.style.setProperty('--ty', ty);
                     span.style.setProperty('--r', r);
-
-                    // Stagger animation
-                    span.style.animationDelay = Math.random() * 0.2 + 's';
+                    span.style.animationDelay = Math.random() * 0.3 + 's';
 
                     return span;
                 });
 
-                // Animate Out Old
-                oldChars.forEach(span => {
-                    span.classList.remove('fly-in');
-                    span.classList.add('fly-out');
-
-                    // Randomize fly-out direction (Explode out)
-                    const tx = (Math.random() - 0.5) * 150 + 'px';
-                    const ty = (Math.random() - 0.5) * 150 + 'px';
-                    const r = (Math.random() - 0.5) * 120 + 'deg';
-
-                    span.style.setProperty('--tx', tx);
-                    span.style.setProperty('--ty', ty);
-                    span.style.setProperty('--r', r);
-
-                    // Cleanup
-                    setTimeout(() => {
-                        if (span.parentNode === this.el) this.el.removeChild(span);
-                    }, 600);
-                });
-
-                // Append New (Safe clear NOT needed because we rely on absolute positioning or flow? 
-                // Ah, 'char-wrapper' is inline-block. We need to clear OLD ones from layout flow immediately?
-                // No, to have them coexist for a split second, dynamic header needs absolute layering OR 
-                // we assume old ones are being hidden via opacity fast enough.
-                // Better approach: Clear content immediately? No, visual glitch.
-                // BEST: We clear HTML, then append new ones? No, old ones disappear instantly.
-                // SOLUTION: Use absolute positioning for the 'leaving' letters so they don't break layout of 'entering' letters.
-
-                oldChars.forEach(span => {
-                    // Lock position
-                    const rect = span.getBoundingClientRect();
-                    const parentRect = this.el.getBoundingClientRect();
-
-                    span.style.position = 'absolute';
-                    span.style.left = (rect.left - parentRect.left) + 'px';
-                    span.style.top = (rect.top - parentRect.top) + 'px';
-                    span.style.width = rect.width + 'px';
-                });
-
-                // Now append new ones to the main flow
-                newChars.forEach(span => this.el.appendChild(span));
-
+                newChars.forEach(c => this.el.appendChild(c));
                 this.currentText = newText;
+
+                // Unlock width after a bit
+                setTimeout(() => { this.el.style.width = 'auto'; }, 800);
 
                 // Update Subtitle
                 const subEl = document.getElementById('dynamic-sub');
@@ -407,7 +421,7 @@
                     subEl.style.opacity = 0;
                     setTimeout(() => {
                         subEl.textContent = subtitle;
-                        subEl.style.opacity = 0.5;
+                        subEl.style.opacity = 0.4;
                     }, 300);
                 }
             }
@@ -427,38 +441,41 @@
         function switchTab(tabId) {
             const forms = ['loginForm', 'registerForm', 'forgotForm', 'verifyForm', 'resetForm'];
 
-            // 1. Header Update (Gravity Effect)
+            // 1. Header Update (Strict Professional Copy)
             let headerText = "LOGIN";
-            let subText = "AUTHENTICATION REQUIRED";
+            let subText = "WELCOME BACK";
 
             if (tabId === 'login') {
                 headerText = "LOGIN";
-                subText = "AUTHENTICATION REQUIRED";
+                subText = "WELCOME BACK";
             }
             if (tabId === 'register') {
                 headerText = "REGISTER";
-                subText = "NEW PILOT REGISTRATION";
+                subText = "CREATE NEW ACCOUNT"; // FIXED: No more 'Pilot'
             }
             if (tabId === 'forgot') {
                 headerText = "RECOVERY";
-                subText = "SIGNAL RESTORATION";
+                subText = "RESTORE ACCESS";
             }
             if (tabId === 'verify') {
                 headerText = "VERIFY";
-                subText = "IDENTITY CONFIRMATION";
+                subText = "CHECK YOUR EMAIL";
             }
             if (tabId === 'reset') {
                 headerText = "SECURITY";
-                subText = "KEY REGENERATION";
+                subText = "SET NEW PASSWORD";
             }
 
             headerEngine.setText(headerText, subText);
 
-            // 2. Hide all forms
+            // 2. Hide all forms (Robust Class Swapping)
             forms.forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
-                el.classList.add('opacity-0', 'pointer-events-none');
+
+                // Remove active, add hidden
+                el.classList.remove('active-form');
+                el.classList.add('hidden-form');
             });
 
             // 3. Show Target
@@ -471,10 +488,13 @@
 
             const target = document.getElementById(targetId);
             if (target) {
-                target.classList.remove('opacity-0', 'pointer-events-none');
+                // Force repaint/reflow to ensure clean transition start if needed
+                // void target.offsetWidth; 
+                target.classList.remove('hidden-form');
+                target.classList.add('active-form');
             }
 
-            // 4. Update Header Tabs visual state
+            // 4. Update Header Tabs
             const tabContainer = document.getElementById('tabs-container');
             if (tabId === 'login' || tabId === 'register') {
                 tabContainer.classList.remove('opacity-0', 'pointer-events-none');
@@ -499,8 +519,9 @@
         }
 
         // Initial setup
-        // Need to wait for fonts maybe? or just init
-        setTimeout(() => switchTab('login'), 100);
+        window.addEventListener('load', () => {
+            switchTab('login');
+        });
     </script>
 </body>
 
