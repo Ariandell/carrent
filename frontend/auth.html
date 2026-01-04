@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-config="PROJECT_NAME">FPV Racer - Access Control</title>
+    <title data-config="PROJECT_NAME">FPV Racer - Sign In</title>
+
     <!-- Prevent Caching -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -13,266 +14,240 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/tailwind_config.js"></script>
-    <link href="./css/antigravity.css?v=103" rel="stylesheet">
+    <link href="./css/antigravity.css?v=105" rel="stylesheet">
 
     <!-- Core Config -->
     <script src="js/config.js?v=99"></script>
     <script src="js/lang.js?v=100"></script>
 
-    <!-- Visual Engines (Matched with Landing) -->
+    <!-- Visual Engines -->
     <script src="js/scroll_reveal.js?v=1"></script>
     <script src="js/prism.js?v=2" defer></script>
     <script src="js/fluid.js?v=1" defer></script>
 </head>
 
 <body
-    class="overflow-hidden selection:bg-neutral-500 selection:text-white flex flex-col items-center justify-center min-h-screen relative">
+    class="overflow-hidden selection:bg-blue-500/30 selection:text-white flex flex-col items-center justify-center min-h-screen relative font-sans antialiased">
 
-    <!-- Background Layer (Matched with Landing) -->
+    <!-- Background Layer -->
     <div id="bg-layer" class="fixed inset-0 z-0 bg-[#050505]"></div>
-    <!-- Note: Fluid/Prism scripts will inject canvases here automatically -->
 
-    <!-- Return Home (Minimalist) -->
+    <!-- Return Home -->
     <a href="index.html"
-        class="absolute top-8 left-8 text-[10px] font-mono opacity-40 hover:opacity-100 transition-opacity z-50 flex items-center gap-2 uppercase tracking-widest cursor-pointer">
-        <span>[ BACK_TO_REALITY ]</span>
+        class="absolute top-8 left-8 text-[11px] font-medium opacity-40 hover:opacity-100 transition-opacity z-50 flex items-center gap-2 uppercase tracking-wider cursor-pointer text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span>Back</span>
     </a>
 
     <!-- Main Container -->
-    <main class="relative z-10 w-full max-w-lg px-6 flex flex-col items-center">
+    <main class="relative z-10 w-full max-w-[420px] px-6 flex flex-col items-center">
 
-        <!-- Header: Manifesto Typography -->
-        <div class="text-center mb-12 reveal-text">
-            <h1 class="font-manifesto text-6xl md:text-8xl leading-[0.85] tracking-tighter mb-4">
-                <div class="gravity-text">PILOT</div>
-                <div class="opacity-50 gravity-text">ACCESS</div>
+        <!-- Header -->
+        <div class="text-center mb-10 reveal-text">
+            <div
+                class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10 backdrop-blur-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </div>
+            <h1 class="font-manifesto text-4xl md:text-5xl tracking-wide text-white mb-2">
+                ACCOUNT
             </h1>
-            <p class="text-xs font-mono opacity-50 tracking-[0.2em] uppercase" data-i18n="app_subtitle">
-                SECURE NEURAL LINK V2.0
+            <p class="text-[13px] text-white/40 font-light tracking-wide" data-i18n="app_subtitle">
+                Welcome back. Please enter your details.
             </p>
         </div>
 
-        <!-- Auth Card: Technical HUD Style -->
-        <div id="auth-card" class="w-full relative group reveal-text delay-200">
-
-            <!-- Decorative Corners (Viewfinder) -->
-            <div
-                class="absolute -top-4 -left-4 w-8 h-8 border-t border-l border-white/20 opacity-50 transition-all duration-500 group-hover:w-12 group-hover:h-12 group-hover:opacity-100 group-hover:border-blue-500">
-            </div>
-            <div
-                class="absolute -bottom-4 -right-4 w-8 h-8 border-b border-r border-white/20 opacity-50 transition-all duration-500 group-hover:w-12 group-hover:h-12 group-hover:opacity-100 group-hover:border-blue-500">
-            </div>
+        <!-- Auth Card -->
+        <div id="auth-card" class="w-full relative reveal-text delay-100">
 
             <!-- Glass Container -->
-            <div class="glass-panel p-1 bg-black/40 backdrop-blur-xl border border-white/10 overflow-hidden relative">
+            <div
+                class="glass-panel bg-[#0a0a0a]/60 backdrop-blur-2xl rounded-[32px] border border-white/[0.08] overflow-hidden shadow-2xl shadow-black/50">
 
-                <!-- Scanning Line (Subtle) -->
-                <div
-                    class="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-blue-500/5 to-transparent h-[200%] w-full animate-scan opacity-20">
-                </div>
+                <!-- Inner Content -->
+                <div class="p-8 md:p-10">
 
-                <!-- Inner Content Padding -->
-                <div class="p-8 md:p-10 relative z-10">
-
-                    <!-- Tab Switcher (Integrated Tech Look) -->
-                    <div class="flex justify-between items-center mb-8 border-b border-white/5 pb-4"
-                        id="tabs-container">
-                        <div class="flex gap-4">
-                            <button onclick="switchTab('login')" id="tab-login"
-                                class="text-xs font-bold font-mono tracking-widest uppercase hover:text-white transition-colors text-white border-b-2 border-blue-500 pb-4 -mb-4.5">
-                                [ LOGIN ]
-                            </button>
-                            <button onclick="switchTab('register')" id="tab-register"
-                                class="text-xs font-bold font-mono tracking-widest uppercase hover:text-white transition-colors text-white/40 pb-4 -mb-4.5">
-                                [ REGISTER ]
-                            </button>
+                    <!-- Tab Switcher -->
+                    <div class="flex p-1 bg-white/[0.03] rounded-xl mb-8 relative" id="tabs-container">
+                        <!-- Sliding Background -->
+                        <div id="tab-indicator"
+                            class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-white/10 rounded-lg transition-all duration-300 ease-out border border-white/5 shadow-sm">
                         </div>
-                        <!-- Status Dot -->
-                        <div class="flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-[9px] font-mono opacity-40">NET_ACTIVE</span>
-                        </div>
+
+                        <button onclick="switchTab('login')" id="tab-login"
+                            class="flex-1 relative z-10 py-2.5 text-[11px] font-semibold tracking-wider uppercase transition-colors text-white text-center">
+                            Sign In
+                        </button>
+                        <button onclick="switchTab('register')" id="tab-register"
+                            class="flex-1 relative z-10 py-2.5 text-[11px] font-semibold tracking-wider uppercase transition-colors text-white/40 hover:text-white/70 text-center">
+                            Sign Up
+                        </button>
                     </div>
 
-                    <!-- Forms -->
-                    <div class="relative min-h-[320px]"> <!-- Fixed min-height to prevent layout jumps -->
+                    <!-- Forms Wrapper -->
+                    <div class="relative min-h-[300px]">
 
                         <!-- Login Form -->
                         <form id="loginForm"
-                            class="space-y-6 absolute inset-0 transition-all duration-500 ease-out transform translate-x-0 opacity-100">
-                            <div class="group relative">
-                                <input type="email" id="email"
-                                    class="peer w-full bg-transparent border-b border-white/20 py-4 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
-                                    placeholder="Email" required>
-                                <label for="email"
-                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
-                                    Callsign / Email
-                                </label>
+                            class="space-y-5 absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] opacity-100 transform translate-x-0">
+                            <div class="space-y-4">
+                                <div>
+                                    <label
+                                        class="block text-[11px] font-medium text-white/40 uppercase tracking-wider mb-2 ml-1">Email</label>
+                                    <input type="email" id="email"
+                                        class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all placeholder-white/10 font-light"
+                                        placeholder="name@example.com" required>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-[11px] font-medium text-white/40 uppercase tracking-wider mb-2 ml-1">Password</label>
+                                    <input type="password" id="password"
+                                        class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all placeholder-white/10 font-light"
+                                        placeholder="••••••••" required>
+                                </div>
                             </div>
 
-                            <div class="group relative">
-                                <input type="password" id="password"
-                                    class="peer w-full bg-transparent border-b border-white/20 py-4 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
-                                    placeholder="Password" required>
-                                <label for="password"
-                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
-                                    Security Key
-                                </label>
-                            </div>
-
-                            <div class="flex justify-between items-center pt-2">
-                                <label class="flex items-center gap-2 cursor-pointer group/chk">
-                                    <div
-                                        class="w-4 h-4 border border-white/20 flex items-center justify-center group-hover/chk:border-blue-500 transition-colors">
-                                        <input type="checkbox" class="accordion-checkbox hidden">
-                                        <!-- Custom Checkbox Check -->
+                            <div class="flex justify-between items-center px-1">
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <div class="relative flex items-center">
+                                        <input type="checkbox" class="peer sr-only">
                                         <div
-                                            class="w-2 h-2 bg-blue-500 opacity-0 checkbox-indicator transition-opacity">
+                                            class="w-4 h-4 rounded border border-white/20 peer-checked:bg-white peer-checked:border-white transition-all">
                                         </div>
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            class="h-3 w-3 text-black absolute top-0.5 left-0.5 opacity-0 peer-checked:opacity-100 transition-opacity"
+                                            viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                clip-rule="evenodd" />
+                                        </svg>
                                     </div>
                                     <span
-                                        class="text-[10px] font-mono opacity-50 group-hover/chk:text-white transition-colors uppercase tracking-wider"
-                                        data-i18n="auto_connect">Stay Linked</span>
+                                        class="text-[11px] font-medium text-white/40 group-hover:text-white/60 transition-colors">Remember
+                                        me</span>
                                 </label>
                                 <a href="#" onclick="switchTab('forgot'); return false;"
-                                    class="text-[10px] font-mono text-blue-500/80 hover:text-blue-400 uppercase tracking-wider transition-colors"
-                                    data-i18n="lost_key">
-                                    > Recover Key
+                                    class="text-[11px] font-medium text-white/40 hover:text-white transition-colors">
+                                    Forgot password?
                                 </a>
                             </div>
 
                             <button type="submit"
-                                class="w-full relative overflow-hidden group/btn bg-white text-black py-4 font-bold tracking-[0.2em] text-xs uppercase hover:bg-blue-500 hover:text-white transition-all duration-300"
+                                class="w-full bg-white text-black rounded-xl py-3.5 text-[13px] font-bold uppercase tracking-wide hover:bg-neutral-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] mt-2"
                                 data-i18n="btn_login">
-                                <span class="relative z-10">Initialize Link</span>
-                                <div
-                                    class="absolute inset-0 transform scale-x-0 group-hover/btn:scale-x-100 origin-left transition-transform duration-300 bg-blue-600">
-                                </div>
+                                Sign In
                             </button>
                         </form>
 
                         <!-- Register Form -->
                         <form id="registerForm"
-                            class="space-y-6 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none">
-                            <div class="group relative">
+                            class="space-y-4 absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] opacity-0 pointer-events-none transform translate-x-8">
+                            <div>
+                                <label
+                                    class="block text-[11px] font-medium text-white/40 uppercase tracking-wider mb-2 ml-1">Name</label>
                                 <input type="text" id="regName"
-                                    class="peer w-full bg-transparent border-b border-white/20 py-3 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
-                                    placeholder="Name" required>
-                                <label for="regName"
-                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
-                                    Pilot Handle
-                                </label>
+                                    class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all placeholder-white/10 font-light"
+                                    placeholder="Your Name" required>
                             </div>
-
-                            <div class="group relative">
+                            <div>
+                                <label
+                                    class="block text-[11px] font-medium text-white/40 uppercase tracking-wider mb-2 ml-1">Email</label>
                                 <input type="email" id="regEmail"
-                                    class="peer w-full bg-transparent border-b border-white/20 py-3 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
-                                    placeholder="Email" required>
-                                <label for="regEmail"
-                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
-                                    Callsign / Email
-                                </label>
+                                    class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all placeholder-white/10 font-light"
+                                    placeholder="name@example.com" required>
                             </div>
-
-                            <div class="group relative">
+                            <div>
+                                <label
+                                    class="block text-[11px] font-medium text-white/40 uppercase tracking-wider mb-2 ml-1">Password</label>
                                 <input type="password" id="regPass"
-                                    class="peer w-full bg-transparent border-b border-white/20 py-3 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
-                                    placeholder="Pass" required>
-                                <label for="regPass"
-                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
-                                    Create Key
-                                </label>
+                                    class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all placeholder-white/10 font-light"
+                                    placeholder="Create a password" required>
                             </div>
 
                             <button type="submit"
-                                class="w-full relative overflow-hidden group/btn bg-white text-black py-4 font-bold tracking-[0.2em] text-xs uppercase hover:bg-emerald-500 hover:text-white transition-all duration-300 mt-2"
+                                class="w-full bg-white text-black rounded-xl py-3.5 text-[13px] font-bold uppercase tracking-wide hover:bg-neutral-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] mt-2"
                                 data-i18n="btn_register">
-                                <span class="relative z-10">Establish Link</span>
+                                Create Account
                             </button>
-
-                            <div class="text-[9px] text-center opacity-30 font-mono uppercase">
-                                Protocol Terms Apply
-                            </div>
+                            <p class="text-[10px] text-center text-white/30 pt-2">
+                                By joining, you agree to our Terms of Service.
+                            </p>
                         </form>
 
                         <!-- Forgot Password Form -->
                         <form id="forgotForm"
-                            class="space-y-8 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none flex flex-col justify-center">
-                            <div class="text-center">
-                                <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2 text-blue-500">RECOVERY
-                                    // MODE</h3>
-                                <p class="text-[10px] font-mono opacity-50 uppercase">Signal Lost? Re-establish
-                                    connection.</p>
+                            class="space-y-6 absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] opacity-0 pointer-events-none transform translate-x-8 flex flex-col justify-center">
+                            <div class="text-center mb-2">
+                                <h3 class="text-lg font-semibold text-white mb-1">Reset Password</h3>
+                                <p class="text-sm text-white/40">Enter your email to receive a recovery code.</p>
                             </div>
 
-                            <div class="group relative">
+                            <div>
                                 <input type="email" id="forgotEmail"
-                                    class="peer w-full bg-transparent border-b border-white/20 py-4 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
-                                    placeholder="Email" required>
-                                <label for="forgotEmail"
-                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
-                                    Target Email
-                                </label>
+                                    class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all placeholder-white/10 font-light"
+                                    placeholder="name@example.com" required>
                             </div>
 
                             <button type="submit"
-                                class="w-full btn-minimal border border-white/20 hover:bg-white hover:text-black py-3 font-bold tracking-widest text-xs uppercase transition-all"
+                                class="w-full bg-white/[0.05] border border-white/10 text-white rounded-xl py-3.5 text-[13px] font-bold uppercase tracking-wide hover:bg-white hover:text-black transition-all"
                                 data-i18n="btn_send_code">
-                                Transmit Code
+                                Send Code
                             </button>
                             <button type="button" onclick="switchTab('login')"
-                                class="w-full text-[10px] font-mono opacity-50 hover:opacity-100 uppercase tracking-widest transition-opacity">
-                                < Cancel Sequence </button>
+                                class="w-full text-[11px] font-medium text-white/40 hover:text-white transition-colors">
+                                Cancel
+                            </button>
                         </form>
 
                         <!-- Verify Code Form -->
                         <form id="verifyForm"
-                            class="space-y-8 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none flex flex-col justify-center">
-                            <div class="text-center">
-                                <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2 text-emerald-500">
-                                    VERIFICATION // REQUIRED</h3>
-                                <p class="text-[10px] font-mono opacity-50 uppercase">Input the 6-digit confirmation
-                                    sequence.</p>
+                            class="space-y-6 absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] opacity-0 pointer-events-none transform translate-x-8 flex flex-col justify-center">
+                            <div class="text-center mb-2">
+                                <h3 class="text-lg font-semibold text-white mb-1">Verify Email</h3>
+                                <p class="text-sm text-white/40">We sent a 6-digit code to your email.</p>
                             </div>
 
-                            <div class="group relative">
+                            <div>
                                 <input type="text" id="verifyCode" maxlength="6"
-                                    class="peer w-full bg-transparent border-b border-white/20 py-4 text-2xl text-center font-mono text-white placeholder-transparent focus:border-emerald-500 focus:outline-none transition-colors tracking-[0.5em]"
+                                    class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-4 text-2xl text-center font-mono text-white focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all placeholder-white/10 tracking-[0.5em]"
                                     placeholder="000000" required>
                             </div>
 
                             <button type="submit"
-                                class="w-full btn-minimal border border-emerald-500/50 text-emerald-500 hover:bg-emerald-500 hover:text-black py-3 font-bold tracking-widest text-xs uppercase transition-all"
+                                class="w-full bg-white text-black rounded-xl py-3.5 text-[13px] font-bold uppercase tracking-wide hover:bg-neutral-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                                 data-i18n="btn_verify">
-                                Confirm Sequence
+                                Verify
                             </button>
                             <button type="button" onclick="switchTab('login')"
-                                class="w-full text-[10px] font-mono opacity-50 hover:opacity-100 uppercase tracking-widest transition-opacity">
-                                < Abort </button>
+                                class="w-full text-[11px] font-medium text-white/40 hover:text-white transition-colors">
+                                Cancel
+                            </button>
                         </form>
 
                         <!-- Reset Password Form -->
                         <form id="resetForm"
-                            class="space-y-8 absolute inset-0 transition-all duration-500 ease-out transform translate-x-10 opacity-0 pointer-events-none flex flex-col justify-center">
-                            <div class="text-center">
-                                <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2 text-blue-500">NEW //
-                                    KEY</h3>
+                            class="space-y-6 absolute inset-0 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] opacity-0 pointer-events-none transform translate-x-8 flex flex-col justify-center">
+                            <div class="text-center mb-2">
+                                <h3 class="text-lg font-semibold text-white mb-1">New Password</h3>
+                                <p class="text-sm text-white/40">Create a secure password for your account.</p>
                             </div>
 
-                            <div class="group relative">
+                            <div>
                                 <input type="password" id="resetPass"
-                                    class="peer w-full bg-transparent border-b border-white/20 py-4 text-sm font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
-                                    placeholder="New Pass" required>
-                                <label for="resetPass"
-                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-white/40 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
-                                    Set New Security Key
-                                </label>
+                                    class="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all placeholder-white/10 font-light"
+                                    placeholder="New Password" required>
                             </div>
 
                             <button type="submit"
-                                class="w-full btn-minimal bg-white text-black hover:bg-gray-200 py-3 font-bold tracking-widest text-xs uppercase transition-all"
+                                class="w-full bg-white text-black rounded-xl py-3.5 text-[13px] font-bold uppercase tracking-wide hover:bg-neutral-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                                 data-i18n="btn_reset">
-                                Update Key
+                                Update Password
                             </button>
                         </form>
 
@@ -280,10 +255,11 @@
                 </div>
             </div>
 
-            <!-- Bottom Technical Data -->
-            <div class="flex justify-between mt-4 px-2 opacity-30">
-                <div class="text-[9px] font-mono">SYS_ID: 884-29</div>
-                <div class="text-[9px] font-mono">ENCRYPTION: AES-256</div>
+            <!-- Footer -->
+            <div class="mt-8 flex justify-center gap-6">
+                <a href="#" class="text-[11px] text-white/20 hover:text-white/50 transition-colors">Privacy</a>
+                <a href="#" class="text-[11px] text-white/20 hover:text-white/50 transition-colors">Terms</a>
+                <a href="#" class="text-[11px] text-white/20 hover:text-white/50 transition-colors">Help</a>
             </div>
         </div>
 
@@ -291,38 +267,28 @@
 
     <!-- Dependencies -->
     <script src="js/api.js?v=13"></script>
-    <script src="js/auth.js?v=1000"></script>
+    <script src="js/auth.js?v=1001"></script>
 
     <script>
-        // Checkbox Logic (Custom UI)
-        document.querySelectorAll('input[type="checkbox"]').forEach(i => {
-            i.addEventListener('change', (e) => {
-                const indicator = e.target.parentElement.querySelector('.checkbox-indicator');
-                if (indicator) indicator.style.opacity = e.target.checked ? '1' : '0';
-            });
-        });
-
-        // Tab Switching Logic (Simpler, Class-Based)
-        // We override the old logic to adapt to new structure
+        // Tab Logic (Clean & Fluid)
         function switchTab(tabId) {
             const forms = ['loginForm', 'registerForm', 'forgotForm', 'verifyForm', 'resetForm'];
 
-            // 1. Reset all forms
+            // 1. Hide all
             forms.forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
 
-                // Move out of view and hide
-                el.style.transform = 'translateX(20px)';
+                // Slide out
                 el.style.opacity = '0';
+                //el.style.transform = 'translateY(10px)'; // Subtle vertical slide - removing as it can cause layout jitter if not handled perfectly
+                // Instead just use standard hiding for simplicity in this overwrite to ensure reliability
+                el.classList.add('hidden');
                 el.style.pointerEvents = 'none';
-                // el.classList.add('hidden'); // We rely on opacity/pointer-events for smooth anim
             });
 
-            // 2. Activate Target
+            // 2. Show Target
             let targetId = tabId + 'Form';
-
-            // Map generic tabs to form IDs
             if (tabId === 'login') targetId = 'loginForm';
             if (tabId === 'register') targetId = 'registerForm';
             if (tabId === 'forgot') targetId = 'forgotForm';
@@ -331,39 +297,42 @@
 
             const target = document.getElementById(targetId);
             if (target) {
-                setTimeout(() => {
-                    target.style.transform = 'translateX(0)';
+                target.classList.remove('hidden');
+                requestAnimationFrame(() => {
                     target.style.opacity = '1';
                     target.style.pointerEvents = 'auto';
-                }, 50); // Slight delay for exit anim
+                    target.style.transform = 'translateY(0)';
+                });
             }
 
-            // 3. Update Header Tabs (Only for login/reg)
+            // 3. Update Toggle Switch (Apple-style)
+            const indicator = document.getElementById('tab-indicator');
             const tabContainer = document.getElementById('tabs-container');
+            const loginBtn = document.getElementById('tab-login');
+            const regBtn = document.getElementById('tab-register');
+
             if (tabId === 'login' || tabId === 'register') {
                 tabContainer.classList.remove('opacity-0', 'pointer-events-none');
 
-                const loginBtn = document.getElementById('tab-login');
-                const regBtn = document.getElementById('tab-register');
-
                 if (tabId === 'login') {
-                    loginBtn.classList.remove('text-white/40', 'border-transparent');
-                    loginBtn.classList.add('text-white', 'border-blue-500');
-                    regBtn.classList.add('text-white/40', 'border-transparent');
-                    regBtn.classList.remove('text-white', 'border-blue-500');
+                    indicator.style.left = '4px';
+                    loginBtn.classList.remove('text-white/40');
+                    loginBtn.classList.add('text-white');
+                    regBtn.classList.add('text-white/40');
+                    regBtn.classList.remove('text-white');
                 } else {
-                    regBtn.classList.remove('text-white/40', 'border-transparent');
-                    regBtn.classList.add('text-white', 'border-blue-500');
-                    loginBtn.classList.add('text-white/40', 'border-transparent');
-                    loginBtn.classList.remove('text-white', 'border-blue-500');
+                    // Move to right: 50% + 1px spacing
+                    indicator.style.left = 'calc(50% + 0px)';
+                    regBtn.classList.remove('text-white/40');
+                    regBtn.classList.add('text-white');
+                    loginBtn.classList.add('text-white/40');
+                    loginBtn.classList.remove('text-white');
                 }
             } else {
-                // If in recovery, fade out tabs visually
                 tabContainer.classList.add('opacity-0', 'pointer-events-none');
             }
         }
 
-        // Initial State
         switchTab('login');
     </script>
 </body>
