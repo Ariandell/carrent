@@ -312,6 +312,18 @@
     const extHalfFloat = gl.getExtension('OES_texture_half_float');
     const extHalfFloatLinear = gl.getExtension('OES_texture_half_float_linear');
 
+    // Configuration
+    const config = {
+        TEXTURE_DOWNSAMPLE: 1,
+        DENSITY_DISSIPATION: 0.97, // Fade slightly fast to avoid screen clutter, but slow enough to see curls
+        VELOCITY_DISSIPATION: 0.98,
+        PRESSURE_DISSIPATION: 0.8,
+        PRESSURE_ITERATIONS: 20,
+        CURL: 55, // High vorticity for "liquid" dispersal
+        SPLAT_RADIUS: 0.00025,
+        SPLAT_FORCE: 6000
+    };
+
     if (!extFloat || !extFloatLinear) {
         if (extHalfFloat && extHalfFloatLinear) {
             texType = extHalfFloat.HALF_FLOAT_OES;
@@ -424,8 +436,13 @@
                     const t = (i + 1) / steps;
                     const x = lastX + dx * t;
                     const y = lastY + dy * t;
-                    // Velocity is constant along the line for this frame
-                    splat(x, y, dx * 5.0, dy * 5.0, pointers[0].color);
+
+                    // Add Turbulence/Noise to velocity
+                    // This breaks the "perfect straight line" and initiates curls immediately
+                    const noiseX = (Math.random() - 0.5) * 800;
+                    const noiseY = (Math.random() - 0.5) * 800;
+
+                    splat(x, y, dx * 5.0 + noiseX, dy * 5.0 + noiseY, pointers[0].color);
                 }
             } else {
                 // Single splat (first move or jump)
