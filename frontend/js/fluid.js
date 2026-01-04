@@ -20,7 +20,7 @@
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 20,
         CURL: 30, // Swirly smoke
-        SPLAT_RADIUS: 0.005,
+        SPLAT_RADIUS: 0.02, // Increased for visibility
         SPLAT_FORCE: 6000
     };
 
@@ -28,6 +28,7 @@
     let splatStack = [];
 
     const { drawingBufferWidth: width, drawingBufferHeight: height } = gl;
+    console.log("FluidJS: Init", width, height);
 
     // --- MOUSE INPUT ---
     class Pointer {
@@ -45,7 +46,16 @@
 
     pointers.push(new Pointer());
 
+    // Auto-splat center
+    pointers[0].x = width / 2;
+    pointers[0].y = height / 2;
+    pointers[0].dx = 1000;
+    pointers[0].dy = 1000;
+    pointers[0].moved = true;
+    pointers[0].color = [10.0, 0.5, 0.5]; // Bright Red Test Splat
+
     canvas.addEventListener('mousemove', e => {
+        // ... (This listener on canvas is blocked by pointer-events: none, so redundant but harmless)
         pointers[0].moved = pointers[0].down = true;
         pointers[0].dx = (e.offsetX - pointers[0].x) * 10.0;
         pointers[0].dy = (e.offsetY - pointers[0].y) * 10.0;
@@ -290,14 +300,14 @@
     const gradSubtractProgram = createProgram(gradientSubtractShader);
 
     // --- FBOs ---
-    function createFBO(w, h, type = gl.HALF_FLOAT) {
+    function createFBO(w, h, type = gl.FLOAT) {
         const tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, tex);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.FLOAT, null); // Force FLOAT for smoke smoothness
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, type, null); // Use dynamic type
 
         const fbo = gl.createFramebuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
@@ -305,9 +315,25 @@
         return { tex, fbo, width: w, height: h };
     }
 
-    // Check float support
-    gl.getExtension('OES_texture_float');
-    gl.getExtension('OES_texture_float_linear');
+    // Check Float Support
+    let texType = gl.FLOAT;
+    const extFloat = gl.getExtension('OES_texture_float');
+    const extFloatLinear = gl.getExtension('OES_texture_float_linear');
+    const extHalfFloat = gl.getExtension('OES_texture_half_float');
+    const extHalfFloatLinear = gl.getExtension('OES_texture_half_float_linear');
+
+    if (!extFloat || !extFloatLinear) {
+        if (extHalfFloat && extHalfFloatLinear) {
+            texType = extHalfFloat.HALF_FLOAT_OES;
+            console.log("FluidJS: Using HALF_FLOAT");
+        } else {
+            console.warn("FluidJS: Floating point textures not supported");
+            // Fallback to UNSIGNED_BYTE? It won't work well for fluid physics (precision loss) but better than nothing
+            texType = gl.UNSIGNED_BYTE;
+        }
+    } else {
+        console.log("FluidJS: Using FLOAT");
+    }
 
     let density = createDoubleFBO(canvas.width, canvas.height);
     let velocity = createDoubleFBO(canvas.width, canvas.height);
@@ -316,8 +342,8 @@
     let pressure = createDoubleFBO(canvas.width, canvas.height);
 
     function createDoubleFBO(w, h) {
-        let fbo1 = createFBO(w, h);
-        let fbo2 = createFBO(w, h);
+        let fbo1 = createFBO(w, h, texType);
+        let fbo2 = createFBO(w, h, texType);
         return {
             get read() { return fbo1; },
             set read(value) { fbo1 = value; },
