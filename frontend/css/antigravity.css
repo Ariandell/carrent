@@ -10,6 +10,14 @@
     --primary: #ffffff;
     --glass-bg: rgba(20, 20, 20, 0.6);
     --glass-border: 1px solid rgba(255, 255, 255, 0.05);
+
+    /* Interaction Colors */
+    --hover-text: #050505;
+    /* Dark text on hover */
+    --hover-bg: #ffffff;
+    /* White bg on hover */
+    --accent-color: #34d399;
+    /* Emerald 400 equivalent */
 }
 
 [data-theme="light"] {
@@ -20,6 +28,14 @@
     --primary: #000000;
     --glass-bg: rgba(255, 255, 255, 0.8);
     --glass-border: 1px solid rgba(0, 0, 0, 0.1);
+
+    /* Interaction Colors (Inverted for Light Mode) */
+    --hover-text: #ffffff;
+    /* White text on hover */
+    --hover-bg: #000000;
+    /* Black bg on hover */
+    --accent-color: #059669;
+    /* Emerald 600 equivalent (darker for white bg) */
 }
 
 html {
@@ -113,4 +129,31 @@ body {
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
     border: var(--glass-border);
+}
+
+/* Embedded Text Interactions */
+.interactive-text {
+    display: inline-block;
+    cursor: pointer;
+    position: relative;
+    padding: 0 0.2em;
+    margin: 0 0.1em;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.interactive-text:hover {
+    background: var(--hover-bg);
+    color: var(--hover-text);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Special Case: Language Selectors (Accent Color) */
+.interactive-text.lang-select:hover {
+    color: var(--hover-text);
+    /* Optional: If we want colored text instead of black/white block, can override here.
+       But for Manifesto style, black/white blocks are stronger. 
+       Let's stick to the block reveal as defined above. */
 }
