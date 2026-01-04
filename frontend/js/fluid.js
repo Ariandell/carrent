@@ -20,7 +20,7 @@
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 20,
         CURL: 30, // Swirly smoke
-        SPLAT_RADIUS: 0.02, // Increased for visibility
+        SPLAT_RADIUS: 0.004, // Much harder/smaller brush
         SPLAT_FORCE: 6000
     };
 
@@ -45,14 +45,6 @@
     }
 
     pointers.push(new Pointer());
-
-    // Auto-splat center
-    pointers[0].x = width / 2;
-    pointers[0].y = height / 2;
-    pointers[0].dx = 1000;
-    pointers[0].dy = 1000;
-    pointers[0].moved = true;
-    pointers[0].color = [10.0, 0.5, 0.5]; // Bright Red Test Splat
 
     canvas.addEventListener('mousemove', e => {
         // ... (This listener on canvas is blocked by pointer-events: none, so redundant but harmless)
