@@ -1,220 +1,260 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" class="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-config="PROJECT_NAME">FPV Racer</title>
+    <title data-config="PROJECT_NAME">FPV Racer - Access Control</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/tailwind_config.js"></script>
-    <link href="./css/antigravity.css?v=99" rel="stylesheet">
+    <link href="./css/antigravity.css?v=102" rel="stylesheet">
     <script src="js/config.js?v=99"></script>
     <script src="js/lang.js?v=99"></script>
-    <script src="js/theme.js?v=99"></script>
 </head>
 
-<body class="flex items-center justify-center relative overflow-hidden min-h-screen transition-colors duration-500">
+<body
+    class="overflow-hidden selection:bg-neutral-500 selection:text-white flex items-center justify-center min-h-screen">
 
-    <!-- Theme Toggle -->
-    <!-- Theme Toggle Removed -->
+    <!-- Background Layer -->
+    <div id="bg-layer" class="fixed inset-0 bg-[#050505] -z-20"></div>
 
-    <!-- Particle Animation Canvas injected by particles_engine.js -->
+    <!-- Sparks Engine -->
+    <canvas id="sparks-canvas" class="fixed inset-0 z-0 pointer-events-none"></canvas>
 
-    <div id="auth-card"
-        class="glass-panel p-0 rounded-3xl w-full max-w-md z-10 relative m-4 overflow-hidden animate-fade-in border-blue-500/20 transition-[height] duration-500 ease-in-out">
+    <!-- Return Home -->
+    <a href="index.html"
+        class="absolute top-8 left-8 text-xs font-mono opacity-50 hover:opacity-100 transition-opacity z-50 flex items-center gap-2">
+        <span>&larr;</span> <span data-i18n="back_home">RETURN TO BASE</span>
+    </a>
 
-        <!-- Header -->
-        <div class="p-8 pb-4 text-center">
-            <h1 class="text-4xl font-bold mb-2 tracking-tight font-tech text-blue-600 dark:text-blue-400"
-                data-config="PROJECT_NAME">
-                [NAME]</h1>
-            <p class="text-gray-400 text-sm tracking-wide font-mono" data-i18n="app_subtitle">PILOT ACCESS SYSTEM</p>
-        </div>
+    <!-- Main Auth Container (HUD Style) -->
+    <div id="auth-card" class="relative z-10 w-full max-w-md mx-6">
 
-        <!-- Tabs -->
-        <div class="relative flex border-b border-white/10" id="tabs-container">
-            <button onclick="switchTab('login')" id="tab-login" data-i18n="tab_login"
-                class="flex-1 py-4 text-sm font-bold text-blue-500 transition-all duration-300 tracking-wider z-10">
-                LOGIN
-            </button>
-            <button onclick="switchTab('register')" id="tab-register" data-i18n="tab_register"
-                class="flex-1 py-4 text-sm font-bold text-gray-500 transition-all duration-300 tracking-wider z-10">
-                REGISTER
-            </button>
-            <!-- Sliding Indicator -->
-            <div id="tab-indicator"
-                class="absolute bottom-0 h-[3px] bg-blue-500 transition-all duration-500 ease-out rounded-full"
-                style="width: 50%; left: 0;">
+        <!-- Decorative Glow -->
+        <div class="absolute -inset-10 bg-blue-500/5 blur-3xl rounded-full pointer-events-none animate-pulse"></div>
+
+        <!-- Glass Panel -->
+        <div class="glass-panel p-8 md:p-12 rounded-3xl border border-white/10 relative overflow-hidden">
+
+            <!-- Scanning Line Effect -->
+            <div
+                class="absolute inset-0 z-0 pointer-events-none bg-gradient-to-b from-transparent via-white/5 to-transparent h-[200%] w-full animate-scan opacity-30">
             </div>
-            <!-- Background Highlight -->
-            <div id="tab-highlight"
-                class="absolute top-0 bottom-0 bg-white/5 transition-all duration-500 ease-out rounded-t-lg"
-                style="width: 50%; left: 0;">
+
+            <!-- Header -->
+            <div class="relative z-10 text-center mb-10">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5 mb-6">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-[10px] font-mono tracking-widest opacity-60 uppercase"
+                        data-i18n="system_status">System Online</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold font-manifesto tracking-tight mb-2">
+                    ACCESS<br><span class="opacity-50">CONTROL</span>
+                </h1>
             </div>
-        </div>
 
-        <div class="p-8 pt-6">
-
-            <!-- Login Form -->
-            <form id="loginForm" class="space-y-4 transition-opacity duration-300">
-                <div class="group">
-                    <label class="block text-gray-400 text-xs font-mono mb-2 uppercase tracking-wider"
-                        data-i18n="label_callsign">Callsign
-                        (Email)</label>
-                    <input type="email" id="email" class="w-full rounded-lg p-3 text-sm" placeholder="pilot@fpv.com"
-                        data-i18n="placeholder_email" required>
-                </div>
-                <div class="group">
-                    <label class="block text-gray-400 text-xs font-mono mb-2 uppercase tracking-wider"
-                        data-i18n="label_security_key">Security
-                        Key</label>
-                    <div class="relative">
-                        <input type="password" id="password" class="w-full rounded-lg p-3 pr-12 text-sm"
-                            placeholder="••••••••" data-i18n="placeholder_pass" required>
-                        <button type="button" onclick="togglePassword('password', this)"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors">
-                            <svg class="w-5 h-5 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                            </svg>
-                            <svg class="w-5 h-5 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center text-xs mt-2 font-mono text-gray-500">
-                    <label class="flex items-center cursor-pointer hover:text-gray-300">
-                        <input type="checkbox"
-                            class="mr-2 rounded border-gray-600 bg-transparent text-blue-500 focus:ring-offset-0 focus:ring-blue-500">
-                        <span data-i18n="auto_connect">Auto-Connect</span>
-                    </label>
-                    <a href="#" onclick="switchTab('forgot'); return false;"
-                        class="hover:text-blue-500 transition-colors" data-i18n="lost_key">Lost Key?</a>
-                </div>
-
-                <button type="submit"
-                    class="w-full btn-primary py-3 rounded-full font-bold text-sm tracking-widest mt-4"
-                    data-i18n="btn_login">
-                    УВІЙТИ
+            <!-- Custom Tabs (Technical Toggles) -->
+            <div class="relative z-10 flex p-1 bg-black/20 rounded-xl border border-white/5 mb-8" id="tabs-container">
+                <button onclick="switchTab('login')" id="tab-login"
+                    class="flex-1 py-3 text-xs font-bold font-mono uppercase tracking-widest rounded-lg transition-all duration-300 hover:bg-white/5 text-white">
+                    Login
                 </button>
-            </form>
+                <button onclick="switchTab('register')" id="tab-register"
+                    class="flex-1 py-3 text-xs font-bold font-mono uppercase tracking-widest rounded-lg transition-all duration-300 hover:bg-white/5 text-white/50">
+                    Register
+                </button>
 
-            <!-- Register Form (Hidden) -->
-            <form id="registerForm" class="space-y-4 hidden transition-opacity duration-300">
-                <div class="group">
-                    <label class="block text-gray-400 text-xs font-mono mb-2 uppercase tracking-wider"
-                        data-i18n="label_pilot_name">Pilot
-                        Name</label>
-                    <input type="text" id="regName" class="w-full rounded-lg p-3 text-sm" placeholder="Maverick"
-                        data-i18n="placeholder_name" required>
-                </div>
-                <div class="group">
-                    <label class="block text-gray-400 text-xs font-mono mb-2 uppercase tracking-wider"
-                        data-i18n="label_callsign">Callsign
-                        (Email)</label>
-                    <input type="email" id="regEmail" class="w-full rounded-lg p-3 text-sm" placeholder="pilot@fpv.com"
-                        data-i18n="placeholder_email" required>
-                </div>
-                <div class="group">
-                    <label class="block text-gray-400 text-xs font-mono mb-2 uppercase tracking-wider"
-                        data-i18n="label_security_key">Security
-                        Key</label>
-                    <div class="relative">
-                        <input type="password" id="regPass" class="w-full rounded-lg p-3 pr-12 text-sm"
-                            placeholder="••••••••" data-i18n="placeholder_pass" required>
-                        <button type="button" onclick="togglePassword('regPass', this)"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors">
-                            <svg class="w-5 h-5 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                            </svg>
-                            <svg class="w-5 h-5 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                        </button>
+                <!-- Active Indicator (Handled by simple class toggling in JS or manual CSS if needed, but simple hover/active classes work best for cleanliness) -->
+            </div>
+
+            <!-- Forms Container -->
+            <div class="relative z-10">
+
+                <!-- Login Form -->
+                <form id="loginForm" class="space-y-5 transition-opacity duration-300">
+                    <div class="group">
+                        <label class="block text-[10px] font-mono opacity-50 mb-2 uppercase tracking-widest"
+                            data-i18n="label_callsign">Callsign ID</label>
+                        <input type="email" id="email"
+                            class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none focus:bg-black/40 transition-all placeholder-white/20"
+                            placeholder="PILOT_ID" required>
                     </div>
-                    <!-- Strength Meter -->
-                    <div id="passwordStrength"
-                        class="transition-all duration-300 ease-out overflow-hidden max-h-0 opacity-0">
-                        <div class="strength-meter">
-                            <div class="strength-segment"></div>
-                            <div class="strength-segment"></div>
-                            <div class="strength-segment"></div>
+                    <div class="group">
+                        <label class="block text-[10px] font-mono opacity-50 mb-2 uppercase tracking-widest"
+                            data-i18n="label_security_key">Security Key</label>
+                        <div class="relative">
+                            <input type="password" id="password"
+                                class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none focus:bg-black/40 transition-all placeholder-white/20"
+                                placeholder="••••••••" required>
                         </div>
-                        <div id="strengthText" class="strength-text"></div>
                     </div>
-                </div>
-                <div class="text-[10px] text-gray-600 text-center mt-2 font-mono" data-i18n="terms">
-                    By registering, you accept the protocol terms.
-                </div>
 
-                <button type="submit"
-                    class="w-full btn-primary py-3 rounded-full font-bold text-sm tracking-widest mt-4"
-                    data-i18n="btn_register">
-                    ЗАРЕЄСТРУВАТИСЬ
-                </button>
-            </form>
+                    <div class="flex justify-between items-center text-[10px] font-mono opacity-60">
+                        <label class="flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
+                            <input type="checkbox" class="accent-white rounded bg-transparent border-white/20">
+                            <span data-i18n="auto_connect">Stay Connected</span>
+                        </label>
+                        <a href="#" onclick="switchTab('forgot'); return false;"
+                            class="hover:text-white transition-colors uppercase tracking-widest"
+                            data-i18n="lost_key">Lost Key?</a>
+                    </div>
 
-            <!-- 1. Forgot Password Form -->
-            <form id="forgotForm" class="space-y-4 hidden transition-opacity duration-300">
-                <div class="text-center mb-4">
-                    <h3 class="text-xl font-bold text-blue-600 dark:text-blue-400" data-i18n="forgot_title">Відновлення
-                    </h3>
-                </div>
-                <input type="email" id="forgotEmail"
-                    class="w-full rounded-lg p-3 text-sm bg-black/5 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none transition-colors"
-                    placeholder="email@example.com" data-i18n="placeholder_email" required>
-                <button type="submit" class="w-full btn-primary py-3 rounded-full font-bold text-sm tracking-widest"
-                    data-i18n="btn_send_code">НАДІСЛАТИ КОД</button>
-                <button type="button" onclick="switchTab('login')"
-                    class="w-full text-xs text-gray-500 hover:text-blue-500 mt-2 transition-colors"
-                    data-i18n="back_to_login">← Назад</button>
-            </form>
+                    <button type="submit"
+                        class="w-full btn-minimal bg-white text-black hover:bg-gray-200 hover:text-black border-transparent mt-4 font-bold tracking-widest"
+                        data-i18n="btn_login">
+                        INITIALIZE LINK
+                    </button>
+                </form>
 
-            <!-- 2. Verify Code Form -->
-            <form id="verifyForm" class="space-y-4 hidden transition-opacity duration-300">
-                <div class="text-center mb-4">
-                    <h3 class="text-xl font-bold text-blue-600 dark:text-blue-400" data-i18n="verify_title">Введіть код
-                    </h3>
-                </div>
-                <input type="text" id="verifyCode"
-                    class="w-full rounded-lg p-4 text-2xl tracking-[0.5em] text-center font-bold bg-black/5 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-blue-600 dark:text-blue-400 focus:border-blue-500 focus:outline-none transition-colors"
-                    placeholder="000000" maxlength="6" required>
-                <button type="submit" class="w-full btn-primary py-3 rounded-full font-bold text-sm tracking-widest"
-                    data-i18n="btn_verify">ПІДТВЕРДИТИ</button>
-                <button type="button" onclick="switchTab('login')"
-                    class="w-full text-xs text-gray-500 hover:text-blue-500 mt-2 transition-colors"
-                    data-i18n="back_to_login">← Назад</button>
-            </form>
+                <!-- Register Form -->
+                <form id="registerForm" class="space-y-5 hidden transition-opacity duration-300">
+                    <div class="group">
+                        <label class="block text-[10px] font-mono opacity-50 mb-2 uppercase tracking-widest"
+                            data-i18n="label_pilot_name">Pilot Handle</label>
+                        <input type="text" id="regName"
+                            class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none transition-all placeholder-white/20"
+                            placeholder="MAVERICK" required>
+                    </div>
+                    <div class="group">
+                        <label class="block text-[10px] font-mono opacity-50 mb-2 uppercase tracking-widest"
+                            data-i18n="label_callsign">Callsign (Email)</label>
+                        <input type="email" id="regEmail"
+                            class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none transition-all placeholder-white/20"
+                            placeholder="PILOT@NET" required>
+                    </div>
+                    <div class="group">
+                        <label class="block text-[10px] font-mono opacity-50 mb-2 uppercase tracking-widest"
+                            data-i18n="label_security_key">Create Key</label>
+                        <input type="password" id="regPass"
+                            class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none transition-all placeholder-white/20"
+                            placeholder="••••••••" required>
+                    </div>
 
-            <!-- 3. Reset Password Form -->
-            <form id="resetForm" class="space-y-4 hidden transition-opacity duration-300">
-                <div class="text-center mb-4">
-                    <h3 class="text-xl font-bold text-blue-600 dark:text-blue-400" data-i18n="reset_title">Новий пароль
-                    </h3>
-                </div>
-                <input type="password" id="resetPass"
-                    class="w-full rounded-lg p-3 text-sm bg-black/5 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none transition-colors"
-                    placeholder="••••••••" required>
-                <button type="submit" class="w-full btn-primary py-3 rounded-full font-bold text-sm tracking-widest"
-                    data-i18n="btn_reset">ЗБЕРЕГТИ</button>
-            </form>
+                    <div class="text-[10px] text-center opacity-40 font-mono" data-i18n="terms">
+                        Protocol initialization implies acceptance of terms.
+                    </div>
 
-            <!-- Error container removed: using Toasts -->
+                    <button type="submit"
+                        class="w-full btn-minimal bg-white text-black hover:bg-gray-200 hover:text-black border-transparent mt-4 font-bold tracking-widest"
+                        data-i18n="btn_register">
+                        ESTABLISH LINK
+                    </button>
+                </form>
+
+                <!-- Forgot Password -->
+                <form id="forgotForm" class="space-y-6 hidden transition-opacity duration-300 text-center">
+                    <div>
+                        <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2">RECOVERY MODE</h3>
+                        <p class="text-xs font-mono opacity-50">Enter your callsign to reset credentials.</p>
+                    </div>
+                    <input type="email" id="forgotEmail"
+                        class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none transition-all placeholder-white/20"
+                        placeholder="PILOT@NET" required>
+
+                    <button type="submit"
+                        class="w-full btn-minimal bg-white text-black hover:bg-gray-200 border-transparent font-bold tracking-widest"
+                        data-i18n="btn_send_code">TRANSMIT CODE</button>
+
+                    <button type="button" onclick="switchTab('login')"
+                        class="text-[10px] font-mono opacity-50 hover:opacity-100 uppercase tracking-widest transition-opacity mt-4">
+                        &larr; ABORT RECOVERY
+                    </button>
+                </form>
+
+                <!-- Verify Code -->
+                <form id="verifyForm" class="space-y-6 hidden transition-opacity duration-300 text-center">
+                    <div>
+                        <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2">VERIFICATION</h3>
+                        <p class="text-xs font-mono opacity-50">Enter the 6-digit sequence.</p>
+                    </div>
+                    <input type="text" id="verifyCode"
+                        class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-2xl font-mono text-center tracking-[0.5em] focus:border-white/50 focus:outline-none transition-all placeholder-white/10"
+                        placeholder="000000" maxlength="6" required>
+
+                    <button type="submit"
+                        class="w-full btn-minimal bg-white text-black hover:bg-gray-200 border-transparent font-bold tracking-widest"
+                        data-i18n="btn_verify">CONFIRM SEQUENCE</button>
+
+                    <button type="button" onclick="switchTab('login')"
+                        class="text-[10px] font-mono opacity-50 hover:opacity-100 uppercase tracking-widest transition-opacity mt-4">
+                        &larr; ABORT
+                    </button>
+                </form>
+
+                <!-- Reset Password -->
+                <form id="resetForm" class="space-y-6 hidden transition-opacity duration-300 text-center">
+                    <div>
+                        <h3 class="text-xl font-bold font-manifesto tracking-tight mb-2">NEW SECURITY KEY</h3>
+                    </div>
+                    <input type="password" id="resetPass"
+                        class="w-full bg-black/20 border border-white/10 rounded-lg p-4 text-sm font-mono focus:border-white/50 focus:outline-none transition-all placeholder-white/20"
+                        placeholder="NEW PASSWORD" required>
+
+                    <button type="submit"
+                        class="w-full btn-minimal bg-white text-black hover:bg-gray-200 border-transparent font-bold tracking-widest"
+                        data-i18n="btn_reset">UPDATE KEY</button>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="mt-8 text-center">
+            <div class="text-[10px] font-mono opacity-20 uppercase tracking-widest">
+                SECURE ACCESS • v2.4.0 • ENCRYPTED
+            </div>
         </div>
     </div>
 
-    <script src="js/api.js?v=11"></script>
-    <script src="js/particles_engine.js?v=11"></script>
+    <!-- Script Deps -->
+    <script src="js/api.js?v=13"></script>
+    <!-- Use sparks for background -->
+    <script src="js/sparks.js?v=203"></script>
+    <!-- Reuse auth logic -->
     <script src="js/auth.js?v=999"></script>
+    <script>
+        // Inline styles for tab switching to match the HUD feel
+        function switchTab(tabId) {
+            // Hide all forms
+            ['loginForm', 'registerForm', 'forgotForm', 'verifyForm', 'resetForm'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+
+            // If switching to login or register, handle the toggle style
+            if (tabId === 'login' || tabId === 'register') {
+                document.getElementById('tabs-container').classList.remove('hidden');
+
+                const loginBtn = document.getElementById('tab-login');
+                const regBtn = document.getElementById('tab-register');
+
+                if (tabId === 'login') {
+                    loginBtn.classList.remove('text-white/50');
+                    loginBtn.classList.add('text-white', 'bg-white/10');
+                    regBtn.classList.add('text-white/50');
+                    regBtn.classList.remove('text-white', 'bg-white/10');
+                    // Show login form
+                    document.getElementById('loginForm').classList.remove('hidden');
+                } else {
+                    regBtn.classList.remove('text-white/50');
+                    regBtn.classList.add('text-white', 'bg-white/10');
+                    loginBtn.classList.add('text-white/50');
+                    loginBtn.classList.remove('text-white', 'bg-white/10');
+                    // Show register form
+                    document.getElementById('registerForm').classList.remove('hidden');
+                }
+            } else {
+                // For other forms (forgot, etc), hide the main tabs
+                document.getElementById('tabs-container').classList.add('hidden');
+                if (tabId === 'forgot') document.getElementById('forgotForm').classList.remove('hidden');
+                // Other forms are handled by auth.js logic typically, but if we need manual switch:
+            }
+        }
+
+        // Initialize defaults
+        switchTab('login');
+    </script>
 </body>
 
 </html>
