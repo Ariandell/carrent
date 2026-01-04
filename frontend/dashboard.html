@@ -287,8 +287,28 @@
                     </svg>
                 </button>
             </div>
-            <textarea id="supportMessage" rows="5" class="dash-input mb-4"
-                placeholder="Describe your issue..."></textarea>
+
+            <!-- Subject Dropdown -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2"
+                    data-i18n="support_subject_label">Issue Type</label>
+                <select id="supportSubject" class="dash-input">
+                    <option value="technical" data-i18n="support_type_technical">Technical Issue</option>
+                    <option value="payment" data-i18n="support_type_payment">Payment Problem</option>
+                    <option value="account" data-i18n="support_type_account">Account Issue</option>
+                    <option value="feedback" data-i18n="support_type_feedback">Feedback/Suggestion</option>
+                    <option value="other" data-i18n="support_type_other">Other</option>
+                </select>
+            </div>
+
+            <!-- Message -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-2"
+                    data-i18n="support_message_label">Description</label>
+                <textarea id="supportMessage" rows="5" class="dash-input" placeholder="Describe your issue in detail..."
+                    data-i18n-placeholder="support_placeholder"></textarea>
+            </div>
+
             <button onclick="submitSupport()" class="btn-dash-primary w-full" data-i18n="support_btn">Send
                 Request</button>
         </div>
