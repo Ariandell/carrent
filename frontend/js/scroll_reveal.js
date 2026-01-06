@@ -30,19 +30,6 @@ function initScrollReveal() {
 
 // --- GRAVITY TYPOGRAPHY ENGINE ---
 function initGravityTypography() {
-    const isMobile = window.isMobileDevice && window.isMobileDevice();
-
-    // Scroll detection for mobile throttling
-    let isScrolling = false;
-    let scrollTimeout;
-    if (isMobile) {
-        window.addEventListener('scroll', () => {
-            isScrolling = true;
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => { isScrolling = false; }, 100);
-        }, { passive: true });
-    }
-
     let gravityElements = [];
 
     class GravityText {
@@ -181,22 +168,9 @@ function initGravityTypography() {
     });
 
     // Animation Loop
-    let frameCount = 0;
-    const frameSkip = isMobile ? 2 : 0; // Update every 3rd frame on mobile
-
     function loop() {
-        // Skip frames during scroll on mobile for smoother scrolling
-        if (isMobile && isScrolling) {
-            requestAnimationFrame(loop);
-            return;
-        }
-
-        // Throttle updates on mobile
-        if (frameSkip > 0 && ++frameCount % (frameSkip + 1) !== 0) {
-            requestAnimationFrame(loop);
-            return;
-        }
-
+        // Run full FPS on all devices for maximum smoothness
+        // Since Fluid effect is disabled on mobile, we have GPU budget for this
         gravityElements.forEach(el => el.update());
         requestAnimationFrame(loop);
     }
