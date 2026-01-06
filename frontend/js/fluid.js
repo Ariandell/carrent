@@ -5,6 +5,12 @@
  */
 
 (function () {
+    // Skip on mobile/touch devices - too GPU intensive for smooth scrolling
+    if (window.isMobileDevice && window.isMobileDevice()) {
+        console.log('FluidJS: Disabled on mobile device');
+        return;
+    }
+
     const canvas = document.createElement('canvas');
     canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;mix-blend-mode:screen;'; // Screen blend for transparency
     document.body.appendChild(canvas);

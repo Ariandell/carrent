@@ -224,7 +224,18 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+// Mobile optimization - skip frames
+let frameSkip = 0;
+const isMobilePrism = window.isMobileDevice && window.isMobileDevice();
+const skipFrames = isMobilePrism ? 2 : 0; // Render every 3rd frame on mobile
+
 function render(time) {
+    // Throttle on mobile - render every 3rd frame for better scroll performance
+    if (skipFrames > 0 && ++frameSkip % (skipFrames + 1) !== 0) {
+        requestAnimationFrame(render);
+        return;
+    }
+
     time *= 0.001;
 
     gl.useProgram(program);

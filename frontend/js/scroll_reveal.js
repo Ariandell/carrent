@@ -30,6 +30,17 @@ function initScrollReveal() {
 
 // --- GRAVITY TYPOGRAPHY ENGINE ---
 function initGravityTypography() {
+    // On mobile, skip physics-based character animation - too CPU intensive
+    if (window.isMobileDevice && window.isMobileDevice()) {
+        console.log('GravityText: Using CSS-only mode on mobile');
+        document.querySelectorAll('.gravity-text').forEach(el => {
+            // Simple CSS fade-in instead of per-character physics
+            el.style.opacity = '1';
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        });
+        return; // Skip the physics loop entirely
+    }
+
     let gravityElements = [];
 
     class GravityText {
