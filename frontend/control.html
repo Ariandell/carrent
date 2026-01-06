@@ -180,36 +180,39 @@
             <!-- Background Glow -->
             <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-red-500 blur-[20px] opacity-70"></div>
 
-            <div class="mb-6">
+            <div class="mb-5">
                 <div
-                    class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 animate-pulse">
-                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-3 animate-pulse">
+                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-white mb-2 tracking-tight">Час вичерпується</h3>
-                <p class="text-white/60 text-sm">До кінця сесії менше 30 секунд. <br>Подовжіть час для продовження.</p>
+                <h3 class="text-xl font-bold text-white mb-2 tracking-tight">Час вичерпується</h3>
+                <p class="text-white/60 text-xs">До кінця сесії менше 30 секунд. <br>Подовжіть час для продовження.</p>
             </div>
 
-            <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="grid grid-cols-3 gap-2 mb-5">
                 <button id="btnExtend3" onclick="extendRental(3)"
-                    class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-2xl py-4 transition-all duration-300">
+                    class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-xl py-3 transition-all duration-300">
                     <span
-                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Подовжити</span>
-                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+3хв</span>
+                        class="block text-[10px] font-medium text-white/50 group-hover:text-emerald-400 mb-0.5 uppercase tracking-wider">Подовжити</span>
+                    <span
+                        class="block text-sm font-bold text-white group-hover:text-emerald-300 leading-tight">+3хв</span>
                 </button>
                 <button id="btnExtend5" onclick="extendRental(5)"
-                    class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-2xl py-4 transition-all duration-300">
+                    class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-xl py-3 transition-all duration-300">
                     <span
-                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Подовжити</span>
-                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+5хв</span>
+                        class="block text-[10px] font-medium text-white/50 group-hover:text-emerald-400 mb-0.5 uppercase tracking-wider">Подовжити</span>
+                    <span
+                        class="block text-sm font-bold text-white group-hover:text-emerald-300 leading-tight">+5хв</span>
                 </button>
                 <button id="btnExtend10" onclick="extendRental(10)"
-                    class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-2xl py-4 transition-all duration-300">
+                    class="group relative overflow-hidden bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 rounded-xl py-3 transition-all duration-300">
                     <span
-                        class="block text-sm font-medium text-white/50 group-hover:text-emerald-400 mb-0.5">Подовжити</span>
-                    <span class="block text-lg font-bold text-white group-hover:text-emerald-300">+10хв</span>
+                        class="block text-[10px] font-medium text-white/50 group-hover:text-emerald-400 mb-0.5 uppercase tracking-wider">Подовжити</span>
+                    <span
+                        class="block text-sm font-bold text-white group-hover:text-emerald-300 leading-tight">+10хв</span>
                 </button>
             </div>
 

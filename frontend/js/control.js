@@ -296,18 +296,19 @@ async function extendRental(minutes) {
 }
 
 // Update initialization to fetch price and update button text
+// Update initialization to fetch price and update button text
 function updateExtendButtons() {
     // 3 min
     const cost3 = (3 * currentPricePerMinute).toFixed(2);
-    document.querySelector('#btnExtend3 span:last-child').innerText = `+3хв (${cost3} ₴)`;
+    document.querySelector('#btnExtend3 span:last-child').innerHTML = `+3хв<br><span class="text-[10px] font-normal opacity-80">${cost3} ₴</span>`;
 
     // 5 min
     const cost5 = (5 * currentPricePerMinute).toFixed(2);
-    document.querySelector('#btnExtend5 span:last-child').innerText = `+5хв (${cost5} ₴)`;
+    document.querySelector('#btnExtend5 span:last-child').innerHTML = `+5хв<br><span class="text-[10px] font-normal opacity-80">${cost5} ₴</span>`;
 
     // 10 min
     const cost10 = (10 * currentPricePerMinute).toFixed(2);
-    document.querySelector('#btnExtend10 span:last-child').innerText = `+10хв (${cost10} ₴)`;
+    document.querySelector('#btnExtend10 span:last-child').innerHTML = `+10хв<br><span class="text-[10px] font-normal opacity-80">${cost10} ₴</span>`;
 }
 
 function confirmExit() {
