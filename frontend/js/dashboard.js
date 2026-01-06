@@ -23,6 +23,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (user) {
             userBalance = user.balance || 0;
             document.getElementById('balanceDisplay').innerHTML = `${userBalance} <small class="text-xs">₴</small>`;
+            const mobileBalance = document.getElementById('balanceDisplayMobile');
+            if (mobileBalance) {
+                mobileBalance.innerHTML = `${userBalance} <small class="text-xs">₴</small>`;
+            }
 
             if (user.avatar_url) document.getElementById('userAvatar').src = user.avatar_url;
             if (user.name) document.getElementById('userName').innerText = user.name;
