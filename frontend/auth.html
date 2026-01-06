@@ -164,7 +164,123 @@
 
                     <!-- Forms Wrapper -->
                     <div class="relative min-h-[320px]">
-                        <!-- ... content ... -->
+                        <!-- Login Form -->
+                        <form id="loginForm" class="auth-form active-form space-y-6 absolute inset-0">
+                            <div class="group relative">
+                                <input type="email" id="email"
+                                    class="peer w-full bg-transparent border-b border-white/30 py-4 text-base font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Email" required>
+                                <label for="email"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Email Address
+                                </label>
+                            </div>
+
+                            <div class="group relative">
+                                <input type="password" id="password"
+                                    class="peer w-full bg-transparent border-b border-white/30 py-4 text-base font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Password" required>
+                                <label for="password"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Password
+                                </label>
+                            </div>
+
+                            <div class="flex justify-between items-center pt-2">
+                                <label class="flex items-center gap-2 cursor-pointer group/chk">
+                                    <div
+                                        class="w-4 h-4 border border-white/30 flex items-center justify-center group-hover/chk:border-blue-500 transition-colors">
+                                        <input type="checkbox" class="accordion-checkbox hidden">
+                                        <div
+                                            class="w-2 h-2 bg-blue-500 opacity-0 checkbox-indicator transition-opacity">
+                                        </div>
+                                    </div>
+                                    <span
+                                        class="text-[10px] font-mono opacity-60 group-hover/chk:text-white transition-colors uppercase tracking-wider"
+                                        data-i18n="auto_connect">Remember Me</span>
+                                </label>
+                                <a href="#" onclick="switchTab('forgot'); return false;"
+                                    class="text-[10px] font-mono text-blue-500/90 hover:text-blue-400 uppercase tracking-wider transition-colors"
+                                    data-i18n="lost_key">
+                                    Forgot Password?
+                                </a>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full relative overflow-hidden group/btn bg-white text-black py-4 font-bold tracking-[0.2em] text-xs uppercase hover:bg-blue-500 hover:text-white transition-all duration-300"
+                                data-i18n="btn_login">
+                                <span class="relative z-10">SIGN IN</span>
+                                <div
+                                    class="absolute inset-0 transform scale-x-0 group-hover/btn:scale-x-100 origin-left transition-transform duration-300 bg-blue-600">
+                                </div>
+                            </button>
+                        </form>
+
+                        <!-- Register Form -->
+                        <form id="registerForm" class="auth-form hidden-form space-y-6 absolute inset-0">
+                            <div class="group relative">
+                                <input type="text" id="regName"
+                                    class="peer w-full bg-transparent border-b border-white/30 py-3 text-base font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Name" required>
+                                <label for="regName"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Full Name
+                                </label>
+                            </div>
+
+                            <div class="group relative">
+                                <input type="email" id="regEmail"
+                                    class="peer w-full bg-transparent border-b border-white/30 py-3 text-base font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Email" required>
+                                <label for="regEmail"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Email Address
+                                </label>
+                            </div>
+
+                            <div class="group relative">
+                                <input type="password" id="regPass"
+                                    class="peer w-full bg-transparent border-b border-white/30 py-3 text-base font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Pass" required>
+                                <label for="regPass"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Create Password
+                                </label>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full relative overflow-hidden group/btn bg-white text-black py-4 font-bold tracking-[0.2em] text-xs uppercase hover:bg-blue-500 hover:text-white transition-all duration-300 mt-2"
+                                data-i18n="btn_register">
+                                <span class="relative z-10">CREATE ACCOUNT</span>
+                            </button>
+                        </form>
+
+                        <!-- Forgot Password Form -->
+                        <form id="forgotForm"
+                            class="auth-form hidden-form space-y-8 absolute inset-0 flex flex-col justify-center">
+                            <div class="text-center opacity-60 text-xs font-mono mb-4 text-white">
+                                Enter your email below to receive a secure recovery code.
+                            </div>
+
+                            <div class="group relative">
+                                <input type="email" id="forgotEmail"
+                                    class="peer w-full bg-transparent border-b border-white/30 py-4 text-base font-mono text-white placeholder-transparent focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Email" required>
+                                <label for="forgotEmail"
+                                    class="absolute left-0 -top-2 text-[10px] text-blue-500 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-4 peer-focus:-top-2 peer-focus:text-[10px] peer-focus:text-blue-500 font-mono tracking-widest uppercase">
+                                    Target Email
+                                </label>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full btn-minimal border border-white/30 text-white hover:bg-white hover:text-black py-3 font-bold tracking-widest text-xs uppercase transition-all"
+                                data-i18n="btn_send_code">
+                                TRANSMIT CODE
+                            </button>
+                            <button type="button" onclick="switchTab('login')"
+                                class="w-full text-[10px] font-mono opacity-50 hover:opacity-100 uppercase tracking-widest transition-opacity text-white">
+                                < CANCEL </button>
+                        </form>
 
                         <!-- Verify Code Form -->
                         <form id="verifyForm"
