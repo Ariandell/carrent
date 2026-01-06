@@ -274,7 +274,15 @@ async def report_rental_issue(
         
     rental.issue_report = report_data.issue
     await db.commit()
-    await db.refresh(rental)
+    
+    # Reload with relationships for Pydantic
+    result = await db.execute(
+        select(Rental)
+        .options(joinedload(Rental.user), joinedload(Rental.car))
+        .where(Rental.id == rental.id)
+    )
+    rental = result.scalars().first()
+    
     return rental
 
 @router.post("/feedback", response_model=RentalResponse)
@@ -295,5 +303,13 @@ async def submit_rental_feedback(
     rental.rating = feedback_data.rating
     rental.feedback = feedback_data.comment
     await db.commit()
-    await db.refresh(rental)
+    
+    # Reload with relationships for Pydantic
+    result = await db.execute(
+        select(Rental)
+        .options(joinedload(Rental.user), joinedload(Rental.car))
+        .where(Rental.id == rental.id)
+    )
+    rental = result.scalars().first()
+    
     return rental
