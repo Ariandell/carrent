@@ -209,6 +209,13 @@ body {
     line-height: 0.9;
 }
 
+/* Safety for all sections to prevent horizontal spill */
+section {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+}
+
 /* --- SPECIAL COMPONENTS --- */
 
 .btn-minimal {

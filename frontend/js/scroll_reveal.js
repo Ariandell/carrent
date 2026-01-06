@@ -119,7 +119,9 @@ function initGravityTypography() {
                     const t = (normPos - 0.75) / 0.25; // 0 to 1
 
                     // Scatter downwards and outwards
-                    x = (seed - 0.5) * 150 * t;
+                    // Reduced X scatter on mobile to prevent overflow (was 150)
+                    const xMult = isMobile ? 40 : 150;
+                    x = (seed - 0.5) * xMult * t;
                     y = t * 150; // Fly in from below
                     r = (seed - 0.5) * 60 * t;
                     opacity = 1 - t; // Fade in
@@ -134,7 +136,8 @@ function initGravityTypography() {
                     const easeT = t * t;
 
                     y = -easeT * 400 * (0.5 + seed); // Fly UP fast
-                    x = (seed - 0.5) * 100 * easeT; // Drift sideways
+                    const xMult = isMobile ? 30 : 100; // Drift sideways (reduced on mobile)
+                    x = (seed - 0.5) * xMult * easeT;
                     opacity = 1 - (t * 0.8); // Fade out slowly
                     r = (seed - 0.5) * 45 * easeT; // Gentle spin
                     blur = t * 4; // Slight blur
