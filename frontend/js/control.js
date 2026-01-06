@@ -60,7 +60,10 @@ function connectWebSocket(carId) {
         el.classList.add('bg-emerald-400', 'shadow-[0_0_10px_#34d399]');
 
         const txt = document.getElementById('statusText');
-        if (txt) txt.innerText = "ОНЛАЙН";
+        if (txt) {
+            txt.dataset.i18n = "status_online";
+            txt.innerText = window.t ? window.t('status_online') : "ONLINE";
+        }
 
         document.getElementById('ping').innerText = '24'; // Fake initial ping
     };
@@ -71,7 +74,10 @@ function connectWebSocket(carId) {
         el.classList.remove('bg-emerald-400', 'shadow-[0_0_10px_#34d399]');
 
         const txt = document.getElementById('statusText');
-        if (txt) txt.innerText = "ОФЛАЙН";
+        if (txt) {
+            txt.dataset.i18n = "status_offline";
+            txt.innerText = window.t ? window.t('status_offline') : "OFFLINE";
+        }
 
         document.getElementById('ping').innerText = '--';
     };

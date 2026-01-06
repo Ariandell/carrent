@@ -10,6 +10,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/tailwind_config.js"></script>
     <script src="js/config.js?v=99"></script>
+    <script src="js/lang.js?v=99"></script>
     <link href="./css/antigravity.css?v=99" rel="stylesheet">
     <style>
         body {
@@ -53,7 +54,8 @@
                 class="hud-element flex items-center gap-3 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
                 <span id="connectionStatus"
                     class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm transition-all duration-300"></span>
-                <span id="statusText" class="text-xs font-bold tracking-wide uppercase hidden sm:inline">Офлайн</span>
+                <span id="statusText" class="text-xs font-bold tracking-wide uppercase hidden sm:inline"
+                    data-i18n="status_offline">Офлайн</span>
 
                 <!-- Divider -->
                 <div class="w-px h-3 bg-white/20 mx-1"></div>
@@ -73,7 +75,8 @@
                                 d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0">
                             </path>
                         </svg>
-                        <span id="ping">--</span><span class="text-[10px] opacity-60 ml-0.5">ms</span>
+                        <span id="ping">--</span><span class="text-[10px] opacity-60 ml-0.5"
+                            data-i18n="unit_ms">ms</span>
                     </div>
                 </div>
             </div>
@@ -92,11 +95,11 @@
             <div class="flex gap-2 interactive ml-auto">
                 <button onclick="openReportModal()"
                     class="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/20 border border-yellow-500/30 hover:bg-yellow-500 hover:text-black transition-all rounded-full text-xs font-medium">
-                    <span>⚠️</span> Скарга
+                    <span>⚠️</span> <span data-i18n="btn_report">Скарга</span>
                 </button>
                 <button onclick="confirmExit()"
                     class="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/20 border border-red-500/30 hover:bg-red-500 hover:text-white transition-all rounded-full text-xs font-medium">
-                    <span>✕</span> Вихід
+                    <span>✕</span> <span data-i18n="btn_exit">Вихід</span>
                 </button>
             </div>
         </div>
