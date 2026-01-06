@@ -26,7 +26,12 @@ const fragmentShaderSource = `
     uniform vec2 u_resolution;
     uniform float u_time;
 
-    // Full Spectral Palette (Rainbow)
+    // --- UTILS ---
+    mat2 rotate2d(float a) {
+        float s = sin(a), c = cos(a);
+        return mat2(c, -s, s, c);
+    }
+
     vec3 palette( in float t ) {
         vec3 a = vec3(0.5, 0.5, 0.5);
         vec3 b = vec3(0.5, 0.5, 0.5);
@@ -35,120 +40,114 @@ const fragmentShaderSource = `
         return a + b*cos( 6.28318*(c*t+d) );
     }
 
-    float sdTriangle( in vec2 p, in float r ) {
-        const float k = sqrt(3.0);
-        p.x = abs(p.x) - 1.0;
-        p.y = p.y + 1.0/k;
-        if( p.x+k*p.y > 0.0 ) p = vec2(p.x-k*p.y,-k*p.x-p.y)/2.0;
-        p.x -= clamp( p.x, -2.0, 0.0 );
-        return -length(p)*sign(p.y);
+    // --- SDF GEOMETRY ---
+    // Triangular Prism SDF
+    // h.x = width, h.y = height/depth
+    float sdTriPrism( vec3 p, vec2 h ) {
+        vec3 q = abs(p);
+        return max(q.z-h.y,max(q.x*0.866025+p.y*0.5,-p.y)-h.x*0.5);
     }
 
-    // Simple noise
-    float hash(float n) { return fract(sin(n) * 43758.5453123); }
-    float noise(in vec2 x) {
-        vec2 p = floor(x);
-        vec2 f = fract(x);
-        f = f*f*(3.0-2.0*f);
-        float n = p.x + p.y*57.0;
-        return mix(mix(hash(n+0.0), hash(n+1.0),f.x),
-                   mix(hash(n+57.0), hash(n+58.0),f.x),f.y);
+    // Scene Distance
+    float map(vec3 p) {
+        // Rotate the prism slowly
+        vec3 q = p;
+        q.xz *= rotate2d(u_time * 0.3); 
+        q.xy *= rotate2d(0.3); // Slight tilt
+
+        // Prism dimensions
+        return sdTriPrism(q, vec2(1.0, 1.5)); // Width 1.0, Length 1.5
     }
 
+    // Normal calculation
+    vec3 calcNormal(vec3 p) {
+        float e = 0.001;
+        vec2 k = vec2(1.0, -1.0);
+        return normalize(k.xyy * map(p + k.xyy * e) +
+                         k.yyx * map(p + k.yyx * e) +
+                         k.yxy * map(p + k.yxy * e) +
+                         k.xxx * map(p + k.xxx * e));
+    }
+
+    // --- MAIN ---
     void main() {
         vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
-        vec2 uv0 = uv;
+        
+        // --- 3D CAMERA SETUP ---
+        vec3 ro = vec3(0.0, 0.0, -4.0); // Camera Origin (back)
+        vec3 rd = normalize(vec3(uv, 1.5)); // Ray Direction (Field of View)
 
-        // --- 1. DARK GLASS PRISM ---
-        // Pass UV * 2.5 is okay, but we want it aspect-ratio aware so it doesn't stretch
-        vec2 prismUV = uv;
-        prismUV.x *= u_resolution.x / u_resolution.y; // Correct aspect ratio for shape calculation?
-        // Actually, uv is already corrected by dividing by u_resolution.y in main() line 59:
-        // vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
-        // This makes Y range [-1, 1] and X range [-ratio, ratio].
-        // So a triangle defined in this space is already isotropic (not stretched).
+        // Light setup
+        vec3 lightPos = vec3(-2.0, 2.0, -3.0);
         
-        // HOWEVER, if the screen is very tall (mobile), X range is small (e.g. [-0.5, 0.5]).
-        // The triangle might be clipped if it's too wide.
-        
-        // Let's scale the prism down on mobile (if Aspect Ratio < 1)
-        float ar = u_resolution.x / u_resolution.y;
-        float scale = 2.5;
-        if (ar < 1.0) {
-            scale = 4.0; // Make it appear smaller (inverse scale)
+        // Raymarching
+        float t = 0.0;
+        float d = 0.0;
+        int steps = 0;
+        for(int i = 0; i < 64; i++) {
+            vec3 p = ro + rd * t;
+            d = map(p);
+            t += d;
+            steps = i;
+            if(d < 0.001 || t > 10.0) break;
         }
 
-        float d = sdTriangle(uv * scale, 1.0);
-        
-        // Edge: Thin, sharp white line
-        float edge = smoothstep(0.04, 0.0, abs(d)); 
-        
-        // Interior: Dark, but not fully black (glass hint)
-        // Add a subtle reflection gradient
-        float reflection = smoothstep(0.5, -0.5, uv.y + uv.x) * 0.1;
-        
-        // --- 2. ENTRY BEAM (Laser) ---
-        // Thin white line from left
-        float beamY = abs(uv.y + uv.x * 0.35); 
-        float entryMask = smoothstep(0.005, 0.001, beamY); 
-        entryMask *= smoothstep(0.1, -0.4, uv.x); // Stop at prism
-        entryMask *= smoothstep(-1.0, -0.5, uv.x); // Fade in from left
-        
-        // --- 3. LIQUID RAINBOW BEAM ---
-        // Fan geometry
-        float angle = atan(uv.y, uv.x);
-        float radius = length(uv);
-        
-        // Domain Warping for "Liquid" look:
-        // Instead of distorting the shape, we distort the COORDINATES used for color
-        // This keeps the beam shape clean but makes the inside look like oil.
-        float noiseVal = noise(uv * 4.0 + vec2(u_time * 0.2, 0.0)); // Slower noise
-        
-        // Color depends on Angle + Noise - Time
-        // This moves the colors outward and swirls them
-        // SLOWED DOWN: u_time * 0.05 (was 0.2)
-        float colorIndex = (angle * 2.0) + (noiseVal * 0.5) - (u_time * 0.05);
-        
-        vec3 spectrum = palette(colorIndex);
-        
-        // Beam Shape Mask (Cone)
-        float fanMask = smoothstep(0.6, 0.1, abs(angle)); // Soft edges 
-        fanMask *= smoothstep(0.0, 0.4, uv.x); // Fade in after prism
-        
-        // Add "God Ray" streaks for texture
-        float streaks = smoothstep(0.4, 0.6, noise(vec2(angle * 10.0, radius * 2.0 - u_time)));
-        spectrum += streaks * 0.15;
-
-        // --- COMPOSITION ---
         vec3 col = vec3(0.0);
         float alpha = 0.0;
 
-        // Draw Entry
-        col += vec3(1.0) * entryMask * 3.0; // Hot white
-        alpha += entryMask;
+        // --- PRISM RENDER ---
+        if(t < 10.0) {
+            vec3 p = ro + rd * t;
+            vec3 n = calcNormal(p);
+            vec3 lightDir = normalize(lightPos - p);
+            
+            // Fresnel Effect (White edges)
+            // Power determines sharpness
+            float fresnel = pow(1.0 + dot(rd, n), 3.0);
+            
+            // Specular Reflection
+            vec3 ref = reflect(rd, n);
+            float spec = pow(max(dot(ref, lightDir), 0.0), 16.0);
 
-        // Draw Spectrum
-        if (d >= 0.0) {
-            col += spectrum * fanMask * 1.0; 
-            alpha += fanMask * 0.6; // Semi-transparent beam
+            // Glass Base Color (Dark)
+            vec3 glassCol = vec3(0.05, 0.05, 0.08); 
+
+            // Combine
+            col = glassCol + vec3(1.0) * fresnel * 0.8 + vec3(1.0) * spec * 0.5;
+            alpha = 0.9; // Solid glass
         }
 
-        // Draw Prism Body (Occlusion)
-        if (d < 0.0) {
-            // Dark Glass
-            col = vec3(0.02) + reflection; // Almost black + reflection
-            alpha = 0.95; // Solid
-             
-            // Add the glowing edge ON TOP
-            col += vec3(1.0) * edge;
-        } else {
-            // Add faint edge glow outside too
-           alpha += edge * 0.1;
-           col += vec3(1.0) * edge * 0.1;
+        // --- BEAM EFFECTS (Post-Process style) ---
+        // 1. White Entry Beam (Left)
+        float beamY = abs(uv.y - uv.x * 0.2); // Angled line
+        float entryBeam = smoothstep(0.02, 0.005, beamY) * smoothstep(0.0, -0.5, uv.x);
+        col += vec3(1.0) * entryBeam * 2.0;
+        alpha += entryBeam;
+
+        // 2. Rainbow Exit Beam (Right)
+        // Fan out from near center
+        vec2 fanUV = uv - vec2(0.3, 0.0); // Offset origin slightly right (where prism is)
+        float angle = atan(fanUV.y, fanUV.x);
+        float dist = length(fanUV);
+
+        if (fanUV.x > 0.0) { // Only right side
+            float noise = sin(dist * 10.0 - u_time * 2.0) * 0.02; // Waviness
+            float beamSpread = abs(angle + noise);
+            
+            float rainbowMask = smoothstep(0.5, 0.0, beamSpread); // Cone shape
+            rainbowMask *= smoothstep(0.0, 0.5, fanUV.x); // Fade in from source
+
+            // Spectral Color
+            // Map angle to 0-1 range roughly
+            float hue = (angle + 0.5); 
+            vec3 spectrum = palette(hue + u_time * 0.1);
+
+            col += spectrum * rainbowMask * 1.5; // Additive glow
+            alpha += rainbowMask * 0.5;
         }
         
         // Vignette
-        alpha *= smoothstep(1.8, 0.6, length(uv));
+        col *= 1.0 - length(uv) * 0.3;
 
         gl_FragColor = vec4(col, alpha);
     }
