@@ -15,6 +15,16 @@
         return mobileUA || hasTouchScreen;
     };
 
+    // Precise Platform Detection
+    window.isAndroid = function () {
+        return /Android/i.test(navigator.userAgent);
+    };
+
+    window.isIOS = function () {
+        return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad Pro
+    };
+
     // Cache the result for performance (device type doesn't change during session)
     window._isMobileDeviceCached = null;
     const originalFn = window.isMobileDevice;

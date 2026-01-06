@@ -226,8 +226,9 @@ resize();
 
 // Mobile optimization - skip frames
 let frameSkip = 0;
-const isMobilePrism = window.isMobileDevice && window.isMobileDevice();
-const skipFrames = isMobilePrism ? 2 : 0; // Render every 3rd frame on mobile
+// Only throttle on Android for Prism effect. iOS handles WebGL fine.
+const isAndroidPrism = window.isAndroid && window.isAndroid();
+const skipFrames = isAndroidPrism ? 2 : 0; // Render every 3rd frame on Android
 
 function render(time) {
     // Throttle on mobile - render every 3rd frame for better scroll performance

@@ -97,9 +97,9 @@
 
     function initParticles() {
         particles = [];
-        // Reduce particle count on mobile by 50%
-        const isMobile = window.isMobileDevice && window.isMobileDevice();
-        const densityDivisor = isMobile ? 50000 : 25000;
+        // Reduce particle count ONLY on Android (iPhones are fast enough)
+        const isAndroid = window.isAndroid && window.isAndroid();
+        const densityDivisor = isAndroid ? 50000 : 25000;
         const particleCount = (width * height) / densityDivisor;
 
         for (let i = 0; i < particleCount; i++) {
@@ -108,9 +108,9 @@
     }
 
     function animate() {
-        // Skip frames during scroll on mobile for smoother scrolling
-        const isMobile = window.isMobileDevice && window.isMobileDevice();
-        if (isScrolling && isMobile) {
+        // Skip frames during scroll on ANDROID only
+        const isAndroid = window.isAndroid && window.isAndroid();
+        if (isScrolling && isAndroid) {
             requestAnimationFrame(animate);
             return;
         }

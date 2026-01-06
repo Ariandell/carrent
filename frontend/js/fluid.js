@@ -5,11 +5,19 @@
  */
 
 (function () {
-    // Skip on mobile/touch devices - too GPU intensive for smooth scrolling
-    if (window.isMobileDevice && window.isMobileDevice()) {
-        console.log('FluidJS: Disabled on mobile device');
+    // Only disable on Android devices (they struggle with heavy WebGL overlay + scroll)
+    // iOS (iPhones/iPads) usually handle this fine
+    if (window.isAndroid && window.isAndroid()) {
+        console.log('FluidJS: Disabled on Android (Performance Mode)');
         return;
     }
+    // Mobile check: If it's another mobile but not Android (e.g. unknown), maybe safeguard?
+    // User specifically asked for differentiation. Let's assume generic "Mobile" that isn't iOS might be slow too?
+    // Actually user said "iPhone has one, Android another". 
+    // Let's trust iOS is fast.
+
+    // Safety: If it's a very weak generic mobile device that isn't Android or iOS?
+    // Let's rely on isAndroid() for exclusion.
 
     const canvas = document.createElement('canvas');
     canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;mix-blend-mode:screen;'; // Screen blend for transparency
