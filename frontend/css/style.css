@@ -14,10 +14,11 @@
     --primary: #3b82f6;
     /* Blue 500 */
     --primary-glow: rgba(59, 130, 246, 0.5);
-    --accent: #06b6d4;
-    /* Cyan 500 */
-    --success: #10b981;
-    /* Emerald 500 */
+    --accent: #3b82f6;
+    /* Blue 500 (Unified) */
+    --success: #3b82f6;
+    /* Blue 500 (Unified) - specific success states can use utility classes */
+    /* We keep the variable but map it to primary for consistency unless forced */
     --danger: #ef4444;
     /* Red 500 */
     --text-main: #1f2937;
