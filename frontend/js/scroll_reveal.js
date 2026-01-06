@@ -30,15 +30,17 @@ function initScrollReveal() {
 
 // --- GRAVITY TYPOGRAPHY ENGINE ---
 function initGravityTypography() {
-    // On mobile, skip physics-based character animation - too CPU intensive
-    if (window.isMobileDevice && window.isMobileDevice()) {
-        console.log('GravityText: Using CSS-only mode on mobile');
-        document.querySelectorAll('.gravity-text').forEach(el => {
-            // Simple CSS fade-in instead of per-character physics
-            el.style.opacity = '1';
-            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        });
-        return; // Skip the physics loop entirely
+    const isMobile = window.isMobileDevice && window.isMobileDevice();
+
+    // Scroll detection for mobile throttling
+    let isScrolling = false;
+    let scrollTimeout;
+    if (isMobile) {
+        window.addEventListener('scroll', () => {
+            isScrolling = true;
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => { isScrolling = false; }, 100);
+        }, { passive: true });
     }
 
     let gravityElements = [];
@@ -179,7 +181,22 @@ function initGravityTypography() {
     });
 
     // Animation Loop
+    let frameCount = 0;
+    const frameSkip = isMobile ? 2 : 0; // Update every 3rd frame on mobile
+
     function loop() {
+        // Skip frames during scroll on mobile for smoother scrolling
+        if (isMobile && isScrolling) {
+            requestAnimationFrame(loop);
+            return;
+        }
+
+        // Throttle updates on mobile
+        if (frameSkip > 0 && ++frameCount % (frameSkip + 1) !== 0) {
+            requestAnimationFrame(loop);
+            return;
+        }
+
         gravityElements.forEach(el => el.update());
         requestAnimationFrame(loop);
     }
