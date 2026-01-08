@@ -214,30 +214,38 @@ if (heroSection) {
     heroSection.insertBefore(canvas, heroSection.firstChild);
 }
 
+// Resolution Scale - Reduce for performance (0.5 = half resolution, crisp but faster)
+const resolutionScale = 0.5;
+
 function resize() {
-    canvas.width = window.innerWidth;
+    // Set internal resolution lower than screen
+    canvas.width = window.innerWidth * resolutionScale;
     // Limit to hero height if possible, or full screen
-    // Let's match the parent section height if possible, else window
-    canvas.height = heroSection ? heroSection.offsetHeight : window.innerHeight;
+    const rawHeight = heroSection ? heroSection.offsetHeight : window.innerHeight;
+    canvas.height = rawHeight * resolutionScale;
+
     gl.viewport(0, 0, canvas.width, canvas.height);
 }
 window.addEventListener('resize', resize);
 resize();
 
-// Mobile optimization - skip frames
-let frameSkip = 0;
-// Only throttle on Android for Prism effect. iOS handles WebGL fine.
-const isAndroidPrism = window.isAndroid && window.isAndroid();
-const skipFrames = isAndroidPrism ? 2 : 0; // Render every 3rd frame on Android
+// FPS Throttling
+const fps = 30; // Cap at 30 FPS for background effects
+const frameInterval = 1000 / fps;
+let lastDrawTime = 0;
 
-function render(time) {
-    // Throttle on mobile - render every 3rd frame for better scroll performance
-    if (skipFrames > 0 && ++frameSkip % (skipFrames + 1) !== 0) {
-        requestAnimationFrame(render);
-        return;
-    }
+function render(currentTime) {
+    requestAnimationFrame(render);
 
-    time *= 0.001;
+    // Throttle FPS
+    const elapsed = currentTime - lastDrawTime;
+    if (elapsed < frameInterval) return;
+
+    // Adjust lastDrawTime to snap to grid (keeps smooth cadence)
+    lastDrawTime = currentTime - (elapsed % frameInterval);
+
+    // Convert to seconds for shader
+    const timeInSeconds = currentTime * 0.001;
 
     gl.useProgram(program);
     gl.enableVertexAttribArray(positionAttributeLocation);
@@ -245,13 +253,8 @@ function render(time) {
     gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
     gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
-    gl.uniform1f(timeUniformLocation, time * config.speed);
-
-    // Blending is handled by pre-multiplied alpha or standard composite
-    // We used alpha:true context
+    gl.uniform1f(timeUniformLocation, timeInSeconds * config.speed);
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-    requestAnimationFrame(render);
 }
 requestAnimationFrame(render);

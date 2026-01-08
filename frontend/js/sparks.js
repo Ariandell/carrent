@@ -107,20 +107,32 @@
         }
     }
 
-    function animate() {
+    // FPS Throttling for Sparks
+    const fps = 30;
+    const frameDuration = 1000 / fps;
+    let lastTime = 0;
+
+    function animate(currentTime) {
+        requestAnimationFrame(animate);
+
+        // Throttle
+        if (!currentTime) currentTime = performance.now();
+        const deltaTime = currentTime - lastTime;
+
+        if (deltaTime < frameDuration) return;
+
         // Skip frames during scroll on ANDROID only
         const isAndroid = window.isAndroid && window.isAndroid();
         if (isScrolling && isAndroid) {
-            requestAnimationFrame(animate);
             return;
         }
+
+        lastTime = currentTime - (deltaTime % frameDuration);
 
         ctx.clearRect(0, 0, width, height);
 
         // Draw Ambient Dust
         particles.forEach(p => p.update());
-
-        requestAnimationFrame(animate);
     }
 
     // Init
