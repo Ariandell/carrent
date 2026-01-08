@@ -579,37 +579,37 @@
         // Blit to screen
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-    } requestAnimationFrame(update);
-}
+        requestAnimationFrame(update);
+    }
 
     // Helper
     function compileShader(type, source) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error(gl.getShaderInfoLog(shader));
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.error(gl.getShaderInfoLog(shader));
+        }
+        return shader;
     }
-    return shader;
-}
 
-// Resize
-function resize() {
-    if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        // Re-init FBOs
-        density = createDoubleFBO(canvas.width, canvas.height);
-        velocity = createDoubleFBO(canvas.width, canvas.height);
-        divergence = createFBO(canvas.width, canvas.height);
-        curl = createFBO(canvas.width, canvas.height);
-        pressure = createDoubleFBO(canvas.width, canvas.height);
+    // Resize
+    function resize() {
+        if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // Re-init FBOs
+            density = createDoubleFBO(canvas.width, canvas.height);
+            velocity = createDoubleFBO(canvas.width, canvas.height);
+            divergence = createFBO(canvas.width, canvas.height);
+            curl = createFBO(canvas.width, canvas.height);
+            pressure = createDoubleFBO(canvas.width, canvas.height);
+        }
     }
-}
-window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize);
 
-// Init
-resize();
-update();
+    // Init
+    resize();
+    update();
 
-}) ();
+})();
