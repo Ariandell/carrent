@@ -439,7 +439,22 @@
     let lastY = 0;
 
     // --- MAIN LOOP ---
-    function update() {
+    // FPS Throttling
+    const fps = 30; // Optimized for performance
+    const frameInterval = 1000 / fps;
+    let lastDrawTime = 0;
+
+    function update(currentTime) {
+        requestAnimationFrame(update);
+
+        // Throttle FPS
+        if (!currentTime) currentTime = performance.now();
+        const elapsed = currentTime - lastDrawTime;
+        if (elapsed < frameInterval) return;
+
+        // Adjust lastDrawTime to snap to grid
+        lastDrawTime = currentTime - (elapsed % frameInterval);
+
         const dt = 0.025; // 40% faster physics (was 0.016)
 
         gl.viewport(0, 0, canvas.width, canvas.height);
@@ -470,32 +485,33 @@
 
         // Splats (Interpolated)
         if (pointers[0].moved) {
-            const dx = pointers[0].x - lastX;
-            const dy = pointers[0].y - lastY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+            // Scale mouse coordinates to match downsampled canvas
+            const scaleX = canvas.width / window.innerWidth;
+            const scaleY = canvas.height / window.innerHeight;
 
-            // Only interpolate if distance is reasonable (avoid jumps on init/tab switch)
+            const rawDx = pointers[0].x - lastX;
+            const rawDy = pointers[0].y - lastY;
+
+            // Re-calculate lastX/Y in scaled space for interpolation if needed?
+            // Actually, best to interpolate in RAW space then scale result.
+
+            const dist = Math.sqrt(rawDx * rawDx + rawDy * rawDy);
+
             if (dist < 800 && dist > 0) {
-                const steps = Math.ceil(dist / 5); // Splat every 5 pixels
+                const steps = Math.ceil(dist / 5);
                 for (let i = 0; i < steps; i++) {
                     const t = (i + 1) / steps;
-                    const x = lastX + dx * t;
-                    const y = lastY + dy * t;
-
-                    // Linear interpolation without noise for smoothness
-                    splat(x, y, dx * 5.0, dy * 5.0, pointers[0].color);
+                    const x = (lastX + rawDx * t) * scaleX;
+                    const y = (lastY + rawDy * t) * scaleY;
+                    splat(x, y, rawDx * 5.0 * scaleX, rawDy * 5.0 * scaleY, pointers[0].color);
                 }
             } else {
-                // Single splat (first move or jump)
-                splat(pointers[0].x, pointers[0].y, dx * 5.0, dy * 5.0, pointers[0].color);
+                splat(pointers[0].x * scaleX, pointers[0].y * scaleY, rawDx * 5.0 * scaleX, rawDy * 5.0 * scaleY, pointers[0].color);
             }
 
             lastX = pointers[0].x;
             lastY = pointers[0].y;
             pointers[0].moved = false;
-        } else {
-            // Keep last pos updated even if not technically 'moved' (for subtle idle drift if implemented later)
-            // But here we just relying on the flag.
         }
 
         // Curl
@@ -563,38 +579,37 @@
         // Blit to screen
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-
-        requestAnimationFrame(update);
-    }
+    } requestAnimationFrame(update);
+}
 
     // Helper
     function compileShader(type, source) {
-        const shader = gl.createShader(type);
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.error(gl.getShaderInfoLog(shader));
-        }
-        return shader;
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(shader));
     }
+    return shader;
+}
 
-    // Resize
-    function resize() {
-        if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            // Re-init FBOs
-            density = createDoubleFBO(canvas.width, canvas.height);
-            velocity = createDoubleFBO(canvas.width, canvas.height);
-            divergence = createFBO(canvas.width, canvas.height);
-            curl = createFBO(canvas.width, canvas.height);
-            pressure = createDoubleFBO(canvas.width, canvas.height);
-        }
+// Resize
+function resize() {
+    if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        // Re-init FBOs
+        density = createDoubleFBO(canvas.width, canvas.height);
+        velocity = createDoubleFBO(canvas.width, canvas.height);
+        divergence = createFBO(canvas.width, canvas.height);
+        curl = createFBO(canvas.width, canvas.height);
+        pressure = createDoubleFBO(canvas.width, canvas.height);
     }
-    window.addEventListener('resize', resize);
+}
+window.addEventListener('resize', resize);
 
-    // Init
-    resize();
-    update();
+// Init
+resize();
+update();
 
-})();
+}) ();
