@@ -675,10 +675,10 @@
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     }
 
-    let lastWidth = 0; // Start at 0 to ensure initial resize runs
+    let lastWidth = 0;
     function resize() {
-        // On mobile, prevent reset when URL bar shows/hides (vertical resize only)
-        if (isMobile && window.innerWidth === lastWidth) return;
+        // On mobile, prevent reset on vertical resize (URL bar) OR minor width shifts
+        if (isMobile && Math.abs(window.innerWidth - lastWidth) < 50) return;
         lastWidth = window.innerWidth;
 
         const targetWidth = Math.floor(window.innerWidth * config.RESOLUTION_SCALE);
