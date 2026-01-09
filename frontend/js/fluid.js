@@ -26,13 +26,13 @@
     const isMobile = window.innerWidth < 768;
     const config = {
         TEXTURE_DOWNSAMPLE: 1,
-        DENSITY_DISSIPATION: 0.9,
+        DENSITY_DISSIPATION: 0.8, // Faster fade (was 0.9)
         VELOCITY_DISSIPATION: 0.99,
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 10,
         CURL: 20,
-        SPLAT_RADIUS: isMobile ? 0.0005 : 0.001, // Reduced for mobile
-        SPLAT_FORCE: isMobile ? 3000 : 6000,     // Reduced for mobile
+        SPLAT_RADIUS: isMobile ? 0.0002 : 0.0005, // Much finer lines (was 0.0005/0.001)
+        SPLAT_FORCE: isMobile ? 2000 : 4000,      // Less explosive (was 3000/6000)
         RESOLUTION_SCALE: 0.5,
         FPS_LIMIT: 60
     };
