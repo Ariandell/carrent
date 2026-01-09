@@ -42,6 +42,8 @@
     let inputQueue = []; // Queue for coalesced input events
     let lastX = 0;
     let lastY = 0;
+    let brushVx = 0;
+    let brushVy = 0;
 
     const { drawingBufferWidth: width, drawingBufferHeight: height } = gl;
 
@@ -612,18 +614,21 @@
             const targetX = pointers[0].x;
             const targetY = pointers[0].y;
 
-            // Lerp factor: lower = smoother/slower, higher = faster/jittery
-            // PC (1.0) follows instantly. Mobile (0.2) smooths out low-freq inputs.
-            const lerp = isMobile ? 0.2 : 1.0;
+            // Spring Physics (Momentum) for ultra-smooth chasing
+            // Low tension = smooth but laggy. High tension = fast response.
+            // Friction prevents overshooting.
+            const tension = isMobile ? 0.05 : 0.5;
+            const friction = isMobile ? 0.75 : 0.65;
 
-            const dx = targetX - lastX;
-            const dy = targetY - lastY;
+            brushVx += (targetX - lastX) * tension;
+            brushVy += (targetY - lastY) * tension;
 
-            // Move brush towards target
-            const x = lastX + dx * lerp;
-            const y = lastY + dy * lerp;
+            brushVx *= friction;
+            brushVy *= friction;
 
-            // Calculate velocity based on this smooth step
+            const x = lastX + brushVx;
+            const y = lastY + brushVy;
+
             const velX = (x - lastX) * 5.0;
             const velY = (y - lastY) * 5.0;
 
@@ -635,9 +640,11 @@
             lastX = x;
             lastY = y;
         } else {
-            // Snap brush to pointer so next click starts seamlessly
+            // Snap brush and reset momentum
             lastX = pointers[0].x;
             lastY = pointers[0].y;
+            brushVx = 0;
+            brushVy = 0;
         }
 
         // Curl
