@@ -137,8 +137,8 @@
         const scaleY = canvas.height / rect.height;
 
         return {
-            x: (pointer.clientX - rect.left) * scaleX,
-            y: (pointer.clientY - rect.top) * scaleY
+            x: pointer.clientX * scaleX,
+            y: pointer.clientY * scaleY
         };
     }
 
