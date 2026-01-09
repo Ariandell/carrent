@@ -73,17 +73,17 @@
     pointers.push(new Pointer());
 
     function getPointerPos(event) {
+        // Use the first changed touch for simplicity, or mouse event
+        const pointer = event.targetTouches ? event.targetTouches[0] : event;
         const rect = canvas.getBoundingClientRect();
-        const clientX = event.clientX || (event.touches && event.touches[0].clientX);
-        const clientY = event.clientY || (event.touches && event.touches[0].clientY);
 
         // Scale input coordinates to match internal canvas resolution
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
         return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY
+            x: (pointer.clientX - rect.left) * scaleX,
+            y: (pointer.clientY - rect.top) * scaleY
         };
     }
 
@@ -99,8 +99,9 @@
         pointers[0].color = [Math.sin(t) + 1.5, Math.sin(t + 2) + 1.5, Math.sin(t + 4) + 1.5];
     });
 
-    // Touch support
+    // Touch support with better smoothness
     window.addEventListener('touchstart', e => {
+        // e.preventDefault(); // Optional: prevents scroll if desired, but we want scroll
         const pos = getPointerPos(e);
         pointers[0].down = true;
         pointers[0].moved = false;
@@ -108,14 +109,14 @@
         pointers[0].y = pos.y;
         lastX = pointers[0].x;
         lastY = pointers[0].y;
-    }, { passive: true });
+    }, { passive: false }); // Passive true causes issues sometimes with high-freq updates
 
     window.addEventListener('touchmove', e => {
         const pos = getPointerPos(e);
         pointers[0].moved = pointers[0].down = true;
         pointers[0].x = pos.x;
         pointers[0].y = pos.y;
-    }, { passive: true });
+    }, { passive: false });
 
     window.addEventListener('touchend', () => {
         pointers[0].down = false;
@@ -438,7 +439,19 @@
         if (pointers[0].moved) {
             const dx = pointers[0].x - lastX;
             const dy = pointers[0].y - lastY;
-            splat(pointers[0].x, pointers[0].y, dx * 5.0, dy * 5.0, pointers[0].color);
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Interpolate if moved significantly to prevent "dots"
+            if (dist > 0) {
+                const steps = Math.ceil(dist / 2); // Step every 2 pixels for smoothness
+                for (let i = 0; i < steps; i++) {
+                    const t = (i + 1) / steps;
+                    const x = lastX + dx * t;
+                    const y = lastY + dy * t;
+                    splat(x, y, dx * 5.0, dy * 5.0, pointers[0].color);
+                }
+            }
+
             lastX = pointers[0].x;
             lastY = pointers[0].y;
             pointers[0].moved = false;
