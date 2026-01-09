@@ -161,6 +161,8 @@
     window.addEventListener('pointerdown', e => {
         const pos = getPointerPos(e);
         updatePointer(pos.x, pos.y);
+        lastX = pos.x; // Fix "jump from corner" bug
+        lastY = pos.y;
         pointers[0].moved = false; // Reset move flag on down
     });
 
