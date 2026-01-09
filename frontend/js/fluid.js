@@ -36,8 +36,16 @@
     canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;mix-blend-mode:screen;';
     document.body.appendChild(canvas);
 
-    const gl = canvas.getContext('webgl');
+    // Try WebGL2 first (better float texture support on mobile), fallback to WebGL1
+    let gl = canvas.getContext('webgl2');
+    let isWebGL2 = !!gl;
+    if (!gl) {
+        gl = canvas.getContext('webgl');
+        isWebGL2 = false;
+    }
     if (!gl) return;
+
+    console.log('WebGL version:', isWebGL2 ? '2.0' : '1.0');
 
     // --- SMART CONFIG ---
     // const isMobile = window.innerWidth < 768; // Removed to ensure consistency
@@ -68,7 +76,7 @@
     gl.getExtension('WEBGL_color_buffer_float');
 
     // Test if a texture type actually works for FBO rendering
-    function testFBORenderable(type) {
+    function testFBORenderable(internalFormat, format, type) {
         const tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, tex);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -76,7 +84,7 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         try {
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 4, 4, 0, gl.RGBA, type, null);
+            gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, 4, 4, 0, format, type, null);
         } catch (e) {
             gl.deleteTexture(tex);
             return false;
@@ -93,18 +101,34 @@
 
     // Select best working texture type
     let texType = gl.UNSIGNED_BYTE;
+    let texInternalFormat = gl.RGBA;
+    let texFormat = gl.RGBA;
     let isLowPrecision = true;
 
-    if (extHalfFloat && testFBORenderable(extHalfFloat.HALF_FLOAT_OES)) {
-        texType = extHalfFloat.HALF_FLOAT_OES;
-        isLowPrecision = false;
-        console.log('Texture: HALF_FLOAT (HDR)');
-    } else if (extFloat && testFBORenderable(gl.FLOAT)) {
-        texType = gl.FLOAT;
-        isLowPrecision = false;
-        console.log('Texture: FLOAT (HDR)');
+    if (isWebGL2) {
+        // WebGL2: Try RGBA16F (best for fluid sim)
+        gl.getExtension('EXT_color_buffer_float'); // Enable float FBO in WebGL2
+        if (testFBORenderable(gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT)) {
+            texType = gl.HALF_FLOAT;
+            texInternalFormat = gl.RGBA16F;
+            isLowPrecision = false;
+            console.log('Texture: WebGL2 RGBA16F (HDR)');
+        } else if (testFBORenderable(gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE)) {
+            console.log('Texture: WebGL2 RGBA8 (LDR)');
+        }
     } else {
-        console.log('Texture: UNSIGNED_BYTE (LDR - colors will be scaled)');
+        // WebGL1: Try extensions
+        if (extHalfFloat && testFBORenderable(gl.RGBA, gl.RGBA, extHalfFloat.HALF_FLOAT_OES)) {
+            texType = extHalfFloat.HALF_FLOAT_OES;
+            isLowPrecision = false;
+            console.log('Texture: WebGL1 HALF_FLOAT (HDR)');
+        } else if (extFloat && testFBORenderable(gl.RGBA, gl.RGBA, gl.FLOAT)) {
+            texType = gl.FLOAT;
+            isLowPrecision = false;
+            console.log('Texture: WebGL1 FLOAT (HDR)');
+        } else {
+            console.log('Texture: WebGL1 UNSIGNED_BYTE (LDR)');
+        }
     }
 
     // --- MOUSE/TOUCH INPUT ---
@@ -436,15 +460,18 @@
     })();
 
     // --- FBOs ---
-    function createFBO(w, h, type = gl.FLOAT) {
+    // --- FBOs ---
+    function createFBO(w, h) {
         const tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, tex);
 
-        // Auto-detect filtering support: LINEAR if possible, NEAREST fallback
+        // Auto-detect filtering
         let filter = gl.LINEAR;
-        // Strict check: if HalfFloat and NO Linear extension, force Nearest
-        // (Simplified check logic without global flags)
-        if (type === (gl.getExtension('OES_texture_half_float')?.HALF_FLOAT_OES) && !gl.getExtension('OES_texture_half_float_linear')) {
+        // If extension for linear filtering is missing for this type, fallback to nearest
+        if (texType === gl.FLOAT && !gl.getExtension('OES_texture_float_linear')) {
+            filter = gl.NEAREST;
+        }
+        if ((texType === gl.HALF_FLOAT || (gl.getExtension('OES_texture_half_float') && texType === gl.getExtension('OES_texture_half_float').HALF_FLOAT_OES)) && !gl.getExtension('OES_texture_half_float_linear')) {
             filter = gl.NEAREST;
         }
 
@@ -452,19 +479,27 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, type, null);
+        // Use global formats detected at startup
+        gl.texImage2D(gl.TEXTURE_2D, 0, texInternalFormat, w, h, 0, texFormat, texType, null);
 
         const fbo = gl.createFramebuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+
+        // Debug FBO status
+        const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+        if (status !== gl.FRAMEBUFFER_COMPLETE) {
+            console.error('FBO incomplete:', status);
+        }
+
         return { tex, fbo, width: w, height: h };
     }
 
     let density, velocity, divergence, curl, pressure;
 
     function createDoubleFBO(w, h) {
-        let fbo1 = createFBO(w, h, texType);
-        let fbo2 = createFBO(w, h, texType);
+        let fbo1 = createFBO(w, h); // No need to pass type
+        let fbo2 = createFBO(w, h);
         return {
             get read() { return fbo1; },
             set read(value) { fbo1 = value; },
