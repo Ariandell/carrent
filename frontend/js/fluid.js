@@ -5,32 +5,7 @@
  */
 
 (function () {
-    // === ON-SCREEN DEBUG CONSOLE ===
-    const logDiv = document.createElement('div');
-    logDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;max-height:40%;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:10px;overflow-y:auto;z-index:99999;pointer-events:none;white-space:pre-wrap;padding:5px;';
-    document.body.appendChild(logDiv);
-
-    function logToScreen(msg, color = '#0f0') {
-        const line = document.createElement('div');
-        line.style.color = color;
-        line.textContent = msg;
-        logDiv.appendChild(line);
-        logDiv.scrollTop = logDiv.scrollHeight;
-    }
-
-    const origLog = console.log;
-    const origError = console.error;
-    console.log = function (...args) {
-        origLog.apply(console, args);
-        logToScreen(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
-    };
-    console.error = function (...args) {
-        origError.apply(console, args);
-        logToScreen('ERROR: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '), '#f55');
-    };
-    // ===============================
-
-    console.log('=== FluidJS v6 Debug ===');
+    // (Debug console removed)
 
     const canvas = document.createElement('canvas');
     canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;mix-blend-mode:screen;';
@@ -48,22 +23,25 @@
     console.log('WebGL version:', isWebGL2 ? '2.0' : '1.0');
 
     // --- SMART CONFIG ---
-    // const isMobile = window.innerWidth < 768; // Removed to ensure consistency
+    const isMobile = window.innerWidth < 768;
     const config = {
         TEXTURE_DOWNSAMPLE: 1,
-        DENSITY_DISSIPATION: 0.9, // PC Default: 0.9 (was 0.96)
+        DENSITY_DISSIPATION: 0.9,
         VELOCITY_DISSIPATION: 0.99,
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 10,
         CURL: 20,
-        SPLAT_RADIUS: 0.001, // Increased from 0.0005 to soft blend dots
-        SPLAT_FORCE: 6000,
-        RESOLUTION_SCALE: 0.5, // Fixed at 0.5x for all devices (Soft look)
+        SPLAT_RADIUS: isMobile ? 0.0005 : 0.001, // Reduced for mobile
+        SPLAT_FORCE: isMobile ? 3000 : 6000,     // Reduced for mobile
+        RESOLUTION_SCALE: 0.5,
         FPS_LIMIT: 60
     };
 
     let pointers = [];
     let splatStack = [];
+    let inputQueue = []; // Queue for coalesced input events
+    let lastX = 0;
+    let lastY = 0;
 
     const { drawingBufferWidth: width, drawingBufferHeight: height } = gl;
 
@@ -162,43 +140,40 @@
         };
     }
 
-    // Input Listeners
-    window.addEventListener('mousemove', e => {
-        const pos = getPointerPos(e);
+    // Input Listeners (Unified Pointer Events for Coalesced Support)
+    function updatePointer(x, y) {
         pointers[0].moved = pointers[0].down = true;
-        pointers[0].x = pos.x;
-        pointers[0].y = pos.y;
+        pointers[0].dx = (x - pointers[0].x) * 5.0;
+        pointers[0].dy = (y - pointers[0].y) * 5.0;
+        pointers[0].x = x;
+        pointers[0].y = y;
 
-        // Color Cycle - scale for LDR mode to prevent clamping
+        // Color Cycle
         const t = Date.now() / 1000;
-        const colorScale = isLowPrecision ? 0.3 : 1.0; // Reduce intensity for 8-bit
+        const colorScale = isLowPrecision ? 0.3 : 1.0;
         pointers[0].color = [
             (Math.sin(t) + 1.5) * colorScale,
             (Math.sin(t + 2) + 1.5) * colorScale,
             (Math.sin(t + 4) + 1.5) * colorScale
         ];
+    }
+
+    window.addEventListener('pointerdown', e => {
+        const pos = getPointerPos(e);
+        updatePointer(pos.x, pos.y);
+        pointers[0].moved = false; // Reset move flag on down
     });
 
-    // Touch support with better smoothness
-    window.addEventListener('touchstart', e => {
-        // e.preventDefault(); // Optional: prevents scroll if desired, but we want scroll
-        const pos = getPointerPos(e);
-        pointers[0].down = true;
-        pointers[0].moved = false;
-        pointers[0].x = pos.x;
-        pointers[0].y = pos.y;
-        lastX = pointers[0].x;
-        lastY = pointers[0].y;
-    }, { passive: false }); // Passive true causes issues sometimes with high-freq updates
+    window.addEventListener('pointermove', e => {
+        // Coalesced events fix scroll judder by capturing high-freq inputs
+        const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+        for (let event of events) {
+            const pos = getPointerPos(event);
+            inputQueue.push(pos);
+        }
+    });
 
-    window.addEventListener('touchmove', e => {
-        const pos = getPointerPos(e);
-        pointers[0].moved = pointers[0].down = true;
-        pointers[0].x = pos.x;
-        pointers[0].y = pos.y;
-    }, { passive: false });
-
-    window.addEventListener('touchend', () => {
+    window.addEventListener('pointerup', () => {
         pointers[0].down = false;
         pointers[0].moved = false;
     });
@@ -531,8 +506,7 @@
         density.swap();
     }
 
-    let lastX = 0;
-    let lastY = 0;
+    // lastX/lastY moved to top
     let lastTime = 0;
     const frameInterval = 1000 / config.FPS_LIMIT;
 
@@ -568,22 +542,34 @@
         density.swap();
 
         // Splats
-        if (pointers[0].moved) {
+        if (inputQueue.length > 0) {
+            // Process all coalesced events
+            for (let i = 0; i < inputQueue.length; i++) {
+                const pos = inputQueue[i];
+                const dx = pos.x - lastX;
+                const dy = pos.y - lastY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                // Interpolate if moved significantly to prevent "dots"
+                if (dist > 0) {
+                    const steps = Math.ceil(dist / 2); // Step every 2 pixels for smoothness
+                    for (let j = 0; j < steps; j++) {
+                        const t = (j + 1) / steps;
+                        const x = lastX + dx * t;
+                        const y = lastY + dy * t;
+                        splat(x, y, dx * 5.0, dy * 5.0, pointers[0].color);
+                    }
+                }
+                lastX = pos.x;
+                lastY = pos.y;
+                updatePointer(pos.x, pos.y);
+            }
+            inputQueue = []; // Clear queue
+        } else if (pointers[0].down && pointers[0].moved) {
+            // Fallback for single-frame moves (e.g. initial down)
             const dx = pointers[0].x - lastX;
             const dy = pointers[0].y - lastY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            // Interpolate if moved significantly to prevent "dots"
-            if (dist > 0) {
-                const steps = Math.ceil(dist / 2); // Step every 2 pixels for smoothness
-                for (let i = 0; i < steps; i++) {
-                    const t = (i + 1) / steps;
-                    const x = lastX + dx * t;
-                    const y = lastY + dy * t;
-                    splat(x, y, dx * 5.0, dy * 5.0, pointers[0].color);
-                }
-            }
-
+            splat(pointers[0].x, pointers[0].y, dx * 5.0, dy * 5.0, pointers[0].color);
             lastX = pointers[0].x;
             lastY = pointers[0].y;
             pointers[0].moved = false;
