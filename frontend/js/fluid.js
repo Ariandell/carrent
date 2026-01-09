@@ -4,6 +4,46 @@
  */
 
 (function () {
+    // === ON-SCREEN LOGGER ===
+    const logDiv = document.createElement('div');
+    logDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:50%;background:rgba(0,0,0,0.7);color:#0f0;font-family:monospace;font-size:10px;overflow-y:scroll;z-index:10000;pointer-events:none;white-space:pre-wrap;padding:5px;';
+    document.body.appendChild(logDiv);
+
+    function logToScreen(msg, color = '#0f0') {
+        const line = document.createElement('div');
+        line.style.color = color;
+        line.textContent = msg;
+        logDiv.appendChild(line);
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    const originalLog = console.log;
+    const originalError = console.error;
+
+    console.log = function (...args) {
+        originalLog.apply(console, args);
+        // Convert args to string safely
+        const msg = args.map(a => {
+            if (typeof a === 'object') {
+                try { return JSON.stringify(a); } catch (e) { return '[Circular]'; }
+            }
+            return String(a);
+        }).join(' ');
+        logToScreen(msg);
+    };
+
+    console.error = function (...args) {
+        originalError.apply(console, args);
+        const msg = args.map(a => {
+            if (typeof a === 'object') {
+                try { return JSON.stringify(a); } catch (e) { return '[Circular]'; }
+            }
+            return String(a);
+        }).join(' ');
+        logToScreen('ERROR: ' + msg, '#f55');
+    };
+    // ========================
+
     console.log('=== FluidJS Debug Start ===');
     console.log('User Agent:', navigator.userAgent);
     console.log('Platform:', navigator.platform);
