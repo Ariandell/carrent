@@ -130,15 +130,9 @@
     function getPointerPos(event) {
         // Use the first changed touch for simplicity, or mouse event
         const pointer = event.targetTouches ? event.targetTouches[0] : event;
-        const rect = canvas.getBoundingClientRect();
-
-        // Scale input coordinates to match internal canvas resolution
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-
         return {
-            x: pointer.clientX * scaleX,
-            y: pointer.clientY * scaleY
+            x: pointer.clientX * config.RESOLUTION_SCALE,
+            y: pointer.clientY * config.RESOLUTION_SCALE
         };
     }
 
