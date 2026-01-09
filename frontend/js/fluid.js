@@ -5,6 +5,33 @@
  */
 
 (function () {
+    // === ON-SCREEN DEBUG CONSOLE ===
+    const logDiv = document.createElement('div');
+    logDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;max-height:40%;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:10px;overflow-y:auto;z-index:99999;pointer-events:none;white-space:pre-wrap;padding:5px;';
+    document.body.appendChild(logDiv);
+
+    function logToScreen(msg, color = '#0f0') {
+        const line = document.createElement('div');
+        line.style.color = color;
+        line.textContent = msg;
+        logDiv.appendChild(line);
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    const origLog = console.log;
+    const origError = console.error;
+    console.log = function (...args) {
+        origLog.apply(console, args);
+        logToScreen(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+    };
+    console.error = function (...args) {
+        origError.apply(console, args);
+        logToScreen('ERROR: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '), '#f55');
+    };
+    // ===============================
+
+    console.log('=== FluidJS v6 Debug ===');
+
     const canvas = document.createElement('canvas');
     canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;mix-blend-mode:screen;';
     document.body.appendChild(canvas);
@@ -164,6 +191,8 @@
             gl_Position = vec4(aPosition, 0.0, 1.0);
         }
     `);
+
+    console.log('Vertex shaders:', baseVertexShader ? 'OK' : 'FAIL', neighborVertexShader ? 'OK' : 'FAIL');
 
     const copyShader = compileShader(gl.FRAGMENT_SHADER, `
         precision mediump float;
@@ -353,6 +382,14 @@
     const vorticityProgram = createProgram(vorticityShader, neighborVertexShader);
     const pressureProgram = createProgram(pressureShader, neighborVertexShader);
     const gradSubtractProgram = createProgram(gradientSubtractShader, neighborVertexShader);
+
+    console.log('Physics programs:',
+        'div:', !!divergenceProgram.program,
+        'curl:', !!curlProgram.program,
+        'vort:', !!vorticityProgram.program,
+        'pres:', !!pressureProgram.program,
+        'grad:', !!gradSubtractProgram.program
+    );
 
     const blit = (() => {
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
