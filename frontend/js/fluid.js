@@ -307,11 +307,15 @@
     const copyProgram = createProgram(copyShader);
 
     // --- FBOs ---
-    function createFBO(w, h, type = gl.FLOAT) {
+    // Note: useNearestFiltering is set later based on extension support
+    function createFBO(w, h, type = gl.FLOAT, forceNearest = false) {
         const tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        // Use NEAREST if device doesn't support linear filtering for float textures
+        const filterMode = forceNearest ? gl.NEAREST : gl.LINEAR;
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filterMode);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filterMode);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, type, null);
@@ -324,18 +328,29 @@
 
     // FEATURE CHECK: Prefer HALF_FLOAT for performance if available
     let texType = gl.UNSIGNED_BYTE;
+    let useNearestFiltering = false; // Flag for devices without linear float filtering
+
     const extHalfFloat = gl.getExtension('OES_texture_half_float');
     const extHalfFloatLinear = gl.getExtension('OES_texture_half_float_linear');
     const extFloat = gl.getExtension('OES_texture_float');
     const extFloatLinear = gl.getExtension('OES_texture_float_linear');
 
-    // Priority: Half Float > Float > Byte
+    // Priority: Half Float with Linear > Half Float with Nearest > Float > Byte
     if (extHalfFloat && extHalfFloatLinear) {
         texType = extHalfFloat.HALF_FLOAT_OES;
-        console.log("FluidJS: Using HALF_FLOAT (Optimal)");
+        console.log("FluidJS: Using HALF_FLOAT + LINEAR (Optimal)");
+    } else if (extHalfFloat) {
+        // Android often has HALF_FLOAT but not linear filtering - still use it!
+        texType = extHalfFloat.HALF_FLOAT_OES;
+        useNearestFiltering = true;
+        console.log("FluidJS: Using HALF_FLOAT + NEAREST (Android Mode)");
     } else if (extFloat && extFloatLinear) {
         texType = gl.FLOAT;
         console.log("FluidJS: Using FLOAT (High Precision)");
+    } else if (extFloat) {
+        texType = gl.FLOAT;
+        useNearestFiltering = true;
+        console.log("FluidJS: Using FLOAT + NEAREST");
     } else {
         console.log("FluidJS: Using UNSIGNED_BYTE (Fallback)");
     }
@@ -343,8 +358,8 @@
     let density, velocity, divergence, curl, pressure;
 
     function createDoubleFBO(w, h) {
-        let fbo1 = createFBO(w, h, texType);
-        let fbo2 = createFBO(w, h, texType);
+        let fbo1 = createFBO(w, h, texType, useNearestFiltering);
+        let fbo2 = createFBO(w, h, texType, useNearestFiltering);
         return {
             get read() { return fbo1; },
             set read(value) { fbo1 = value; },
@@ -542,8 +557,8 @@
             canvas.height = targetHeight;
             density = createDoubleFBO(canvas.width, canvas.height);
             velocity = createDoubleFBO(canvas.width, canvas.height);
-            divergence = createFBO(canvas.width, canvas.height);
-            curl = createFBO(canvas.width, canvas.height);
+            divergence = createFBO(canvas.width, canvas.height, texType, useNearestFiltering);
+            curl = createFBO(canvas.width, canvas.height, texType, useNearestFiltering);
             pressure = createDoubleFBO(canvas.width, canvas.height);
         }
     }
