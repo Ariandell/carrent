@@ -440,14 +440,19 @@
         const tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, tex);
 
-        // Auto-detect filtering
+        // Auto-detect filtering: Prioritize LINEAR for smooth quality
         let filter = gl.LINEAR;
-        // If extension for linear filtering is missing for this type, fallback to nearest
-        if (texType === gl.FLOAT && !gl.getExtension('OES_texture_float_linear')) {
-            filter = gl.NEAREST;
-        }
-        if ((texType === gl.HALF_FLOAT || (gl.getExtension('OES_texture_half_float') && texType === gl.getExtension('OES_texture_half_float').HALF_FLOAT_OES)) && !gl.getExtension('OES_texture_half_float_linear')) {
-            filter = gl.NEAREST;
+
+        // For float/half-float types, verify if linear filtering is actually supported
+        // In WebGL2, we might need OES_texture_float_linear even for HALF_FLOAT
+        if (texType === gl.FLOAT || texType === gl.HALF_FLOAT ||
+            (gl.getExtension('OES_texture_half_float') && texType === gl.getExtension('OES_texture_half_float').HALF_FLOAT_OES)) {
+
+            const hasLinear = gl.getExtension('OES_texture_float_linear') || gl.getExtension('OES_texture_half_float_linear');
+            if (!hasLinear) {
+                filter = gl.NEAREST;
+                console.warn('Linear float filtering not supported, falling back to NEAREST');
+            }
         }
 
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
