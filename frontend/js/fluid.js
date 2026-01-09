@@ -13,18 +13,17 @@
     if (!gl) return;
 
     // --- SMART CONFIG ---
-    const isMobile = window.innerWidth < 768; // Simple check for mobile
+    // const isMobile = window.innerWidth < 768; // Removed to ensure consistency
     const config = {
         TEXTURE_DOWNSAMPLE: 1,
-        DENSITY_DISSIPATION: 0.96, // Slower dissipation for "richer" feel
+        DENSITY_DISSIPATION: 0.9, // PC Default: 0.9 (was 0.96)
         VELOCITY_DISSIPATION: 0.99,
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 10,
         CURL: 20,
-        SPLAT_RADIUS: 0.0005,
+        SPLAT_RADIUS: 0.001, // Increased from 0.0005 to soft blend dots
         SPLAT_FORCE: 6000,
-        // Resolution: Desktop gets 0.5x (enough for 1080p/4k), Mobile gets 1.0x (needed for small screens) check
-        RESOLUTION_SCALE: isMobile ? 1.0 : 0.5,
+        RESOLUTION_SCALE: 0.5, // Fixed at 0.5x for all devices (Soft look)
         FPS_LIMIT: 60
     };
 
