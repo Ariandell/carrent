@@ -617,8 +617,8 @@
             // Spring Physics (Momentum) for ultra-smooth chasing
             // Low tension = smooth but laggy. High tension = fast response.
             // Friction prevents overshooting.
-            const tension = isMobile ? 0.05 : 0.5;
-            const friction = isMobile ? 0.75 : 0.65;
+            const tension = isMobile ? 0.15 : 0.5;
+            const friction = isMobile ? 0.8 : 0.65;
 
             brushVx += (targetX - lastX) * tension;
             brushVy += (targetY - lastY) * tension;
