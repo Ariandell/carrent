@@ -170,11 +170,8 @@
 
     window.addEventListener('pointermove', e => {
         if (e.pointerType === 'touch') return;
-        const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
-        for (let event of events) {
-            const pos = getPointerPos(event);
-            inputQueue.push(pos);
-        }
+        const pos = getPointerPos(e);
+        updatePointer(pos.x, pos.y);
     });
 
     window.addEventListener('pointerup', e => {
@@ -185,7 +182,6 @@
 
     // Explicit Touch support (Survives scrolling on Android)
     window.addEventListener('touchstart', e => {
-        // Do NOT preventDefault, allow scroll
         const pos = getPointerPos(e);
         updatePointer(pos.x, pos.y);
         lastX = pos.x;
@@ -194,11 +190,10 @@
     }, { passive: true });
 
     window.addEventListener('touchmove', e => {
-        // Push all active touches to queue
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            const t = e.changedTouches[i];
-            const pos = getPointerPos(t);
-            inputQueue.push(pos);
+        // Just take the first changed touch for target (Simple Chasing)
+        if (e.changedTouches.length > 0) {
+            const pos = getPointerPos(e.changedTouches[0]);
+            updatePointer(pos.x, pos.y);
         }
     }, { passive: true });
 
