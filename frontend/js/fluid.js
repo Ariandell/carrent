@@ -2,25 +2,18 @@
  * WebGL Fluid Simulation
  * A high-performance Navier-Stokes solver for the cursor smoke effect.
  * Adapted for "Pearl Smoke" aesthetic (High precision, slow dissipation, iridescent colors).
+ * OPTIMIZED v3: FPS Limit + Res Scale + Half-Float + Deferred Init
  */
 
 (function () {
     // Only disable on Android devices (they struggle with heavy WebGL overlay + scroll)
-    // iOS (iPhones/iPads) usually handle this fine
     if (window.isAndroid && window.isAndroid()) {
         console.log('FluidJS: Disabled on Android (Performance Mode)');
         return;
     }
-    // Mobile check: If it's another mobile but not Android (e.g. unknown), maybe safeguard?
-    // User specifically asked for differentiation. Let's assume generic "Mobile" that isn't iOS might be slow too?
-    // Actually user said "iPhone has one, Android another". 
-    // Let's trust iOS is fast.
-
-    // Safety: If it's a very weak generic mobile device that isn't Android or iOS?
-    // Let's rely on isAndroid() for exclusion.
 
     const canvas = document.createElement('canvas');
-    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;mix-blend-mode:screen;'; // Screen blend for transparency
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;mix-blend-mode:screen;';
     document.body.appendChild(canvas);
 
     const gl = canvas.getContext('webgl');
@@ -29,20 +22,22 @@
     // Configuration
     const config = {
         TEXTURE_DOWNSAMPLE: 1,
-        DENSITY_DISSIPATION: 0.9, // Fade faster to keep screen clean
+        DENSITY_DISSIPATION: 0.9,
         VELOCITY_DISSIPATION: 0.99,
         PRESSURE_DISSIPATION: 0.8,
-        PRESSURE_ITERATIONS: 20,
-        CURL: 25,
+        PRESSURE_ITERATIONS: 10, // Reduced from 20 -> 10 (Critical optimization for high-res screens)
+        CURL: 20,
         SPLAT_RADIUS: 0.0005,
-        SPLAT_FORCE: 6000
+        SPLAT_FORCE: 6000,
+        // Performance settings
+        RESOLUTION_SCALE: 0.5, // Render at half resolution
+        FPS_LIMIT: 30          // Cap FPS
     };
 
     let pointers = [];
     let splatStack = [];
 
     const { drawingBufferWidth: width, drawingBufferHeight: height } = gl;
-    console.log("FluidJS: Init", width, height);
 
     // --- MOUSE INPUT ---
     class Pointer {
@@ -60,68 +55,41 @@
 
     pointers.push(new Pointer());
 
-    canvas.addEventListener('mousemove', e => {
-        // ... (This listener on canvas is blocked by pointer-events: none, so redundant but harmless)
-        // Just update position, interpolation happens in update loop
-        pointers[0].moved = pointers[0].down = true;
-        pointers[0].x = e.offsetX;
-        pointers[0].y = e.offsetY;
-
-        // Iridescent Color Cycling
-        // High Lightness (mostly white base), shifting hue
-        const t = Date.now() / 1000;
-        const r = Math.sin(t) * 0.5 + 0.5;
-        const g = Math.sin(t + 2) * 0.5 + 0.5;
-        const b = Math.sin(t + 4) * 0.5 + 0.5;
-        // Boost for "Add" blend mode (Glow)
-        pointers[0].color = [r * 2, g * 2, b * 2];
-    });
-
-    // Pass-through events hack:
-    // Since this canvas is z-index 9999, we need to manually forward clicks?
-    // CSS 'pointer-events: none' solves this. But then we can't listen to events ON the canvas.
-    // Solution: Listen on WINDOW.
-    // Color Update Logic
-    function updatePointerColor(pointer) {
-        const t = Date.now() / 500;
-        const r = Math.sin(t) * 1.5 + 1.5;
-        const g = Math.sin(t + 2.0) * 1.5 + 1.5;
-        const b = Math.sin(t + 4.0) * 1.5 + 1.5;
-        pointer.color = [r, g, b];
-    }
-
-    // Helper to get canvas relative coordinates
+    // Helper to get canvas relative coordinates with scaling
     function getPointerPos(event, targetCanvas) {
         const rect = targetCanvas.getBoundingClientRect();
         const clientX = event.clientX || (event.touches && event.touches[0].clientX);
         const clientY = event.clientY || (event.touches && event.touches[0].clientY);
 
+        const cssX = clientX - rect.left;
+        const cssY = clientY - rect.top;
+
+        // Correctly map CSS pixels to BackingStore pixels, handling the 0.5 resolution scale
         return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
+            x: cssX * (targetCanvas.width / rect.width),
+            y: cssY * (targetCanvas.height / rect.height)
         };
     }
 
-    // Mouse Support
     window.addEventListener('mousemove', e => {
         const pos = getPointerPos(e, canvas);
         pointers[0].moved = pointers[0].down = true;
         pointers[0].x = pos.x;
         pointers[0].y = pos.y;
-        updatePointerColor(pointers[0]);
+
+        // Iridescent Color Cycling
+        const t = Date.now() / 1000;
+        pointers[0].color = [Math.sin(t) + 1.5, Math.sin(t + 2) + 1.5, Math.sin(t + 4) + 1.5];
     });
 
-    // Touch Support (Mobile)
     window.addEventListener('touchstart', e => {
         const pos = getPointerPos(e, canvas);
         pointers[0].down = true;
-        pointers[0].moved = false; // Reset interpolation
+        pointers[0].moved = false;
         pointers[0].x = pos.x;
         pointers[0].y = pos.y;
-        // Also reset last positions to prevent jump from previous touch
         lastX = pointers[0].x;
         lastY = pointers[0].y;
-        updatePointerColor(pointers[0]);
     }, { passive: true });
 
     window.addEventListener('touchmove', e => {
@@ -129,7 +97,6 @@
         pointers[0].moved = pointers[0].down = true;
         pointers[0].x = pos.x;
         pointers[0].y = pos.y;
-        updatePointerColor(pointers[0]);
     }, { passive: true });
 
     window.addEventListener('touchend', e => {
@@ -352,7 +319,7 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, type, null); // Use dynamic type
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, type, null);
 
         const fbo = gl.createFramebuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
@@ -360,31 +327,25 @@
         return { tex, fbo, width: w, height: h };
     }
 
-    // Check Float Support
-    let texType = gl.FLOAT;
-    const extFloat = gl.getExtension('OES_texture_float');
-    const extFloatLinear = gl.getExtension('OES_texture_float_linear');
+    // FEATURE CHECK: Prefer HALF_FLOAT for performance if available
+    let texType = gl.UNSIGNED_BYTE;
     const extHalfFloat = gl.getExtension('OES_texture_half_float');
     const extHalfFloatLinear = gl.getExtension('OES_texture_half_float_linear');
+    const extFloat = gl.getExtension('OES_texture_float');
+    const extFloatLinear = gl.getExtension('OES_texture_float_linear');
 
-    if (!extFloat || !extFloatLinear) {
-        if (extHalfFloat && extHalfFloatLinear) {
-            texType = extHalfFloat.HALF_FLOAT_OES;
-            console.log("FluidJS: Using HALF_FLOAT");
-        } else {
-            console.warn("FluidJS: Floating point textures not supported");
-            // Fallback to UNSIGNED_BYTE? It won't work well for fluid physics (precision loss) but better than nothing
-            texType = gl.UNSIGNED_BYTE;
-        }
+    // Priority: Half Float > Float > Byte
+    if (extHalfFloat && extHalfFloatLinear) {
+        texType = extHalfFloat.HALF_FLOAT_OES;
+        console.log("FluidJS: Using HALF_FLOAT (Optimal)");
+    } else if (extFloat && extFloatLinear) {
+        texType = gl.FLOAT;
+        console.log("FluidJS: Using FLOAT (High Precision)");
     } else {
-        console.log("FluidJS: Using FLOAT");
+        console.log("FluidJS: Using UNSIGNED_BYTE (Fallback)");
     }
 
-    let density = createDoubleFBO(canvas.width, canvas.height);
-    let velocity = createDoubleFBO(canvas.width, canvas.height);
-    let divergence = createFBO(canvas.width, canvas.height);
-    let curl = createFBO(canvas.width, canvas.height);
-    let pressure = createDoubleFBO(canvas.width, canvas.height);
+    let density, velocity, divergence, curl, pressure;
 
     function createDoubleFBO(w, h) {
         let fbo1 = createFBO(w, h, texType);
@@ -439,8 +400,18 @@
     let lastY = 0;
 
     // --- MAIN LOOP ---
-    function update() {
-        const dt = 0.025; // 40% faster physics (was 0.016)
+    let lastTime = 0;
+    const frameInterval = 1000 / config.FPS_LIMIT;
+
+    function update(currentTime) {
+        requestAnimationFrame(update);
+
+        if (!currentTime) currentTime = performance.now();
+        const elapsed = currentTime - lastTime;
+        if (elapsed < frameInterval) return;
+        lastTime = currentTime - (elapsed % frameInterval);
+
+        const dt = 0.025;
 
         gl.viewport(0, 0, canvas.width, canvas.height);
 
@@ -461,41 +432,32 @@
         gl.uniform1i(advectionProgram.uniforms.uSource, 1);
         gl.uniform1f(advectionProgram.uniforms.dissipation, config.DENSITY_DISSIPATION);
 
-
-
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, density.read.tex);
         blit(density.write.fbo);
         density.swap();
 
-        // Splats (Interpolated)
+        // Splats
         if (pointers[0].moved) {
             const dx = pointers[0].x - lastX;
             const dy = pointers[0].y - lastY;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            // Only interpolate if distance is reasonable (avoid jumps on init/tab switch)
             if (dist < 800 && dist > 0) {
-                const steps = Math.ceil(dist / 5); // Splat every 5 pixels
+                const steps = Math.ceil(dist / 5);
                 for (let i = 0; i < steps; i++) {
                     const t = (i + 1) / steps;
                     const x = lastX + dx * t;
                     const y = lastY + dy * t;
-
-                    // Linear interpolation without noise for smoothness
                     splat(x, y, dx * 5.0, dy * 5.0, pointers[0].color);
                 }
             } else {
-                // Single splat (first move or jump)
                 splat(pointers[0].x, pointers[0].y, dx * 5.0, dy * 5.0, pointers[0].color);
             }
 
             lastX = pointers[0].x;
             lastY = pointers[0].y;
             pointers[0].moved = false;
-        } else {
-            // Keep last pos updated even if not technically 'moved' (for subtle idle drift if implemented later)
-            // But here we just relying on the flag.
         }
 
         // Curl
@@ -528,7 +490,7 @@
         gl.bindTexture(gl.TEXTURE_2D, velocity.read.tex);
         blit(divergence.fbo);
 
-        // Pressure Solver
+        // Pressure
         gl.useProgram(pressureProgram.program);
         gl.uniform2f(pressureProgram.uniforms.texelSize, 1.0 / canvas.width, 1.0 / canvas.height);
         gl.uniform1i(pressureProgram.uniforms.uDivergence, 0);
@@ -560,11 +522,8 @@
         gl.uniform1i(copyProgram.uniforms.uTexture, 0);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, density.read.tex);
-        // Blit to screen
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-
-        requestAnimationFrame(update);
     }
 
     // Helper
@@ -580,10 +539,12 @@
 
     // Resize
     function resize() {
-        if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            // Re-init FBOs
+        const targetWidth = Math.floor(window.innerWidth * config.RESOLUTION_SCALE);
+        const targetHeight = Math.floor(window.innerHeight * config.RESOLUTION_SCALE);
+
+        if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
             density = createDoubleFBO(canvas.width, canvas.height);
             velocity = createDoubleFBO(canvas.width, canvas.height);
             divergence = createFBO(canvas.width, canvas.height);
@@ -593,8 +554,10 @@
     }
     window.addEventListener('resize', resize);
 
-    // Init
-    resize();
-    update();
+    // DEFERRED INIT: Wait for main thread to settle
+    setTimeout(() => {
+        resize();
+        update();
+    }, 100);
 
 })();
