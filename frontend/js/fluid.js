@@ -616,19 +616,18 @@
             const targetX = pointers[0].x;
             const targetY = pointers[0].y;
 
-            // Spring Physics (Momentum) frame-rate independent
+            // Spring Physics (Momentum)
             const tension = isMobile ? 0.2 : 0.5;
-            const friction = isMobile ? 0.9 : 0.65; // Critical Damping
+            const friction = isMobile ? 0.9 : 0.65;
 
-            // Apply forces scaled by time
-            brushVx += (targetX - lastX) * tension * physDt;
-            brushVy += (targetY - lastY) * tension * physDt;
+            brushVx += (targetX - lastX) * tension;
+            brushVy += (targetY - lastY) * tension;
 
-            brushVx *= Math.pow(friction, physDt);
-            brushVy *= Math.pow(friction, physDt);
+            brushVx *= friction;
+            brushVy *= friction;
 
-            const x = lastX + brushVx * physDt;
-            const y = lastY + brushVy * physDt;
+            const x = lastX + brushVx;
+            const y = lastY + brushVy;
 
             // Calculate distance moved this frame
             const dx = x - lastX;
