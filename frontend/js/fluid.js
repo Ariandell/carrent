@@ -545,10 +545,11 @@
         requestAnimationFrame(update);
 
         if (!currentTime) currentTime = performance.now();
-        // Remove FPS limiting to match native refresh rate (smoothness > consistency)
-        // const elapsed = currentTime - lastTime;
-        // if (elapsed < frameInterval) return;
-        // lastTime = currentTime - (elapsed % frameInterval);
+
+        // Physics Delta Time (Normalized to 60FPS) across refresh rates
+        const rawDt = (currentTime - lastTime) || 16.6;
+        lastTime = currentTime;
+        const physDt = Math.min(rawDt / 16.6, 4.0);
 
         const dt = 0.025;
         gl.viewport(0, 0, canvas.width, canvas.height);
@@ -615,20 +616,19 @@
             const targetX = pointers[0].x;
             const targetY = pointers[0].y;
 
-            // Spring Physics (Momentum) for ultra-smooth chasing
-            // Low tension = smooth but laggy. High tension = fast response.
-            // Friction prevents overshooting.
-            const tension = isMobile ? 0.2 : 0.5; // Stiffer
-            const friction = isMobile ? 0.85 : 0.65; // More damping
+            // Spring Physics (Momentum) frame-rate independent
+            const tension = isMobile ? 0.2 : 0.5;
+            const friction = isMobile ? 0.9 : 0.65; // Critical Damping
 
-            brushVx += (targetX - lastX) * tension;
-            brushVy += (targetY - lastY) * tension;
+            // Apply forces scaled by time
+            brushVx += (targetX - lastX) * tension * physDt;
+            brushVy += (targetY - lastY) * tension * physDt;
 
-            brushVx *= friction;
-            brushVy *= friction;
+            brushVx *= Math.pow(friction, physDt);
+            brushVy *= Math.pow(friction, physDt);
 
-            const x = lastX + brushVx;
-            const y = lastY + brushVy;
+            const x = lastX + brushVx * physDt;
+            const y = lastY + brushVy * physDt;
 
             // Calculate distance moved this frame
             const dx = x - lastX;
