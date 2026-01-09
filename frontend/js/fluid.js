@@ -2,7 +2,7 @@
  * WebGL Fluid Simulation
  * A high-performance Navier-Stokes solver for the cursor smoke effect.
  * Adapted for "Pearl Smoke" aesthetic (High precision, slow dissipation, iridescent colors).
- * OPTIMIZED v3: FPS Limit + Res Scale + Half-Float + Deferred Init
+ * OPTIMIZED v4: 60 FPS Target + Res Scale + Half-Float + Deferred Init
  */
 
 (function () {
@@ -25,13 +25,13 @@
         DENSITY_DISSIPATION: 0.9,
         VELOCITY_DISSIPATION: 0.99,
         PRESSURE_DISSIPATION: 0.8,
-        PRESSURE_ITERATIONS: 10, // Reduced from 20 -> 10 (Critical optimization for high-res screens)
+        PRESSURE_ITERATIONS: 10,
         CURL: 20,
         SPLAT_RADIUS: 0.0005,
         SPLAT_FORCE: 6000,
         // Performance settings
         RESOLUTION_SCALE: 0.5, // Render at half resolution
-        FPS_LIMIT: 30          // Cap FPS
+        FPS_LIMIT: 60          // Target 60 FPS (VSync-aware via rAF logic)
     };
 
     let pointers = [];
@@ -64,7 +64,6 @@
         const cssX = clientX - rect.left;
         const cssY = clientY - rect.top;
 
-        // Correctly map CSS pixels to BackingStore pixels, handling the 0.5 resolution scale
         return {
             x: cssX * (targetCanvas.width / rect.width),
             y: cssY * (targetCanvas.height / rect.height)
