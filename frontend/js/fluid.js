@@ -8,7 +8,7 @@
     // (Debug console removed)
 
     const canvas = document.createElement('canvas');
-    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;mix-blend-mode:screen;';
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100lvh;pointer-events:none;z-index:9999;mix-blend-mode:screen;';
     document.body.appendChild(canvas);
 
     // Try WebGL2 first (better float texture support on mobile), fallback to WebGL1
@@ -675,7 +675,12 @@
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     }
 
+    let lastWidth = window.innerWidth;
     function resize() {
+        // On mobile, prevent reset when URL bar shows/hides (vertical resize only)
+        if (isMobile && window.innerWidth === lastWidth) return;
+        lastWidth = window.innerWidth;
+
         const targetWidth = Math.floor(window.innerWidth * config.RESOLUTION_SCALE);
         const targetHeight = Math.floor(window.innerHeight * config.RESOLUTION_SCALE);
 
