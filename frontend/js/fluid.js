@@ -31,7 +31,7 @@
         PRESSURE_DISSIPATION: 0.8,
         PRESSURE_ITERATIONS: 10,
         CURL: 20,
-        SPLAT_RADIUS: isMobile ? 0.0002 : 0.0005, // Much finer lines (was 0.0005/0.001)
+        SPLAT_RADIUS: isMobile ? 0.0004 : 0.0005, // Slightly thicker for better blending
         SPLAT_FORCE: isMobile ? 2000 : 4000,      // Less explosive (was 3000/6000)
         RESOLUTION_SCALE: 0.5,
         FPS_LIMIT: 60
@@ -545,9 +545,10 @@
         requestAnimationFrame(update);
 
         if (!currentTime) currentTime = performance.now();
-        const elapsed = currentTime - lastTime;
-        if (elapsed < frameInterval) return;
-        lastTime = currentTime - (elapsed % frameInterval);
+        // Remove FPS limiting to match native refresh rate (smoothness > consistency)
+        // const elapsed = currentTime - lastTime;
+        // if (elapsed < frameInterval) return;
+        // lastTime = currentTime - (elapsed % frameInterval);
 
         const dt = 0.025;
         gl.viewport(0, 0, canvas.width, canvas.height);
@@ -617,8 +618,8 @@
             // Spring Physics (Momentum) for ultra-smooth chasing
             // Low tension = smooth but laggy. High tension = fast response.
             // Friction prevents overshooting.
-            const tension = isMobile ? 0.15 : 0.5;
-            const friction = isMobile ? 0.8 : 0.65;
+            const tension = isMobile ? 0.2 : 0.5; // Stiffer
+            const friction = isMobile ? 0.85 : 0.65; // More damping
 
             brushVx += (targetX - lastX) * tension;
             brushVy += (targetY - lastY) * tension;
