@@ -158,16 +158,18 @@
         ];
     }
 
+    // Mouse support via Pointer Events (Ignore touch to avoid duplicates)
     window.addEventListener('pointerdown', e => {
+        if (e.pointerType === 'touch') return;
         const pos = getPointerPos(e);
         updatePointer(pos.x, pos.y);
-        lastX = pos.x; // Fix "jump from corner" bug
+        lastX = pos.x;
         lastY = pos.y;
-        pointers[0].moved = false; // Reset move flag on down
+        pointers[0].moved = false;
     });
 
     window.addEventListener('pointermove', e => {
-        // Coalesced events fix scroll judder by capturing high-freq inputs
+        if (e.pointerType === 'touch') return;
         const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
         for (let event of events) {
             const pos = getPointerPos(event);
@@ -175,7 +177,32 @@
         }
     });
 
-    window.addEventListener('pointerup', () => {
+    window.addEventListener('pointerup', e => {
+        if (e.pointerType === 'touch') return;
+        pointers[0].down = false;
+        pointers[0].moved = false;
+    });
+
+    // Explicit Touch support (Survives scrolling on Android)
+    window.addEventListener('touchstart', e => {
+        // Do NOT preventDefault, allow scroll
+        const pos = getPointerPos(e);
+        updatePointer(pos.x, pos.y);
+        lastX = pos.x;
+        lastY = pos.y;
+        pointers[0].moved = false;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', e => {
+        // Push all active touches to queue
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            const t = e.changedTouches[i];
+            const pos = getPointerPos(t);
+            inputQueue.push(pos);
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
         pointers[0].down = false;
         pointers[0].moved = false;
     });
