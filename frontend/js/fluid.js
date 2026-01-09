@@ -571,6 +571,7 @@
         density.swap();
 
         // Splats
+        /* OLD INPUT QUEUE LOGIC
         if (inputQueue.length > 0) {
             // Process all coalesced events
             for (let i = 0; i < inputQueue.length; i++) {
@@ -602,6 +603,41 @@
             lastX = pointers[0].x;
             lastY = pointers[0].y;
             pointers[0].moved = false;
+        }
+
+        */
+
+        // Splats (Smoothed "Chasing" Cursor)
+        if (pointers[0].down) {
+            const targetX = pointers[0].x;
+            const targetY = pointers[0].y;
+
+            // Lerp factor: lower = smoother/slower, higher = faster/jittery
+            // PC (1.0) follows instantly. Mobile (0.2) smooths out low-freq inputs.
+            const lerp = isMobile ? 0.2 : 1.0;
+
+            const dx = targetX - lastX;
+            const dy = targetY - lastY;
+
+            // Move brush towards target
+            const x = lastX + dx * lerp;
+            const y = lastY + dy * lerp;
+
+            // Calculate velocity based on this smooth step
+            const velX = (x - lastX) * 5.0;
+            const velY = (y - lastY) * 5.0;
+
+            // Only splat if moving
+            if (Math.abs(velX) > 0.1 || Math.abs(velY) > 0.1) {
+                splat(x, y, velX, velY, pointers[0].color);
+            }
+
+            lastX = x;
+            lastY = y;
+        } else {
+            // Snap brush to pointer so next click starts seamlessly
+            lastX = pointers[0].x;
+            lastY = pointers[0].y;
         }
 
         // Curl
