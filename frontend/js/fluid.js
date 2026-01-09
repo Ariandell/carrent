@@ -629,12 +629,23 @@
             const x = lastX + brushVx;
             const y = lastY + brushVy;
 
-            const velX = (x - lastX) * 5.0;
-            const velY = (y - lastY) * 5.0;
+            // Calculate distance moved this frame
+            const dx = x - lastX;
+            const dy = y - lastY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
 
-            // Only splat if moving
-            if (Math.abs(velX) > 0.1 || Math.abs(velY) > 0.1) {
-                splat(x, y, velX, velY, pointers[0].color);
+            // Sub-step drawing to fill gaps (prevent dotted lines)
+            // Draw a splat every 2 pixels (approx)
+            if (dist > 0) {
+                const steps = Math.ceil(dist / 2);
+                for (let i = 0; i < steps; i++) {
+                    const t = (i + 1) / steps;
+                    const drawX = lastX + dx * t;
+                    const drawY = lastY + dy * t;
+                    const velX = dx * 5.0; // Velocity is constant for this frame step
+                    const velY = dy * 5.0;
+                    splat(drawX, drawY, velX, velY, pointers[0].color);
+                }
             }
 
             lastX = x;
