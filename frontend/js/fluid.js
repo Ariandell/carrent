@@ -140,6 +140,25 @@
         }
     `);
 
+    // Vertex shader for physics shaders that need neighbor UV coordinates
+    const neighborVertexShader = compileShader(gl.VERTEX_SHADER, `
+        attribute vec2 aPosition;
+        uniform vec2 texelSize;
+        varying vec2 vUv;
+        varying vec2 vL;
+        varying vec2 vR;
+        varying vec2 vT;
+        varying vec2 vB;
+        void main () {
+            vUv = aPosition * 0.5 + 0.5;
+            vL = vUv - vec2(texelSize.x, 0.0);
+            vR = vUv + vec2(texelSize.x, 0.0);
+            vT = vUv + vec2(0.0, texelSize.y);
+            vB = vUv - vec2(0.0, texelSize.y);
+            gl_Position = vec4(aPosition, 0.0, 1.0);
+        }
+    `);
+
     const copyShader = compileShader(gl.FRAGMENT_SHADER, `
         precision mediump float;
         precision mediump sampler2D;
@@ -300,11 +319,14 @@
     `);
 
     // --- PROGRAMS ---
-    function createProgram(fragmentShader) {
+    function createProgram(fragmentShader, vertexShader = baseVertexShader) {
         const program = gl.createProgram();
-        gl.attachShader(program, baseVertexShader);
+        gl.attachShader(program, vertexShader);
         gl.attachShader(program, fragmentShader);
         gl.linkProgram(program);
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error('Program link error:', gl.getProgramInfoLog(program));
+        }
         const uniforms = {};
         const count = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
         for (let i = 0; i < count; i++) {
@@ -314,14 +336,17 @@
         return { program, uniforms };
     }
 
+    // Basic programs (use baseVertexShader)
     const splatProgram = createProgram(splatShader);
     const advectionProgram = createProgram(advectionShader);
-    const divergenceProgram = createProgram(divergenceShader);
-    const curlProgram = createProgram(curlShader);
-    const vorticityProgram = createProgram(vorticityShader);
-    const pressureProgram = createProgram(pressureShader);
-    const gradSubtractProgram = createProgram(gradientSubtractShader);
     const copyProgram = createProgram(copyShader);
+
+    // Physics programs (use neighborVertexShader for vL/vR/vT/vB)
+    const divergenceProgram = createProgram(divergenceShader, neighborVertexShader);
+    const curlProgram = createProgram(curlShader, neighborVertexShader);
+    const vorticityProgram = createProgram(vorticityShader, neighborVertexShader);
+    const pressureProgram = createProgram(pressureShader, neighborVertexShader);
+    const gradSubtractProgram = createProgram(gradientSubtractShader, neighborVertexShader);
 
     const blit = (() => {
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
