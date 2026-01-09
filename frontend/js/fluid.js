@@ -60,26 +60,51 @@
     const { drawingBufferWidth: width, drawingBufferHeight: height } = gl;
 
     // --- EXTENSIONS & SUPPORT ---
-    // Critical for Android High Quality: Enable color buffer extensions!
     const extHalfFloat = gl.getExtension('OES_texture_half_float');
     gl.getExtension('OES_texture_half_float_linear');
-    gl.getExtension('EXT_color_buffer_half_float'); // <--- CRITICAL for rendering to FBO on Android
-
-    // Fallbacks
+    gl.getExtension('EXT_color_buffer_half_float');
     const extFloat = gl.getExtension('OES_texture_float');
     gl.getExtension('OES_texture_float_linear');
     gl.getExtension('WEBGL_color_buffer_float');
 
-    // Texture Type Selection
+    // Test if a texture type actually works for FBO rendering
+    function testFBORenderable(type) {
+        const tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        try {
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 4, 4, 0, gl.RGBA, type, null);
+        } catch (e) {
+            gl.deleteTexture(tex);
+            return false;
+        }
+        const fbo = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+        const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.deleteFramebuffer(fbo);
+        gl.deleteTexture(tex);
+        return status === gl.FRAMEBUFFER_COMPLETE;
+    }
+
+    // Select best working texture type
     let texType = gl.UNSIGNED_BYTE;
-    if (extHalfFloat) {
+    let isLowPrecision = true;
+
+    if (extHalfFloat && testFBORenderable(extHalfFloat.HALF_FLOAT_OES)) {
         texType = extHalfFloat.HALF_FLOAT_OES;
-        // console.log("Using HALF_FLOAT");
-    } else if (extFloat) {
+        isLowPrecision = false;
+        console.log('Texture: HALF_FLOAT (HDR)');
+    } else if (extFloat && testFBORenderable(gl.FLOAT)) {
         texType = gl.FLOAT;
-        // console.log("Using FLOAT");
+        isLowPrecision = false;
+        console.log('Texture: FLOAT (HDR)');
     } else {
-        // console.log("Using UNSIGNED_BYTE");
+        console.log('Texture: UNSIGNED_BYTE (LDR - colors will be scaled)');
     }
 
     // --- MOUSE/TOUCH INPUT ---
@@ -120,9 +145,14 @@
         pointers[0].x = pos.x;
         pointers[0].y = pos.y;
 
-        // Color Cycle
+        // Color Cycle - scale for LDR mode to prevent clamping
         const t = Date.now() / 1000;
-        pointers[0].color = [Math.sin(t) + 1.5, Math.sin(t + 2) + 1.5, Math.sin(t + 4) + 1.5];
+        const colorScale = isLowPrecision ? 0.3 : 1.0; // Reduce intensity for 8-bit
+        pointers[0].color = [
+            (Math.sin(t) + 1.5) * colorScale,
+            (Math.sin(t + 2) + 1.5) * colorScale,
+            (Math.sin(t + 4) + 1.5) * colorScale
+        ];
     });
 
     // Touch support with better smoothness
