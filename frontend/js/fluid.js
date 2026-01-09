@@ -127,7 +127,11 @@
         const shader = gl.createShader(type);
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) return null;
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            const typeName = type === gl.VERTEX_SHADER ? 'VERTEX' : 'FRAGMENT';
+            console.error(`Shader compile error (${typeName}):`, gl.getShaderInfoLog(shader));
+            return null;
+        }
         return shader;
     }
 
@@ -141,14 +145,16 @@
     `);
 
     // Vertex shader for physics shaders that need neighbor UV coordinates
+    // CRITICAL: precision qualifiers MUST match fragment shaders (highp for varyings)
     const neighborVertexShader = compileShader(gl.VERTEX_SHADER, `
+        precision highp float;
         attribute vec2 aPosition;
         uniform vec2 texelSize;
-        varying vec2 vUv;
-        varying vec2 vL;
-        varying vec2 vR;
-        varying vec2 vT;
-        varying vec2 vB;
+        varying highp vec2 vUv;
+        varying highp vec2 vL;
+        varying highp vec2 vR;
+        varying highp vec2 vT;
+        varying highp vec2 vB;
         void main () {
             vUv = aPosition * 0.5 + 0.5;
             vL = vUv - vec2(texelSize.x, 0.0);
