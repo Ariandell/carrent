@@ -80,11 +80,8 @@ const fragmentShaderSource = `
 
         float d = sdTriangle(uv * scale, 1.0);
         
-        // Anti-aliasing width (based on screen resolution)
-        float aa = 2.0 / u_resolution.y; 
-        
-        // Edge: Thin, sharp white line with proper AA
-        float edge = smoothstep(aa, 0.0, abs(d)); 
+        // Edge: Thin, sharp white line
+        float edge = smoothstep(0.04, 0.0, abs(d)); 
         
         // Interior: Dark, but not fully black (glass hint)
         // Add a subtle reflection gradient
@@ -93,7 +90,7 @@ const fragmentShaderSource = `
         // --- 2. ENTRY BEAM (Laser) ---
         // Thin white line from left
         float beamY = abs(uv.y + uv.x * 0.35); 
-        float entryMask = smoothstep(aa, 0.0, beamY); 
+        float entryMask = smoothstep(0.005, 0.001, beamY); 
         entryMask *= smoothstep(0.1, -0.4, uv.x); // Stop at prism
         entryMask *= smoothstep(-1.0, -0.5, uv.x); // Fade in from left
         
@@ -217,8 +214,8 @@ if (heroSection) {
     heroSection.insertBefore(canvas, heroSection.firstChild);
 }
 
-// Resolution Scale - ULTRA quality (2x Super Sampling)
-const resolutionScale = 2.0;
+// Resolution Scale - High quality (Retina ready, max 2x)
+const resolutionScale = Math.min(window.devicePixelRatio || 1, 2);
 
 function resize() {
     // Set internal resolution lower than screen
