@@ -540,7 +540,8 @@
 
     function repel(x, y) {
         // Create an outward explosion of hidden velocity (wind)
-        const force = config.SPLAT_FORCE * 2.5; // Stronger wind for clarity
+        // Strong wind to blow existing smoke away instantly
+        const force = config.SPLAT_FORCE * 5.0;
         const r = canvas.width * 0.05;
 
         splat(x, y, force, 0, null);
@@ -551,13 +552,22 @@
 
     // Inverted explosion (Implosion) - sucks smoke in
     function implode(x, y) {
-        const force = config.SPLAT_FORCE * 5.0;
+        // "Reverse Explosion" - Large radius, inward force, high density
+        const force = config.SPLAT_FORCE * 10.0;
         const color = pointers[0].color;
-        // Inward velocity + High density
+
+        // Use a slightly larger splat radius for the "appearance"
+        const originalRadius = config.SPLAT_RADIUS;
+        gl.useProgram(splatProgram.program);
+        gl.uniform1f(splatProgram.uniforms.radius, originalRadius * 3.0);
+
         splat(x, y, -force, 0, color);
         splat(x, y, force, 0, color);
         splat(x, y, 0, -force, color);
         splat(x, y, 0, force, color);
+
+        // Restore radius
+        gl.uniform1f(splatProgram.uniforms.radius, originalRadius);
     }
 
     // Smart Hover Detection
@@ -565,6 +575,13 @@
         if (e.target.closest('button, a, .btn, input, [role="button"]')) {
             isHovering = true;
             if (hoverTimer) clearTimeout(hoverTimer);
+            // Instant Repel on Entry
+            const pos = getPointerPos(e);
+            repel(pos.x, pos.y);
+            // Also update pointers to avoid lag
+            updatePointer(pos.x, pos.y);
+            lastX = pos.x;
+            lastY = pos.y;
         }
     });
 
@@ -575,7 +592,7 @@
             if (isHovering) {
                 hoverTimer = setTimeout(() => {
                     isHovering = false;
-                    // Trigger return effect
+                    // Trigger return effect (Implosion)
                     implode(pointers[0].x, pointers[0].y);
                 }, 1500);
             }
