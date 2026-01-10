@@ -214,8 +214,8 @@ if (heroSection) {
     heroSection.insertBefore(canvas, heroSection.firstChild);
 }
 
-// Resolution Scale - High quality (Retina ready, max 2x)
-const resolutionScale = Math.min(window.devicePixelRatio || 1, 2);
+// Resolution Scale - Reduce for performance (0.5 = half resolution, crisp but faster)
+const resolutionScale = 0.5;
 
 function resize() {
     // Set internal resolution lower than screen
@@ -230,7 +230,7 @@ window.addEventListener('resize', resize);
 resize();
 
 // FPS Throttling
-const fps = 60; // Smooth 60 FPS
+const fps = 30; // Cap at 30 FPS for background effects
 const frameInterval = 1000 / fps;
 let lastDrawTime = 0;
 
