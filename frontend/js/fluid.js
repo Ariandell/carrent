@@ -534,24 +534,51 @@
         }
     }
 
+    // State for interaction handling
+    let isHovering = false;
+    let hoverTimer = null;
+
     function repel(x, y) {
         // Create an outward explosion of hidden velocity (wind)
-        const force = config.SPLAT_FORCE * 0.5;
-        const r = canvas.width * 0.01; // Small radius offset
+        const force = config.SPLAT_FORCE * 2.5; // Stronger wind for clarity
+        const r = canvas.width * 0.05;
 
-        // 4-way burst to clear the center
-        splat(x + r, y, force, 0, null);      // Push Right
-        splat(x - r, y, -force, 0, null);     // Push Left
-        splat(x, y + r, 0, -force, null);     // Push Down (Y inverted in WebGL sometimes, but symmetric burst is fine)
-        splat(x, y - r, 0, force, null);      // Push Up
+        splat(x, y, force, 0, null);
+        splat(x, y, -force, 0, null);
+        splat(x, y, 0, force, null);
+        splat(x, y, 0, -force, null);
     }
 
-    // Interactive Element Repulsion
-    document.addEventListener('mousemove', e => {
-        // If hovering a button, clear the smoke
+    // Inverted explosion (Implosion) - sucks smoke in
+    function implode(x, y) {
+        const force = config.SPLAT_FORCE * 5.0;
+        const color = pointers[0].color;
+        // Inward velocity + High density
+        splat(x, y, -force, 0, color);
+        splat(x, y, force, 0, color);
+        splat(x, y, 0, -force, color);
+        splat(x, y, 0, force, color);
+    }
+
+    // Smart Hover Detection
+    document.addEventListener('mouseover', e => {
         if (e.target.closest('button, a, .btn, input, [role="button"]')) {
-            const pos = getPointerPos(e);
-            repel(pos.x, pos.y);
+            isHovering = true;
+            if (hoverTimer) clearTimeout(hoverTimer);
+        }
+    });
+
+    document.addEventListener('mouseout', e => {
+        const to = e.relatedTarget;
+        // Only trigger leave if we actually left the interactive zone completely
+        if (!to || !to.closest('button, a, .btn, input, [role="button"]')) {
+            if (isHovering) {
+                hoverTimer = setTimeout(() => {
+                    isHovering = false;
+                    // Trigger return effect
+                    implode(pointers[0].x, pointers[0].y);
+                }, 1500);
+            }
         }
     });
 
@@ -652,17 +679,24 @@
             const dy = y - lastY;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            // Sub-step drawing to fill gaps (prevent dotted lines)
-            // Draw a splat every 2 pixels (approx)
-            if (dist > 0) {
-                const steps = Math.ceil(dist / 2);
-                for (let i = 0; i < steps; i++) {
-                    const t = (i + 1) / steps;
-                    const drawX = lastX + dx * t;
-                    const drawY = lastY + dy * t;
-                    const velX = dx * 5.0; // Velocity is constant for this frame step
-                    const velY = dy * 5.0;
-                    splat(drawX, drawY, velX, velY, pointers[0].color);
+            // INTERACTION LOGIC: 
+            if (isHovering) {
+                // 1. DO NOT DRAW line (skip sub-step drawing)
+                // 2. Continuously Repel (keep clear)
+                if (dist > 0) repel(x, y);
+            } else {
+                // NORMAL DRAWING
+                // Sub-step drawing to fill gaps
+                if (dist > 0) {
+                    const steps = Math.ceil(dist / 2);
+                    for (let i = 0; i < steps; i++) {
+                        const t = (i + 1) / steps;
+                        const drawX = lastX + dx * t;
+                        const drawY = lastY + dy * t;
+                        const velX = dx * 5.0;
+                        const velY = dy * 5.0;
+                        splat(drawX, drawY, velX, velY, pointers[0].color);
+                    }
                 }
             }
 
