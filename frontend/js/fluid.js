@@ -724,16 +724,23 @@
         }
 
         // Process Soft Fade-In (if active)
+        // Process Soft Fade-In (if active)
         if (isFadingIn && fadeFrames > 0) {
-            // Add a small amount of density each frame to simulate fading in
-            const intensity = 0.05; // 5% per frame -> 100% over 20 frames
+            // Stronger build-up to fight dissipation
+            const intensity = 0.2; // 20% per frame -> rapid appearance
             const color = [
                 pointers[0].color[0] * intensity,
                 pointers[0].color[1] * intensity,
                 pointers[0].color[2] * intensity
             ];
-            // No velocity, just density spawning at the spot
-            splat(fadeX, fadeY, 0, 0, color);
+
+            // Add slight random velocity (turbulence) to make it "smoke-like" and visible
+            const angle = Math.random() * Math.PI * 2;
+            const speed = config.SPLAT_FORCE * 0.1;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed;
+
+            splat(fadeX, fadeY, vx, vy, color);
             fadeFrames--;
         } else {
             isFadingIn = false;
