@@ -550,24 +550,22 @@
         splat(x, y, 0, -force, null);
     }
 
-    // Inverted explosion (Implosion) - sucks smoke in
+    // Inverted explosion (Implosion) - gathers smoke from outside
     function implode(x, y) {
-        // "Reverse Explosion" - Large radius, inward force, high density
-        const force = config.SPLAT_FORCE * 10.0;
+        // "Reverse Explosion" - Spawn smoke AROUND the center, flying INWARD
+        const force = config.SPLAT_FORCE * 3.0; // Moderate force so we can see movement
         const color = pointers[0].color;
+        const r = canvas.width * 0.05; // Distance to spawn 'shards' of smoke
 
-        // Use a slightly larger splat radius for the "appearance"
-        const originalRadius = config.SPLAT_RADIUS;
-        gl.useProgram(splatProgram.program);
-        gl.uniform1f(splatProgram.uniforms.radius, originalRadius * 3.0);
-
-        splat(x, y, -force, 0, color);
-        splat(x, y, force, 0, color);
-        splat(x, y, 0, -force, color);
-        splat(x, y, 0, force, color);
-
-        // Restore radius
-        gl.uniform1f(splatProgram.uniforms.radius, originalRadius);
+        // 4 points around the circle, aiming at center
+        // Right point, flying Left
+        splat(x + r, y, -force * 2, 0, color);
+        // Left point, flying Right
+        splat(x - r, y, force * 2, 0, color);
+        // Top point, flying Down
+        splat(x, y - r, 0, force * 2, color);
+        // Bottom point, flying Up
+        splat(x, y + r, 0, -force * 2, color);
     }
 
     // Smart Hover Detection
@@ -594,7 +592,7 @@
                     isHovering = false;
                     // Trigger return effect (Implosion)
                     implode(pointers[0].x, pointers[0].y);
-                }, 1500);
+                }, 500);
             }
         }
     });
