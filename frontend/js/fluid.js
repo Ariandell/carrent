@@ -538,6 +538,12 @@
     let isHovering = false;
     let hoverTimer = null;
 
+    // Fade-in State
+    let isFadingIn = false;
+    let fadeFrames = 0;
+    let fadeX = 0;
+    let fadeY = 0;
+
     function repel(x, y) {
         // Create an outward explosion of hidden velocity (wind)
         // Strong wind to blow existing smoke away instantly
@@ -551,43 +557,19 @@
     }
 
     // Inverted explosion (Implosion) - gathers smoke from outside
-    function implode(x, y) {
-        // "Premium Vortex" - Swirling galaxy sucking into center
-        const force = config.SPLAT_FORCE * 0.15; // Lower constant force, applied many times
-        const color = pointers[0].color;
-        const count = 12; // Number of particles in the ring
-        const radius = canvas.width * 0.025; // Initial radius
-
-        for (let i = 0; i < count; i++) {
-            const angle = (i / count) * Math.PI * 2;
-            const cos = Math.cos(angle);
-            const sin = Math.sin(angle);
-
-            // Spawn Position: Cycle around the center
-            const px = x + cos * radius;
-            const py = y + sin * radius;
-
-            // Velocity Vector:
-            // 1. Inward (Radial): Negative cos/sin
-            // 2. Spin (Tangential): -sin/cos
-            const inwardSpeed = 8.0;
-            const spinSpeed = 4.0;
-
-            const vx = (-cos * inwardSpeed) + (-sin * spinSpeed);
-            const vy = (-sin * inwardSpeed) + (cos * spinSpeed);
-
-            // Apply splat with slightly randomized parameters for natural feel
-            splat(px, py, vx * force, vy * force, color);
-        }
-
-        // Final "Pop" at the center to seal it
-        splat(x, y, 0, 0, color);
+    // Trigger smooth fade-in
+    function triggerFadeIn(x, y) {
+        isFadingIn = true;
+        fadeFrames = 20; // Fade in over ~20 frames (approx 300ms)
+        fadeX = x;
+        fadeY = y;
     }
 
     // Smart Hover Detection
     document.addEventListener('mouseover', e => {
         if (e.target.closest('button, a, .btn, input, [role="button"]')) {
             isHovering = true;
+            isFadingIn = false; // Cancel any active fade-in
             if (hoverTimer) clearTimeout(hoverTimer);
             // Instant Repel on Entry
             const pos = getPointerPos(e);
@@ -606,8 +588,8 @@
             if (isHovering) {
                 hoverTimer = setTimeout(() => {
                     isHovering = false;
-                    // Trigger return effect (Implosion)
-                    implode(pointers[0].x, pointers[0].y);
+                    // Trigger return effect (Fade In)
+                    triggerFadeIn(pointers[0].x, pointers[0].y);
                 }, 500);
             }
         }
@@ -739,6 +721,22 @@
             lastY = pointers[0].y;
             brushVx = 0;
             brushVy = 0;
+        }
+
+        // Process Soft Fade-In (if active)
+        if (isFadingIn && fadeFrames > 0) {
+            // Add a small amount of density each frame to simulate fading in
+            const intensity = 0.05; // 5% per frame -> 100% over 20 frames
+            const color = [
+                pointers[0].color[0] * intensity,
+                pointers[0].color[1] * intensity,
+                pointers[0].color[2] * intensity
+            ];
+            // No velocity, just density spawning at the spot
+            splat(fadeX, fadeY, 0, 0, color);
+            fadeFrames--;
+        } else {
+            isFadingIn = false;
         }
 
         // Curl
