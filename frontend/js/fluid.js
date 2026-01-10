@@ -552,20 +552,36 @@
 
     // Inverted explosion (Implosion) - gathers smoke from outside
     function implode(x, y) {
-        // "Reverse Explosion" - Spawn smoke AROUND the center, flying INWARD
-        const force = config.SPLAT_FORCE * 3.0; // Moderate force so we can see movement
+        // "Premium Vortex" - Swirling galaxy sucking into center
+        const force = config.SPLAT_FORCE * 0.15; // Lower constant force, applied many times
         const color = pointers[0].color;
-        const r = canvas.width * 0.05; // Distance to spawn 'shards' of smoke
+        const count = 12; // Number of particles in the ring
+        const radius = canvas.width * 0.025; // Initial radius
 
-        // 4 points around the circle, aiming at center
-        // Right point, flying Left
-        splat(x + r, y, -force * 2, 0, color);
-        // Left point, flying Right
-        splat(x - r, y, force * 2, 0, color);
-        // Top point, flying Down
-        splat(x, y - r, 0, force * 2, color);
-        // Bottom point, flying Up
-        splat(x, y + r, 0, -force * 2, color);
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2;
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+
+            // Spawn Position: Cycle around the center
+            const px = x + cos * radius;
+            const py = y + sin * radius;
+
+            // Velocity Vector:
+            // 1. Inward (Radial): Negative cos/sin
+            // 2. Spin (Tangential): -sin/cos
+            const inwardSpeed = 8.0;
+            const spinSpeed = 4.0;
+
+            const vx = (-cos * inwardSpeed) + (-sin * spinSpeed);
+            const vy = (-sin * inwardSpeed) + (cos * spinSpeed);
+
+            // Apply splat with slightly randomized parameters for natural feel
+            splat(px, py, vx * force, vy * force, color);
+        }
+
+        // Final "Pop" at the center to seal it
+        splat(x, y, 0, 0, color);
     }
 
     // Smart Hover Detection
