@@ -522,14 +522,38 @@
         blit(velocity.write.fbo);
         velocity.swap();
 
-        gl.uniform1i(splatProgram.uniforms.uTarget, 0);
-        gl.uniform3fv(splatProgram.uniforms.color, color);
+        // Only add density (color) if provided. passing null creates "wind" only.
+        if (color) {
+            gl.uniform1i(splatProgram.uniforms.uTarget, 0);
+            gl.uniform3fv(splatProgram.uniforms.color, color);
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, density.read.tex);
-        blit(density.write.fbo);
-        density.swap();
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, density.read.tex);
+            blit(density.write.fbo);
+            density.swap();
+        }
     }
+
+    function repel(x, y) {
+        // Create an outward explosion of hidden velocity (wind)
+        const force = config.SPLAT_FORCE * 0.5;
+        const r = canvas.width * 0.01; // Small radius offset
+
+        // 4-way burst to clear the center
+        splat(x + r, y, force, 0, null);      // Push Right
+        splat(x - r, y, -force, 0, null);     // Push Left
+        splat(x, y + r, 0, -force, null);     // Push Down (Y inverted in WebGL sometimes, but symmetric burst is fine)
+        splat(x, y - r, 0, force, null);      // Push Up
+    }
+
+    // Interactive Element Repulsion
+    document.addEventListener('mousemove', e => {
+        // If hovering a button, clear the smoke
+        if (e.target.closest('button, a, .btn, input, [role="button"]')) {
+            const pos = getPointerPos(e);
+            repel(pos.x, pos.y);
+        }
+    });
 
     // lastX/lastY moved to top
     let lastTime = 0;
