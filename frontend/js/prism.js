@@ -124,48 +124,22 @@ const fragmentShaderSource = `
         // Parallax offset based on scroll
         float parallaxStrength = 0.4;
         
-        // Color gradient: Cyan -> Blue -> Purple -> Magenta (for depth)
-        vec3 colorFront = vec3(0.4, 0.9, 1.0);   // Cyan
-        vec3 colorBack = vec3(0.8, 0.3, 0.9);    // Purple/Magenta
+        // Color: Monochrome/Glassy
+        vec3 colorGlass = vec3(0.95, 0.98, 1.0); // Very light cyan/white
         
-        // --- RECURSIVE PRISMS (12 layers for infinite depth) ---
+        // --- SINGLE PRISM ---
         vec3 finalColor = vec3(0.0);
         float finalAlpha = 0.0;
         
-        const int NUM_LAYERS = 12;
+        // Single simple layer
+        float layerScale = baseScale;
+        vec2 layerOffset = vec2(0.0, 0.0);
+        float darkness = 1.0;
+        float edgeBright = 1.5;
         
-        // Draw from back to front
-        for (int i = NUM_LAYERS - 1; i >= 0; i--) {
-            float t = float(i) / float(NUM_LAYERS - 1); // 0 = front, 1 = back
-            float invT = 1.0 - t; // 1 = front, 0 = back
-            
-            // Scale: smaller as we go deeper
-            float layerScale = baseScale * (1.0 + t * 4.0);
-            
-            // Offset: more offset for deeper layers (parallax)
-            float offsetX = 0.01 + t * 0.15;
-            float offsetY = -t * 0.03;
-            float parallaxX = u_scroll * parallaxStrength * (0.1 + t * 2.0);
-            float parallaxY = u_scroll * parallaxStrength * (0.02 + t * 0.4);
-            vec2 layerOffset = vec2(offsetX + parallaxX, offsetY + parallaxY);
-            
-            // Darkness: darker as we go deeper
-            float darkness = 0.15 + invT * 0.85;
-            
-            // Edge brightness: dimmer as we go deeper
-            float edgeBright = 0.2 + invT * 0.8;
-            
-            // Color: gradient from front to back
-            vec3 layerColor = mix(colorBack, colorFront, invT);
-            
-            // Draw layer
-            vec4 layer = drawPrism(uv, layerOffset, layerScale, darkness, edgeBright, layerColor);
-            
-            // Blend with depth-based alpha
-            float layerAlphaMultiplier = 0.2 + invT * 0.8;
-            finalColor = mix(finalColor, layer.rgb, layer.a * layerAlphaMultiplier);
-            finalAlpha = max(finalAlpha, layer.a * layerAlphaMultiplier);
-        }
+        vec4 prismLayer = drawPrism(uv, layerOffset, layerScale, darkness, edgeBright, colorGlass);
+        finalColor = prismLayer.rgb;
+        finalAlpha = prismLayer.a;
         
         // --- ENTRY BEAM (Laser) ---
         float beamY = abs(uv.y + uv.x * 0.35); 
@@ -195,11 +169,11 @@ const fragmentShaderSource = `
         col += vec3(1.0) * entryMask * 2.5;
         alpha += entryMask;
 
-        // Spectrum (behind all prisms)
+        // Spectrum (behind prism)
         col += spectrum * fanMask * 0.8; 
         alpha += fanMask * 0.5;
 
-        // Prisms on top
+        // Prism on top
         col = mix(col, finalColor, finalAlpha);
         alpha = max(alpha, finalAlpha);
         
