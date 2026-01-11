@@ -209,21 +209,6 @@ body {
     line-height: 0.9;
 }
 
-/* Hero Text Glow - Premium Depth Effect */
-.gravity-text {
-    text-shadow:
-        0 0 40px rgba(0, 0, 0, 0.8),
-        0 0 80px rgba(0, 0, 0, 0.6),
-        0 0 120px rgba(0, 0, 0, 0.4);
-}
-
-/* Ensure hero text has high contrast */
-section:first-of-type h1,
-section:first-of-type p {
-    position: relative;
-    z-index: 10;
-}
-
 /* Safety for all sections to prevent horizontal spill */
 section {
     overflow-x: hidden;

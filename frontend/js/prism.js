@@ -1,9 +1,10 @@
 /**
- * RECURSIVE PRISM SHADER v3 (Depth + Parallax)
- * Multiple nested prisms with scroll-based parallax effect
+ * FLUID PRISM SHADER v2 (Realism)
+ * Renders a dark suspended prism with a directed spectral dispersion beam.
  */
 
 const canvas = document.createElement('canvas');
+// Enable alpha for true transparency (no mix-blend-mode needed)
 const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false });
 
 // Config
@@ -11,9 +12,6 @@ const config = {
     speed: 0.8,
     intensity: 1.2
 };
-
-// Scroll tracking for parallax
-let scrollProgress = 0;
 
 // Shader Source
 const vertexShaderSource = `
@@ -27,7 +25,6 @@ const fragmentShaderSource = `
     precision highp float;
     uniform vec2 u_resolution;
     uniform float u_time;
-    uniform float u_scroll; // 0.0 to 1.0 scroll progress
 
     // Full Spectral Palette (Rainbow)
     vec3 palette( in float t ) {
@@ -58,127 +55,130 @@ const fragmentShaderSource = `
                    mix(hash(n+57.0), hash(n+58.0),f.x),f.y);
     }
 
-    // Draw a single prism layer with given parameters and color tint
-    // Returns: vec4(color.rgb, alpha)
-    vec4 drawPrism(vec2 uv, vec2 offset, float scale, float darkness, float edgeBrightness, vec3 tintColor) {
-        vec2 prismUV = (uv - offset) * scale;
-        float d = sdTriangle(prismUV, 1.0);
-        
-        vec3 prismColor = vec3(0.0);
-        float prismAlpha = 0.0;
-        
-        if (d < 0.0) {
-            // Inside prism - colored glass
-            float baseDark = 0.008 * darkness;
-            vec3 glassBase = tintColor * baseDark;
-            
-            float edgeDist = abs(d);
-            float depth = smoothstep(0.0, 0.3, edgeDist);
-            
-            // Facet lighting with color
-            float facet1 = smoothstep(0.3, 0.8, prismUV.y - prismUV.x * 0.5);
-            float facet2 = smoothstep(0.3, 0.8, -prismUV.y - prismUV.x * 0.5);
-            float facet3 = smoothstep(-0.5, 0.2, prismUV.x);
-            
-            vec3 facetColor = vec3(0.0);
-            facetColor += tintColor * 0.015 * facet1 * 0.3 * darkness;
-            facetColor += tintColor * 0.012 * facet2 * 0.2 * darkness;
-            facetColor += tintColor * 0.018 * facet3 * 0.2 * darkness;
-            
-            // Fresnel with color
-            float fresnel = pow(1.0 - depth, 3.0);
-            vec3 fresnelColor = tintColor * 0.03 * fresnel * darkness;
-            
-            // Edge glow with color
-            float edgeGlow = smoothstep(0.05, 0.0, edgeDist);
-            vec3 edgeColor = tintColor * edgeBrightness * 0.12 * edgeGlow;
-            
-            prismColor = glassBase + facetColor + fresnelColor + edgeColor;
-            prismAlpha = 0.75 * darkness;
-        }
-        
-        // Edge outline with color
-        float outerEdge = smoothstep(0.01, 0.0, abs(d));
-        float innerEdge = smoothstep(0.018, 0.01, abs(d));
-        
-        vec3 edgeGlowColor = tintColor * edgeBrightness * 0.18 * outerEdge * 0.5;
-        edgeGlowColor += tintColor * edgeBrightness * 0.08 * innerEdge * 0.25;
-        
-        if (d >= 0.0) {
-            prismColor = edgeGlowColor;
-            prismAlpha = outerEdge * 0.6 + innerEdge * 0.25;
-        } else {
-            prismColor += edgeGlowColor;
-        }
-        
-        return vec4(prismColor, prismAlpha);
-    }
-
     void main() {
         vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
         vec2 uv0 = uv;
 
+        // --- PRISM SETUP ---
         float ar = u_resolution.x / u_resolution.y;
-        float baseScale = ar < 1.0 ? 1.8 : 1.2;
+        float scale = 2.5;
+        if (ar < 1.0) {
+            scale = 4.0; // Make it appear smaller on mobile
+        }
+
+        float d = sdTriangle(uv * scale, 1.0);
         
-        // Parallax offset based on scroll
-        float parallaxStrength = 0.4;
+        // --- 1. PREMIUM GLASS PRISM ---
+        vec3 prismColor = vec3(0.0);
+        float prismAlpha = 0.0;
         
-        // Color: Monochrome/Glassy
-        vec3 colorGlass = vec3(0.95, 0.98, 1.0); // Very light cyan/white
+        if (d < 0.0) {
+            // Inside the prism - create 3D glass effect
+            
+            // Base glass color - DARK glass with subtle blue tint
+            vec3 glassBase = vec3(0.02, 0.025, 0.035);
+            
+            // Calculate distance from edges for depth effect
+            float edgeDist = abs(d);
+            float depth = smoothstep(0.0, 0.3, edgeDist);
+            
+            // Create 3D facets - simulate light hitting different faces
+            vec2 facetUV = uv * scale;
+            float facet1 = smoothstep(0.3, 0.8, facetUV.y - facetUV.x * 0.5);
+            float facet2 = smoothstep(0.3, 0.8, -facetUV.y - facetUV.x * 0.5);
+            float facet3 = smoothstep(-0.5, 0.2, facetUV.x);
+            
+            // Combine facets for 3D appearance - DARKER values
+            vec3 facetColor = vec3(0.0);
+            facetColor += vec3(0.04, 0.05, 0.07) * facet1 * 0.4;
+            facetColor += vec3(0.03, 0.04, 0.06) * facet2 * 0.3;
+            facetColor += vec3(0.05, 0.06, 0.08) * facet3 * 0.3;
+            
+            // Add subtle internal reflections - reduced
+            float internalReflection = noise(facetUV * 3.0 + u_time * 0.1) * 0.05;
+            facetColor += internalReflection;
+            
+            // Fresnel effect - edges are more reflective but darker
+            float fresnel = pow(1.0 - depth, 3.0);
+            vec3 fresnelColor = vec3(0.08, 0.10, 0.14) * fresnel;
+            
+            // Specular highlights on glass surface - reduced intensity
+            vec2 lightDir = normalize(vec2(-0.5, 0.8));
+            float specular = pow(max(0.0, dot(normalize(facetUV), lightDir)), 32.0);
+            vec3 specularColor = vec3(0.3, 0.35, 0.4) * specular * 0.4;
+            
+            // Edge highlights - subtle bright rims
+            float edgeGlow = smoothstep(0.08, 0.0, edgeDist);
+            vec3 edgeColor = vec3(0.2, 0.25, 0.3) * edgeGlow;
+            
+            // Combine all glass effects
+            prismColor = glassBase + facetColor + fresnelColor + specularColor + edgeColor;
+            
+            // Add chromatic aberration hint at edges - reduced
+            float chromaticEdge = smoothstep(0.05, 0.0, edgeDist);
+            prismColor += palette(facetUV.x * 0.5 + facetUV.y * 0.3) * chromaticEdge * 0.08;
+            
+            prismAlpha = 0.95;
+        }
         
-        // --- SINGLE PRISM ---
-        vec3 finalColor = vec3(0.0);
-        float finalAlpha = 0.0;
+        // Outer edge glow - subtle glass outline
+        float outerEdge = smoothstep(0.015, 0.0, abs(d));
+        float innerEdge = smoothstep(0.025, 0.015, abs(d));
         
-        // Single simple layer
-        float layerScale = baseScale;
-        vec2 layerOffset = vec2(0.0, 0.0);
-        float darkness = 1.0;
-        float edgeBright = 1.5;
+        // Multi-layer edge for depth - DARKER
+        vec3 edgeGlowColor = vec3(0.3, 0.35, 0.4) * outerEdge * 0.8;
+        edgeGlowColor += vec3(0.2, 0.25, 0.3) * innerEdge * 0.5;
         
-        vec4 prismLayer = drawPrism(uv, layerOffset, layerScale, darkness, edgeBright, colorGlass);
-        finalColor = prismLayer.rgb;
-        finalAlpha = prismLayer.a;
+        if (d >= 0.0) {
+            prismColor = edgeGlowColor;
+            prismAlpha = outerEdge * 0.9 + innerEdge * 0.4;
+        } else {
+            prismColor += edgeGlowColor;
+        }
         
-        // --- ENTRY BEAM (Laser) ---
+        // --- 2. ENTRY BEAM (Laser) ---
         float beamY = abs(uv.y + uv.x * 0.35); 
-        float entryMask = smoothstep(0.004, 0.001, beamY); 
-        entryMask *= smoothstep(0.05, -0.5, uv.x);
-        entryMask *= smoothstep(-1.0, -0.5, uv.x);
+        float entryMask = smoothstep(0.005, 0.001, beamY); 
+        entryMask *= smoothstep(0.1, -0.4, uv.x); // Stop at prism
+        entryMask *= smoothstep(-1.0, -0.5, uv.x); // Fade in from left
         
-        // --- RAINBOW BEAM ---
+        // --- 3. LIQUID RAINBOW BEAM ---
         float angle = atan(uv.y, uv.x);
         float radius = length(uv);
         
+        // Domain Warping for "Liquid" look
         float noiseVal = noise(uv * 4.0 + vec2(u_time * 0.2, 0.0));
         float colorIndex = (angle * 2.0) + (noiseVal * 0.5) - (u_time * 0.05);
         vec3 spectrum = palette(colorIndex);
         
+        // Beam Shape Mask (Cone)
         float fanMask = smoothstep(0.6, 0.1, abs(angle));
-        fanMask *= smoothstep(-0.05, 0.35, uv.x);
+        fanMask *= smoothstep(0.0, 0.4, uv.x); // Fade in after prism
         
+        // Add "God Ray" streaks
         float streaks = smoothstep(0.4, 0.6, noise(vec2(angle * 10.0, radius * 2.0 - u_time)));
-        spectrum += streaks * 0.12;
+        spectrum += streaks * 0.15;
 
         // --- FINAL COMPOSITION ---
         vec3 col = vec3(0.0);
         float alpha = 0.0;
 
-        // Entry Beam
-        col += vec3(1.0) * entryMask * 2.5;
+        // Draw Entry Beam
+        col += vec3(1.0) * entryMask * 3.0;
         alpha += entryMask;
 
-        // Spectrum (behind prism)
-        col += spectrum * fanMask * 0.8; 
-        alpha += fanMask * 0.5;
+        // Draw Spectrum (only outside prism)
+        if (d >= 0.0) {
+            col += spectrum * fanMask * 1.0; 
+            alpha += fanMask * 0.6;
+        }
 
-        // Prism on top
-        col = mix(col, finalColor, finalAlpha);
-        alpha = max(alpha, finalAlpha);
+        // Draw Prism (on top of everything behind it)
+        col = mix(col, prismColor, prismAlpha);
+        alpha = max(alpha, prismAlpha);
         
         // Vignette
-        alpha *= smoothstep(1.8, 0.5, length(uv));
+        alpha *= smoothstep(1.8, 0.6, length(uv));
 
         gl_FragColor = vec4(col, alpha);
     }
@@ -215,7 +215,6 @@ const program = createProgram(gl, vertexShader, fragmentShader);
 const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
 const resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
 const timeUniformLocation = gl.getUniformLocation(program, "u_time");
-const scrollUniformLocation = gl.getUniformLocation(program, "u_scroll");
 
 const positionBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -228,52 +227,54 @@ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
     1, 1,
 ]), gl.STATIC_DRAW);
 
-// Canvas Styles
+// Canvas Styles - BEHIND CONTENT
 canvas.id = 'prism-canvas';
 canvas.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 1.0; pointer-events: none;';
 
 // Inject
 const heroSection = document.querySelector('section');
 if (heroSection) {
+    // Ensure parent has logic context
     if (getComputedStyle(heroSection).position === 'static') {
         heroSection.style.position = 'relative';
     }
     heroSection.style.overflow = 'hidden';
+
+    // Insert as FIRST child to settle behind other content (z-index -1 works relative to stacking context)
     heroSection.insertBefore(canvas, heroSection.firstChild);
 }
 
-// Resolution Scale
+// Resolution Scale - Full resolution for smooth anti-aliased edges
 const resolutionScale = 1.0;
 
 function resize() {
+    // Set internal resolution lower than screen
     canvas.width = window.innerWidth * resolutionScale;
+    // Limit to hero height if possible, or full screen
     const rawHeight = heroSection ? heroSection.offsetHeight : window.innerHeight;
     canvas.height = rawHeight * resolutionScale;
+
     gl.viewport(0, 0, canvas.width, canvas.height);
 }
 window.addEventListener('resize', resize);
 resize();
 
-// Scroll listener for parallax
-window.addEventListener('scroll', () => {
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    scrollProgress = docHeight > 0 ? Math.min(scrollTop / docHeight, 1.0) : 0;
-}, { passive: true });
-
 // FPS Throttling
-const fps = 30;
+const fps = 30; // Cap at 30 FPS for background effects
 const frameInterval = 1000 / fps;
 let lastDrawTime = 0;
 
 function render(currentTime) {
     requestAnimationFrame(render);
 
+    // Throttle FPS
     const elapsed = currentTime - lastDrawTime;
     if (elapsed < frameInterval) return;
 
+    // Adjust lastDrawTime to snap to grid (keeps smooth cadence)
     lastDrawTime = currentTime - (elapsed % frameInterval);
 
+    // Convert to seconds for shader
     const timeInSeconds = currentTime * 0.001;
 
     gl.useProgram(program);
@@ -283,7 +284,6 @@ function render(currentTime) {
 
     gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
     gl.uniform1f(timeUniformLocation, timeInSeconds * config.speed);
-    gl.uniform1f(scrollUniformLocation, scrollProgress);
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
