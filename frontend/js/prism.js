@@ -206,6 +206,12 @@ const fragmentShaderSource = `
         float angle = atan(spectrumUV.y, spectrumUV.x);
         float radius = length(spectrumUV);
         
+        // Fix: Restore spectrum color calculation
+        float noiseVal = noise(uv * 4.0 + vec2(u_time * 0.2, 0.0));
+        // Use local angle for color distribution
+        float colorIndex = (angle * 3.0) + (noiseVal * 0.5) - (u_time * 0.1);
+        vec3 spectrum = palette(colorIndex);
+        
         float baseAngle = -0.2; // Slight downward angle for exit
         float spread = 0.3; // Fan spread width
         
