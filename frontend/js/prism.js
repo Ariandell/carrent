@@ -59,93 +59,123 @@ const fragmentShaderSource = `
         vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
         vec2 uv0 = uv;
 
-        // --- 1. DARK GLASS PRISM ---
-        // Pass UV * 2.5 is okay, but we want it aspect-ratio aware so it doesn't stretch
-        vec2 prismUV = uv;
-        prismUV.x *= u_resolution.x / u_resolution.y; // Correct aspect ratio for shape calculation?
-        // Actually, uv is already corrected by dividing by u_resolution.y in main() line 59:
-        // vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
-        // This makes Y range [-1, 1] and X range [-ratio, ratio].
-        // So a triangle defined in this space is already isotropic (not stretched).
-        
-        // HOWEVER, if the screen is very tall (mobile), X range is small (e.g. [-0.5, 0.5]).
-        // The triangle might be clipped if it's too wide.
-        
-        // Let's scale the prism down on mobile (if Aspect Ratio < 1)
+        // --- PRISM SETUP ---
         float ar = u_resolution.x / u_resolution.y;
         float scale = 2.5;
         if (ar < 1.0) {
-            scale = 4.0; // Make it appear smaller (inverse scale)
+            scale = 4.0; // Make it appear smaller on mobile
         }
 
         float d = sdTriangle(uv * scale, 1.0);
         
-        // Edge: Thin, sharp white line
-        float edge = smoothstep(0.04, 0.0, abs(d)); 
+        // --- 1. PREMIUM GLASS PRISM ---
+        vec3 prismColor = vec3(0.0);
+        float prismAlpha = 0.0;
         
-        // Interior: Dark, but not fully black (glass hint)
-        // Add a subtle reflection gradient
-        float reflection = smoothstep(0.5, -0.5, uv.y + uv.x) * 0.1;
+        if (d < 0.0) {
+            // Inside the prism - create 3D glass effect
+            
+            // Base glass color with slight blue tint
+            vec3 glassBase = vec3(0.08, 0.12, 0.18);
+            
+            // Calculate distance from edges for depth effect
+            float edgeDist = abs(d);
+            float depth = smoothstep(0.0, 0.3, edgeDist);
+            
+            // Create 3D facets - simulate light hitting different faces
+            vec2 facetUV = uv * scale;
+            float facet1 = smoothstep(0.3, 0.8, facetUV.y - facetUV.x * 0.5);
+            float facet2 = smoothstep(0.3, 0.8, -facetUV.y - facetUV.x * 0.5);
+            float facet3 = smoothstep(-0.5, 0.2, facetUV.x);
+            
+            // Combine facets for 3D appearance
+            vec3 facetColor = vec3(0.0);
+            facetColor += vec3(0.15, 0.18, 0.25) * facet1 * 0.6;
+            facetColor += vec3(0.12, 0.15, 0.22) * facet2 * 0.5;
+            facetColor += vec3(0.18, 0.22, 0.28) * facet3 * 0.4;
+            
+            // Add subtle internal reflections
+            float internalReflection = noise(facetUV * 3.0 + u_time * 0.1) * 0.15;
+            facetColor += internalReflection;
+            
+            // Fresnel effect - edges are more reflective
+            float fresnel = pow(1.0 - depth, 3.0);
+            vec3 fresnelColor = vec3(0.3, 0.35, 0.45) * fresnel;
+            
+            // Specular highlights on glass surface
+            vec2 lightDir = normalize(vec2(-0.5, 0.8));
+            float specular = pow(max(0.0, dot(normalize(facetUV), lightDir)), 32.0);
+            vec3 specularColor = vec3(1.0) * specular * 0.8;
+            
+            // Edge highlights - bright rims
+            float edgeGlow = smoothstep(0.08, 0.0, edgeDist);
+            vec3 edgeColor = vec3(0.6, 0.7, 0.9) * edgeGlow;
+            
+            // Combine all glass effects
+            prismColor = glassBase + facetColor + fresnelColor + specularColor + edgeColor;
+            
+            // Add chromatic aberration hint at edges
+            float chromaticEdge = smoothstep(0.05, 0.0, edgeDist);
+            prismColor += palette(facetUV.x * 0.5 + facetUV.y * 0.3) * chromaticEdge * 0.2;
+            
+            prismAlpha = 0.95;
+        }
+        
+        // Outer edge glow - premium glass outline
+        float outerEdge = smoothstep(0.015, 0.0, abs(d));
+        float innerEdge = smoothstep(0.025, 0.015, abs(d));
+        
+        // Multi-layer edge for depth
+        vec3 edgeGlowColor = vec3(0.8, 0.9, 1.0) * outerEdge * 1.5;
+        edgeGlowColor += vec3(0.5, 0.6, 0.8) * innerEdge * 0.8;
+        
+        if (d >= 0.0) {
+            prismColor = edgeGlowColor;
+            prismAlpha = outerEdge * 0.9 + innerEdge * 0.4;
+        } else {
+            prismColor += edgeGlowColor;
+        }
         
         // --- 2. ENTRY BEAM (Laser) ---
-        // Thin white line from left
         float beamY = abs(uv.y + uv.x * 0.35); 
         float entryMask = smoothstep(0.005, 0.001, beamY); 
         entryMask *= smoothstep(0.1, -0.4, uv.x); // Stop at prism
         entryMask *= smoothstep(-1.0, -0.5, uv.x); // Fade in from left
         
         // --- 3. LIQUID RAINBOW BEAM ---
-        // Fan geometry
         float angle = atan(uv.y, uv.x);
         float radius = length(uv);
         
-        // Domain Warping for "Liquid" look:
-        // Instead of distorting the shape, we distort the COORDINATES used for color
-        // This keeps the beam shape clean but makes the inside look like oil.
-        float noiseVal = noise(uv * 4.0 + vec2(u_time * 0.2, 0.0)); // Slower noise
-        
-        // Color depends on Angle + Noise - Time
-        // This moves the colors outward and swirls them
-        // SLOWED DOWN: u_time * 0.05 (was 0.2)
+        // Domain Warping for "Liquid" look
+        float noiseVal = noise(uv * 4.0 + vec2(u_time * 0.2, 0.0));
         float colorIndex = (angle * 2.0) + (noiseVal * 0.5) - (u_time * 0.05);
-        
         vec3 spectrum = palette(colorIndex);
         
         // Beam Shape Mask (Cone)
-        float fanMask = smoothstep(0.6, 0.1, abs(angle)); // Soft edges 
+        float fanMask = smoothstep(0.6, 0.1, abs(angle));
         fanMask *= smoothstep(0.0, 0.4, uv.x); // Fade in after prism
         
-        // Add "God Ray" streaks for texture
+        // Add "God Ray" streaks
         float streaks = smoothstep(0.4, 0.6, noise(vec2(angle * 10.0, radius * 2.0 - u_time)));
         spectrum += streaks * 0.15;
 
-        // --- COMPOSITION ---
+        // --- FINAL COMPOSITION ---
         vec3 col = vec3(0.0);
         float alpha = 0.0;
 
-        // Draw Entry
-        col += vec3(1.0) * entryMask * 3.0; // Hot white
+        // Draw Entry Beam
+        col += vec3(1.0) * entryMask * 3.0;
         alpha += entryMask;
 
-        // Draw Spectrum
+        // Draw Spectrum (only outside prism)
         if (d >= 0.0) {
             col += spectrum * fanMask * 1.0; 
-            alpha += fanMask * 0.6; // Semi-transparent beam
+            alpha += fanMask * 0.6;
         }
 
-        // Draw Prism Body (Occlusion)
-        if (d < 0.0) {
-            // Dark Glass
-            col = vec3(0.02) + reflection; // Almost black + reflection
-            alpha = 0.95; // Solid
-             
-            // Add the glowing edge ON TOP
-            col += vec3(1.0) * edge;
-        } else {
-            // Add faint edge glow outside too
-           alpha += edge * 0.1;
-           col += vec3(1.0) * edge * 0.1;
-        }
+        // Draw Prism (on top of everything behind it)
+        col = mix(col, prismColor, prismAlpha);
+        alpha = max(alpha, prismAlpha);
         
         // Vignette
         alpha *= smoothstep(1.8, 0.6, length(uv));
