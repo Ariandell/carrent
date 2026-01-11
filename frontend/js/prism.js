@@ -80,7 +80,7 @@ const fragmentShaderSource = `
         float scale = 1.3;
         uv *= scale;
 
-        // --- PRISM ---
+        // --- PRISM GEOMETRY ---
         float triSize = 0.8;
         float d = sdTriangle(uv, triSize);
 
@@ -101,36 +101,45 @@ const fragmentShaderSource = `
 
         finalColor += vec3(1.1) * inBeam * clamp(inMask, 0.0, 1.0);
 
-        // --- OUTPUT BEAM (Restored "Fluid/Fan" Effect) ---
-        // Rotated/Offset UV for correct fan direction
-        vec2 fanUV = uv;
-        fanUV.x -= 0.1; // Origin near center
-        fanUV.y += 0.15;
+        // --- OUTPUT BEAM (Horizontal Flow) ---
+        // We want the fan to start from the right face (approx 0.35, -0.15)
+        // AND flow strictly RIGHT (angle 0)
+        
+        vec2 fanOrigin = vec2(0.25, -0.15); // Start point of rainbow
+        vec2 fanUV = uv - fanOrigin;
 
         float angle = atan(fanUV.y, fanUV.x);
         float radius = length(fanUV);
 
-        // "Old Fluid" Logic: Noise driving Color Index
-        float noiseVal = noise(fanUV * 3.5 + vec2(u_time * 0.3, 0.0));
+        // "Fluid" Logic driven by horizontal flow
+        // Map noise to move right-to-left to simulate flow leaving the prism
+        float flowX = fanUV.x * 2.5 - u_time * 0.5;
+        float noiseVal = noise(vec2(flowX, fanUV.y * 3.0));
         
-        // Color Index based on angle + noise
-        float colorIndex = (angle * 2.5) + (noiseVal * 0.6) - (u_time * 0.1);
+        // Color Index based on y-position in the beam + slight angle spread
+        // To make it look like a spectrum sorted vertically somewhat
+        float colorIndex = (angle * 3.0) + (noiseVal * 0.5) - (u_time * 0.2);
         vec3 spectrum = palette(colorIndex);
 
-        // Masking: Point roughly Right-Down (-30 degrees approx)
-        float fanDir = -0.3; 
-        float fanWidth = 0.3; // Spread width
-        float fanMask = smoothstep(fanWidth, 0.1, abs(angle - fanDir));
+        // Masking: Strictly Horizontal to the Right
+        float fanDir = 0.0; // 0 radians = Right
+        float fanWidth = 0.25; // Spread width (narrower for "exact right" feel)
         
-        // Fade in as it exits
-        fanMask *= smoothstep(0.35, 0.6, fanUV.x); 
+        // Soft cone shape
+        float fanMask = smoothstep(fanWidth, 0.0, abs(angle - fanDir));
+        
+        // Only forward (x > 0 relative to origin)
+        fanMask *= smoothstep(0.0, 0.1, fanUV.x); 
+        
+        // Soften start
+        fanMask *= smoothstep(0.0, 0.5, radius);
 
-        // Add "Streaks"
-        float streaks = smoothstep(0.3, 0.7, noise(vec2(angle * 12.0, radius * 3.0 - u_time * 1.5)));
-        spectrum += streaks * 0.2;
+        // Add "Streaks" moving horizontally
+        float streaks = smoothstep(0.35, 0.65, noise(vec2(flowX * 2.0, fanUV.y * 8.0)));
+        spectrum += streaks * 0.3;
         
         // Combine Output
-        finalColor += spectrum * fanMask * 1.5;
+        finalColor += spectrum * fanMask * 1.8;
 
         // --- PRISM RENDER (Glass Style) ---
         if (d < 0.0) {
@@ -140,11 +149,9 @@ const fragmentShaderSource = `
             // 1. Subtle Fill (Dark Glass)
             finalColor += vec3(1.0) * 0.03 * smoothstep(0.0, 0.5, dist);
             
-            // 2. Internal Refraction Ray (Connecting Input to Output)
-            float internal = beam(uv, inputHit, vec2(1.0, -0.1), 0.015);
-            finalColor += vec3(1.0) * internal * 0.4 * smoothstep(0.0, 0.2, dist);
-
-            alpha = 0.1; // Low base alpha
+            // [REMOVED] Internal Refraction Ray
+            
+            alpha = 0.05; // Very low base alpha
         }
         
         // --- THIN GLASS EDGE ---
