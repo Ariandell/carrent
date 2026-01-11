@@ -1,19 +1,17 @@
 /**
- * FLUID PRISM SHADER v2 (Realism)
- * Renders a dark suspended prism with a directed spectral dispersion beam.
+ * 3D CRYSTAL PYRAMID SHADER
+ * Realistic glass pyramid with rainbow dispersion
+ * Based on Apple-style mockup
  */
 
 const canvas = document.createElement('canvas');
-// Enable alpha for true transparency (no mix-blend-mode needed)
 const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false });
 
-// Config
 const config = {
-    speed: 0.8,
-    intensity: 1.2
+    speed: 0.3,
+    intensity: 1.0
 };
 
-// Shader Source
 const vertexShaderSource = `
     attribute vec2 a_position;
     void main() {
@@ -26,169 +24,180 @@ const fragmentShaderSource = `
     uniform vec2 u_resolution;
     uniform float u_time;
 
-    // Full Spectral Palette (Rainbow)
-    vec3 palette( in float t ) {
+    // Rainbow palette
+    vec3 rainbow(float t) {
         vec3 a = vec3(0.5, 0.5, 0.5);
         vec3 b = vec3(0.5, 0.5, 0.5);
         vec3 c = vec3(1.0, 1.0, 1.0);
         vec3 d = vec3(0.0, 0.33, 0.67);
-        return a + b*cos( 6.28318*(c*t+d) );
+        return a + b * cos(6.28318 * (c * t + d));
     }
 
-    float sdTriangle( in vec2 p, in float r ) {
-        const float k = sqrt(3.0);
-        p.x = abs(p.x) - 1.0;
-        p.y = p.y + 1.0/k;
-        if( p.x+k*p.y > 0.0 ) p = vec2(p.x-k*p.y,-k*p.x-p.y)/2.0;
-        p.x -= clamp( p.x, -2.0, 0.0 );
-        return -length(p)*sign(p.y);
+    // Signed distance for 2D triangle (front face of pyramid)
+    float sdTriangle(vec2 p, vec2 p0, vec2 p1, vec2 p2) {
+        vec2 e0 = p1 - p0, e1 = p2 - p1, e2 = p0 - p2;
+        vec2 v0 = p - p0, v1 = p - p1, v2 = p - p2;
+        vec2 pq0 = v0 - e0 * clamp(dot(v0, e0) / dot(e0, e0), 0.0, 1.0);
+        vec2 pq1 = v1 - e1 * clamp(dot(v1, e1) / dot(e1, e1), 0.0, 1.0);
+        vec2 pq2 = v2 - e2 * clamp(dot(v2, e2) / dot(e2, e2), 0.0, 1.0);
+        float s = sign(e0.x * e2.y - e0.y * e2.x);
+        vec2 d = min(min(vec2(dot(pq0, pq0), s * (v0.x * e0.y - v0.y * e0.x)),
+                         vec2(dot(pq1, pq1), s * (v1.x * e1.y - v1.y * e1.x))),
+                         vec2(dot(pq2, pq2), s * (v2.x * e2.y - v2.y * e2.x)));
+        return -sqrt(d.x) * sign(d.y);
     }
 
     // Simple noise
-    float hash(float n) { return fract(sin(n) * 43758.5453123); }
-    float noise(in vec2 x) {
-        vec2 p = floor(x);
-        vec2 f = fract(x);
-        f = f*f*(3.0-2.0*f);
-        float n = p.x + p.y*57.0;
-        return mix(mix(hash(n+0.0), hash(n+1.0),f.x),
-                   mix(hash(n+57.0), hash(n+58.0),f.x),f.y);
-    }
+    float hash(float n) { return fract(sin(n) * 43758.5453); }
 
     void main() {
         vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
-        vec2 uv0 = uv;
-
-        // --- PRISM SETUP ---
-        // Shift prism to the right side (Variant 1: Minimalist Elegance)
         float ar = u_resolution.x / u_resolution.y;
         
-        // Offset UV to move prism right
-        vec2 prismUV = uv;
-        prismUV.x -= ar * 0.35; // Move right (positive offset moves left in UV space, so negative moves right)
+        // Position pyramid to the right
+        vec2 pyramidCenter = vec2(ar * 0.25, -0.1);
+        vec2 p = uv - pyramidCenter;
         
-        float scale = 2.5;
+        // Scale
+        float scale = 0.7;
         if (ar < 1.0) {
-            scale = 4.0; // Make it appear smaller on mobile
-            prismUV.x -= 0.0; // Center on mobile
+            scale = 0.5;
+            pyramidCenter = vec2(0.0, -0.15);
+            p = uv - pyramidCenter;
         }
-
-        float d = sdTriangle(prismUV * scale, 1.0);
+        p /= scale;
         
-        // --- 1. PREMIUM GLASS PRISM ---
-        vec3 prismColor = vec3(0.0);
-        float prismAlpha = 0.0;
+        // 3D Pyramid vertices (perspective projection)
+        // Front face triangle
+        vec2 apex = vec2(0.0, 0.6);
+        vec2 frontLeft = vec2(-0.5, -0.4);
+        vec2 frontRight = vec2(0.5, -0.4);
         
-        if (d < 0.0) {
-            // Inside the prism - create 3D glass effect
-            
-            // Base glass color - DARK glass with subtle blue tint
-            vec3 glassBase = vec3(0.02, 0.025, 0.035);
-            
-            // Calculate distance from edges for depth effect
-            float edgeDist = abs(d);
-            float depth = smoothstep(0.0, 0.3, edgeDist);
-            
-            // Create 3D facets - simulate light hitting different faces
-            vec2 facetUV = prismUV * scale;
-            float facet1 = smoothstep(0.3, 0.8, facetUV.y - facetUV.x * 0.5);
-            float facet2 = smoothstep(0.3, 0.8, -facetUV.y - facetUV.x * 0.5);
-            float facet3 = smoothstep(-0.5, 0.2, facetUV.x);
-            
-            // Combine facets for 3D appearance - DARKER values
-            vec3 facetColor = vec3(0.0);
-            facetColor += vec3(0.04, 0.05, 0.07) * facet1 * 0.4;
-            facetColor += vec3(0.03, 0.04, 0.06) * facet2 * 0.3;
-            facetColor += vec3(0.05, 0.06, 0.08) * facet3 * 0.3;
-            
-            // Add subtle internal reflections - reduced
-            float internalReflection = noise(facetUV * 3.0 + u_time * 0.1) * 0.05;
-            facetColor += internalReflection;
-            
-            // Fresnel effect - edges are more reflective but darker
-            float fresnel = pow(1.0 - depth, 3.0);
-            vec3 fresnelColor = vec3(0.08, 0.10, 0.14) * fresnel;
-            
-            // Specular highlights on glass surface - reduced intensity
-            vec2 lightDir = normalize(vec2(-0.5, 0.8));
-            float specular = pow(max(0.0, dot(normalize(facetUV), lightDir)), 32.0);
-            vec3 specularColor = vec3(0.3, 0.35, 0.4) * specular * 0.4;
-            
-            // Edge highlights - subtle bright rims
-            float edgeGlow = smoothstep(0.08, 0.0, edgeDist);
-            vec3 edgeColor = vec3(0.2, 0.25, 0.3) * edgeGlow;
-            
-            // Combine all glass effects
-            prismColor = glassBase + facetColor + fresnelColor + specularColor + edgeColor;
-            
-            // Add chromatic aberration hint at edges - reduced
-            float chromaticEdge = smoothstep(0.05, 0.0, edgeDist);
-            prismColor += palette(facetUV.x * 0.5 + facetUV.y * 0.3) * chromaticEdge * 0.08;
-            
-            prismAlpha = 0.95;
-        }
+        // Side faces (visible due to 3D perspective)
+        vec2 backCenter = vec2(0.0, -0.2); // Base center shifted up for 3D effect
         
-        // Outer edge glow - subtle glass outline
-        float outerEdge = smoothstep(0.015, 0.0, abs(d));
-        float innerEdge = smoothstep(0.025, 0.015, abs(d));
+        // Left face triangle
+        vec2 leftBack = vec2(-0.3, -0.55);
         
-        // Multi-layer edge for depth - DARKER
-        vec3 edgeGlowColor = vec3(0.3, 0.35, 0.4) * outerEdge * 0.8;
-        edgeGlowColor += vec3(0.2, 0.25, 0.3) * innerEdge * 0.5;
+        // Right face triangle  
+        vec2 rightBack = vec2(0.3, -0.55);
         
-        if (d >= 0.0) {
-            prismColor = edgeGlowColor;
-            prismAlpha = outerEdge * 0.9 + innerEdge * 0.4;
-        } else {
-            prismColor += edgeGlowColor;
-        }
+        // Signed distances
+        float dFront = sdTriangle(p, apex, frontLeft, frontRight);
+        float dLeft = sdTriangle(p, apex, leftBack, frontLeft);
+        float dRight = sdTriangle(p, apex, frontRight, rightBack);
+        float dBase = sdTriangle(p, frontLeft, rightBack, frontRight);
+        float dBaseLeft = sdTriangle(p, frontLeft, leftBack, rightBack);
         
-        // --- 2. ENTRY BEAM (Laser) ---
-        // Beam enters from LEFT, hits prism on RIGHT
-        float beamY = abs(prismUV.y + prismUV.x * 0.35); 
-        float entryMask = smoothstep(0.005, 0.001, beamY); 
-        entryMask *= smoothstep(0.1, -0.4, prismUV.x); // Stop at prism
-        entryMask *= smoothstep(-1.0, -0.5, prismUV.x); // Fade in from left
+        // Combine all faces
+        float dPyramid = min(dFront, min(min(dLeft, dRight), min(dBase, dBaseLeft)));
         
-        // --- 3. LIQUID RAINBOW BEAM ---
-        // Use prismUV for beam positioning
-        float angle = atan(prismUV.y, prismUV.x);
-        float radius = length(prismUV);
-        
-        // Domain Warping for "Liquid" look
-        float noiseVal = noise(prismUV * 4.0 + vec2(u_time * 0.2, 0.0));
-        float colorIndex = (angle * 2.0) + (noiseVal * 0.5) - (u_time * 0.05);
-        vec3 spectrum = palette(colorIndex);
-        
-        // Beam Shape Mask (Cone)
-        float fanMask = smoothstep(0.6, 0.1, abs(angle));
-        fanMask *= smoothstep(0.0, 0.4, prismUV.x); // Fade in after prism
-        
-        // Add "God Ray" streaks
-        float streaks = smoothstep(0.4, 0.6, noise(vec2(angle * 10.0, radius * 2.0 - u_time)));
-        spectrum += streaks * 0.15;
-
-        // --- FINAL COMPOSITION ---
+        // Output
         vec3 col = vec3(0.0);
         float alpha = 0.0;
-
-        // Draw Entry Beam
-        col += vec3(1.0) * entryMask * 3.0;
-        alpha += entryMask;
-
-        // Draw Spectrum (only outside prism)
-        if (d >= 0.0) {
-            col += spectrum * fanMask * 1.0; 
-            alpha += fanMask * 0.6;
+        
+        // --- PYRAMID RENDERING ---
+        if (dPyramid < 0.0) {
+            // Inside pyramid
+            float edgeDist = abs(dPyramid);
+            
+            // Different shading for each face
+            vec3 faceColor = vec3(0.0);
+            
+            // Front face - lighter (catches light)
+            if (dFront < 0.0 && dFront > dLeft && dFront > dRight) {
+                float gradient = smoothstep(-0.4, 0.6, p.y);
+                faceColor = mix(vec3(0.15, 0.17, 0.2), vec3(0.4, 0.45, 0.5), gradient);
+                // Add subtle vertical light stripe
+                float stripe = smoothstep(0.15, 0.0, abs(p.x + 0.05));
+                faceColor += vec3(0.15) * stripe * gradient;
+            }
+            // Left face - darker
+            else if (dLeft < 0.0) {
+                float gradient = smoothstep(-0.5, 0.6, p.y);
+                faceColor = mix(vec3(0.08, 0.09, 0.11), vec3(0.2, 0.22, 0.25), gradient);
+            }
+            // Right face - medium 
+            else if (dRight < 0.0) {
+                float gradient = smoothstep(-0.5, 0.6, p.y);
+                faceColor = mix(vec3(0.1, 0.11, 0.13), vec3(0.25, 0.28, 0.32), gradient);
+                // Rainbow reflection on right face
+                float rainbowStrength = smoothstep(0.2, -0.2, p.y) * smoothstep(-0.1, 0.3, p.x);
+                faceColor += rainbow(p.y * 0.5 + 0.5) * rainbowStrength * 0.15;
+            }
+            // Base faces - darkest
+            else {
+                faceColor = vec3(0.05, 0.06, 0.07);
+            }
+            
+            // Edge highlights
+            float edgeGlow = smoothstep(0.02, 0.0, edgeDist);
+            faceColor += vec3(0.5, 0.55, 0.6) * edgeGlow * 0.5;
+            
+            // Internal edge lines between faces
+            float frontEdge = smoothstep(0.015, 0.005, abs(dFront));
+            float leftEdge = smoothstep(0.015, 0.005, abs(dLeft));
+            float rightEdge = smoothstep(0.015, 0.005, abs(dRight));
+            float internalEdges = max(frontEdge, max(leftEdge, rightEdge));
+            faceColor += vec3(0.3, 0.35, 0.4) * internalEdges * 0.3;
+            
+            // Apex highlight
+            float apexDist = length(p - apex);
+            float apexGlow = smoothstep(0.15, 0.0, apexDist);
+            faceColor += vec3(0.4, 0.45, 0.5) * apexGlow * 0.3;
+            
+            col = faceColor;
+            alpha = 0.95;
         }
-
-        // Draw Prism (on top of everything behind it)
-        col = mix(col, prismColor, prismAlpha);
-        alpha = max(alpha, prismAlpha);
+        
+        // Outer edge glow
+        float outerGlow = smoothstep(0.03, 0.0, dPyramid) * smoothstep(-0.02, 0.0, dPyramid);
+        col += vec3(0.3, 0.35, 0.4) * outerGlow * 0.5;
+        alpha = max(alpha, outerGlow * 0.3);
+        
+        // --- RAINBOW BEAM ---
+        // Horizontal beam exiting to the right from pyramid
+        vec2 beamOrigin = pyramidCenter + vec2(0.35 * scale, -0.1 * scale);
+        vec2 beamUV = uv - beamOrigin;
+        
+        // Only render beam to the right of origin
+        if (beamUV.x > 0.0) {
+            // Fan angle for rainbow spread
+            float beamAngle = atan(beamUV.y, beamUV.x);
+            float beamDist = length(beamUV);
+            
+            // Rainbow spread (narrow cone)
+            float spread = 0.4;
+            float beamMask = smoothstep(spread, 0.0, abs(beamAngle));
+            
+            // Fade with distance
+            beamMask *= smoothstep(2.0, 0.0, beamDist);
+            // Fade in from origin
+            beamMask *= smoothstep(0.0, 0.15, beamUV.x);
+            
+            // Rainbow color based on vertical position in beam
+            float rainbowT = (beamAngle / spread) * 0.5 + 0.5;
+            vec3 beamColor = rainbow(rainbowT + u_time * 0.02);
+            
+            // Soft glow effect
+            beamMask *= 0.6;
+            
+            col += beamColor * beamMask;
+            alpha = max(alpha, beamMask * 0.7);
+        }
+        
+        // Subtle light beam entering pyramid from left
+        vec2 entryBeamUV = uv - pyramidCenter;
+        float entryAngle = atan(entryBeamUV.y + 0.1, entryBeamUV.x);
+        float entryMask = smoothstep(0.02, 0.005, abs(entryAngle + 0.1));
+        entryMask *= smoothstep(-0.3 * scale, -0.05 * scale, entryBeamUV.x);
+        entryMask *= smoothstep(-1.5, -0.4, entryBeamUV.x);
+        col += vec3(0.8, 0.85, 0.9) * entryMask * 0.3;
+        alpha = max(alpha, entryMask * 0.2);
         
         // Vignette
-        alpha *= smoothstep(1.8, 0.6, length(uv));
-
+        alpha *= smoothstep(2.0, 0.8, length(uv));
+        
         gl_FragColor = vec4(col, alpha);
     }
 `;
@@ -198,7 +207,7 @@ function createShader(gl, type, source) {
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error(gl.getShaderInfoLog(shader));
+        console.error('Prism shader error:', gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
         return null;
     }
@@ -236,54 +245,44 @@ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
     1, 1,
 ]), gl.STATIC_DRAW);
 
-// Canvas Styles - BEHIND CONTENT
+// Canvas Styles
 canvas.id = 'prism-canvas';
 canvas.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 1.0; pointer-events: none;';
 
 // Inject
 const heroSection = document.querySelector('section');
 if (heroSection) {
-    // Ensure parent has logic context
     if (getComputedStyle(heroSection).position === 'static') {
         heroSection.style.position = 'relative';
     }
     heroSection.style.overflow = 'hidden';
-
-    // Insert as FIRST child to settle behind other content (z-index -1 works relative to stacking context)
     heroSection.insertBefore(canvas, heroSection.firstChild);
 }
 
-// Resolution Scale - Full resolution for smooth anti-aliased edges
+// Full resolution for quality
 const resolutionScale = 1.0;
 
 function resize() {
-    // Set internal resolution lower than screen
     canvas.width = window.innerWidth * resolutionScale;
-    // Limit to hero height if possible, or full screen
     const rawHeight = heroSection ? heroSection.offsetHeight : window.innerHeight;
     canvas.height = rawHeight * resolutionScale;
-
     gl.viewport(0, 0, canvas.width, canvas.height);
 }
 window.addEventListener('resize', resize);
 resize();
 
-// FPS Throttling
-const fps = 30; // Cap at 30 FPS for background effects
+// Animation
+const fps = 60;
 const frameInterval = 1000 / fps;
 let lastDrawTime = 0;
 
 function render(currentTime) {
     requestAnimationFrame(render);
 
-    // Throttle FPS
     const elapsed = currentTime - lastDrawTime;
     if (elapsed < frameInterval) return;
-
-    // Adjust lastDrawTime to snap to grid (keeps smooth cadence)
     lastDrawTime = currentTime - (elapsed % frameInterval);
 
-    // Convert to seconds for shader
     const timeInSeconds = currentTime * 0.001;
 
     gl.useProgram(program);
