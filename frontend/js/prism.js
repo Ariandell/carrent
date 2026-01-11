@@ -60,13 +60,20 @@ const fragmentShaderSource = `
         vec2 uv0 = uv;
 
         // --- PRISM SETUP ---
+        // Shift prism to the right side (Variant 1: Minimalist Elegance)
         float ar = u_resolution.x / u_resolution.y;
+        
+        // Offset UV to move prism right
+        vec2 prismUV = uv;
+        prismUV.x -= ar * 0.35; // Move right (positive offset moves left in UV space, so negative moves right)
+        
         float scale = 2.5;
         if (ar < 1.0) {
             scale = 4.0; // Make it appear smaller on mobile
+            prismUV.x -= 0.0; // Center on mobile
         }
 
-        float d = sdTriangle(uv * scale, 1.0);
+        float d = sdTriangle(prismUV * scale, 1.0);
         
         // --- 1. PREMIUM GLASS PRISM ---
         vec3 prismColor = vec3(0.0);
@@ -83,7 +90,7 @@ const fragmentShaderSource = `
             float depth = smoothstep(0.0, 0.3, edgeDist);
             
             // Create 3D facets - simulate light hitting different faces
-            vec2 facetUV = uv * scale;
+            vec2 facetUV = prismUV * scale;
             float facet1 = smoothstep(0.3, 0.8, facetUV.y - facetUV.x * 0.5);
             float facet2 = smoothstep(0.3, 0.8, -facetUV.y - facetUV.x * 0.5);
             float facet3 = smoothstep(-0.5, 0.2, facetUV.x);
@@ -137,23 +144,25 @@ const fragmentShaderSource = `
         }
         
         // --- 2. ENTRY BEAM (Laser) ---
-        float beamY = abs(uv.y + uv.x * 0.35); 
+        // Beam enters from LEFT, hits prism on RIGHT
+        float beamY = abs(prismUV.y + prismUV.x * 0.35); 
         float entryMask = smoothstep(0.005, 0.001, beamY); 
-        entryMask *= smoothstep(0.1, -0.4, uv.x); // Stop at prism
-        entryMask *= smoothstep(-1.0, -0.5, uv.x); // Fade in from left
+        entryMask *= smoothstep(0.1, -0.4, prismUV.x); // Stop at prism
+        entryMask *= smoothstep(-1.0, -0.5, prismUV.x); // Fade in from left
         
         // --- 3. LIQUID RAINBOW BEAM ---
-        float angle = atan(uv.y, uv.x);
-        float radius = length(uv);
+        // Use prismUV for beam positioning
+        float angle = atan(prismUV.y, prismUV.x);
+        float radius = length(prismUV);
         
         // Domain Warping for "Liquid" look
-        float noiseVal = noise(uv * 4.0 + vec2(u_time * 0.2, 0.0));
+        float noiseVal = noise(prismUV * 4.0 + vec2(u_time * 0.2, 0.0));
         float colorIndex = (angle * 2.0) + (noiseVal * 0.5) - (u_time * 0.05);
         vec3 spectrum = palette(colorIndex);
         
         // Beam Shape Mask (Cone)
         float fanMask = smoothstep(0.6, 0.1, abs(angle));
-        fanMask *= smoothstep(0.0, 0.4, uv.x); // Fade in after prism
+        fanMask *= smoothstep(0.0, 0.4, prismUV.x); // Fade in after prism
         
         // Add "God Ray" streaks
         float streaks = smoothstep(0.4, 0.6, noise(vec2(angle * 10.0, radius * 2.0 - u_time)));
