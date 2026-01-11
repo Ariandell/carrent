@@ -58,7 +58,7 @@ const fragmentShaderSource = `
                    mix(hash(n+57.0), hash(n+58.0),f.x),f.y);
     }
 
-    // Draw a single SIMPLE & BEAUTIFUL prism layer
+    // Draw a single prism layer with given parameters and color tint
     // Returns: vec4(color.rgb, alpha)
     vec4 drawPrism(vec2 uv, vec2 offset, float scale, float darkness, float edgeBrightness, vec3 tintColor) {
         vec2 prismUV = (uv - offset) * scale;
@@ -68,30 +68,47 @@ const fragmentShaderSource = `
         float prismAlpha = 0.0;
         
         if (d < 0.0) {
-            // Inside prism - soft, clean, transparent
+            // Inside prism - colored glass
+            float baseDark = 0.008 * darkness;
+            vec3 glassBase = tintColor * baseDark;
+            
             float edgeDist = abs(d);
+            float depth = smoothstep(0.0, 0.3, edgeDist);
             
-            // Very subtle fill
-            prismColor = tintColor * 0.1 * darkness;
+            // Facet lighting with color
+            float facet1 = smoothstep(0.3, 0.8, prismUV.y - prismUV.x * 0.5);
+            float facet2 = smoothstep(0.3, 0.8, -prismUV.y - prismUV.x * 0.5);
+            float facet3 = smoothstep(-0.5, 0.2, prismUV.x);
             
-            // Soft edge glow inside
-            float innerGlow = smoothstep(0.0, 0.4, edgeDist);
-            prismColor += tintColor * 0.2 * innerGlow * edgeBrightness;
+            vec3 facetColor = vec3(0.0);
+            facetColor += tintColor * 0.015 * facet1 * 0.3 * darkness;
+            facetColor += tintColor * 0.012 * facet2 * 0.2 * darkness;
+            facetColor += tintColor * 0.018 * facet3 * 0.2 * darkness;
             
-            // Low alpha for readability
-            prismAlpha = 0.1 + innerGlow * 0.2 * darkness;
+            // Fresnel with color
+            float fresnel = pow(1.0 - depth, 3.0);
+            vec3 fresnelColor = tintColor * 0.03 * fresnel * darkness;
+            
+            // Edge glow with color
+            float edgeGlow = smoothstep(0.05, 0.0, edgeDist);
+            vec3 edgeColor = tintColor * edgeBrightness * 0.12 * edgeGlow;
+            
+            prismColor = glassBase + facetColor + fresnelColor + edgeColor;
+            prismAlpha = 0.75 * darkness;
         }
         
-        // Clean, sharp edge
-        float edge = smoothstep(0.015, 0.0, abs(d));
-        vec3 edgeColor = tintColor * edgeBrightness * 0.8 * edge;
+        // Edge outline with color
+        float outerEdge = smoothstep(0.01, 0.0, abs(d));
+        float innerEdge = smoothstep(0.018, 0.01, abs(d));
+        
+        vec3 edgeGlowColor = tintColor * edgeBrightness * 0.18 * outerEdge * 0.5;
+        edgeGlowColor += tintColor * edgeBrightness * 0.08 * innerEdge * 0.25;
         
         if (d >= 0.0) {
-            prismColor = edgeColor;
-            prismAlpha = edge * 0.8;
+            prismColor = edgeGlowColor;
+            prismAlpha = outerEdge * 0.6 + innerEdge * 0.25;
         } else {
-            prismColor += edgeColor;
-            prismAlpha = max(prismAlpha, edge * 0.8);
+            prismColor += edgeGlowColor;
         }
         
         return vec4(prismColor, prismAlpha);
@@ -104,133 +121,71 @@ const fragmentShaderSource = `
         float ar = u_resolution.x / u_resolution.y;
         float baseScale = ar < 1.0 ? 1.8 : 1.2;
         
-        // --- SINGLE MINIMALIST PRISM ---
-        // Just one perfect triangle, no recursion, no depth tunnel
+        // Parallax offset based on scroll
+        float parallaxStrength = 0.4;
         
-        // --- THIN PRISM WITH SUBTLE DEPTH ---
+        // Color gradient: Cyan -> Blue -> Purple -> Magenta (for depth)
+        vec3 colorFront = vec3(0.4, 0.9, 1.0);   // Cyan
+        vec3 colorBack = vec3(0.8, 0.3, 0.9);    // Purple/Magenta
         
+        // --- RECURSIVE PRISMS (12 layers for infinite depth) ---
         vec3 finalColor = vec3(0.0);
         float finalAlpha = 0.0;
         
-        // Configuration
-        float prismWidth = 1.3; // Make it thinner (> 1.0 compresses X)
-        vec2 center = vec2(0.0, -0.05);
-        float mainScale = baseScale * 1.6;
+        const int NUM_LAYERS = 12;
         
-        // 1. BACK FACE (Depth)
-        // Drawn slightly opaque and offset
-        vec2 backOffset = vec2(0.04, 0.02); // Shifted right/up
-        vec2 backUV = (uv - center - backOffset) * mainScale;
-        backUV.x *= prismWidth;
-        float dBack = sdTriangle(backUV, 1.0);
-        
-        if (dBack < 0.0) {
-            float backAlpha = 0.15;
-            vec3 backCol = vec3(0.6, 0.7, 0.8) * 0.2; // Darker, bluish
+        // Draw from back to front
+        for (int i = NUM_LAYERS - 1; i >= 0; i--) {
+            float t = float(i) / float(NUM_LAYERS - 1); // 0 = front, 1 = back
+            float invT = 1.0 - t; // 1 = front, 0 = back
             
-            // Edge of back face
-            float backEdge = smoothstep(0.02, 0.0, abs(dBack));
-            backCol += vec3(0.5, 0.6, 0.9) * backEdge * 0.5;
+            // Scale: smaller as we go deeper
+            float layerScale = baseScale * (1.0 + t * 4.0);
             
-            finalColor = backCol;
-            finalAlpha = backAlpha;
+            // Offset: more offset for deeper layers (parallax)
+            float offsetX = 0.01 + t * 0.15;
+            float offsetY = -t * 0.03;
+            float parallaxX = u_scroll * parallaxStrength * (0.1 + t * 2.0);
+            float parallaxY = u_scroll * parallaxStrength * (0.02 + t * 0.4);
+            vec2 layerOffset = vec2(offsetX + parallaxX, offsetY + parallaxY);
+            
+            // Darkness: darker as we go deeper
+            float darkness = 0.15 + invT * 0.85;
+            
+            // Edge brightness: dimmer as we go deeper
+            float edgeBright = 0.2 + invT * 0.8;
+            
+            // Color: gradient from front to back
+            vec3 layerColor = mix(colorBack, colorFront, invT);
+            
+            // Draw layer
+            vec4 layer = drawPrism(uv, layerOffset, layerScale, darkness, edgeBright, layerColor);
+            
+            // Blend with depth-based alpha
+            float layerAlphaMultiplier = 0.2 + invT * 0.8;
+            finalColor = mix(finalColor, layer.rgb, layer.a * layerAlphaMultiplier);
+            finalAlpha = max(finalAlpha, layer.a * layerAlphaMultiplier);
         }
         
-        // 2. FRONT FACE (The Main Prism)
-        vec2 frontUV = (uv - center) * mainScale;
-        frontUV.x *= prismWidth;
-        float dFront = sdTriangle(frontUV, 1.0);
+        // --- ENTRY BEAM (Laser) ---
+        float beamY = abs(uv.y + uv.x * 0.35); 
+        float entryMask = smoothstep(0.004, 0.001, beamY); 
+        entryMask *= smoothstep(0.05, -0.5, uv.x);
+        entryMask *= smoothstep(-1.0, -0.5, uv.x);
         
-        if (dFront < 0.0) {
-            // Glass body
-            float glassAlpha = 0.08;
-            // Vertical gradient
-            float gradient = smoothstep(-1.0, 1.2, frontUV.y); 
-            vec3 glassCol = vec3(0.95, 0.98, 1.0) * (0.1 + gradient * 0.2);
-            
-            // Interaction with back face (fake refraction look where they overlap)
-            if (finalAlpha > 0.0) {
-                 glassCol += vec3(0.1, 0.2, 0.3); // Additive darkening?
-            }
-            
-            finalColor = mix(finalColor, glassCol, 0.6);
-            finalAlpha = max(finalAlpha, glassAlpha);
-        }
+        // --- RAINBOW BEAM ---
+        float angle = atan(uv.y, uv.x);
+        float radius = length(uv);
         
-        // 3. FRONT EDGES (Bright White)
-        float outlineWidth = 0.02;
-        float frontEdge = smoothstep(outlineWidth + 0.005, outlineWidth, abs(dFront));
-        
-        // Make the corners glow more
-        // Vertices of the equilateral triangle in UV space are approx:
-        // Top: (0, 1), Bottom Right: (0.866, -0.5), Bottom Left: (-0.866, -0.5)
-        // But we scaled X, so actual coords differ. 
-        // We just use the SDF edge.
-        
-        vec3 edgeCol = vec3(1.0);
-        finalColor = mix(finalColor, edgeCol, frontEdge);
-        finalAlpha = max(finalAlpha, frontEdge);
-        
-        // 4. CONNECTION LINES (Depth wires)
-        // Connect corners of front and back? Too complex for loopless.
-        // We leave the visual separation to imply depth.
-        
-        // --- BEAM ALIGNMENT ---
-        // We want the beam to hit the LEFT RIB (Left Edge)
-        // Triangle Left Edge is roughly at x = -0.5 (scaled)
-        // Let's adjust beam origin to hit that specific area.
-        
-        // Left side contact point approx:
-        vec2 hitPoint = center + vec2(-0.35 / prismWidth, 0.0); 
-        
-        // Beam Line: Shifted to pass through hitPoint
-        // y = k(x - hitX) + hitY
-        float beamSlope = -0.35;
-        float beamYVal = hitPoint.y + beamSlope * (uv.x - hitPoint.x);
-        float beamDist = abs(uv.y - beamYVal);
-        
-        float entryMask = smoothstep(0.004, 0.001, beamDist); 
-        
-        // Mask the beam so it stops AT the prism (somewhat)
-        // or fades into it.
-        float beamFade = smoothstep(hitPoint.x + 0.1, hitPoint.x - 0.2, uv.x);
-        entryMask *= beamFade;
-        entryMask *= smoothstep(-1.2, -0.5, uv.x); // Fade in from far left 
-        // --- SPECTRUM ORIGIN ---
-        // Exit from RIGHT RIB (Right Edge)
-        vec2 exitPoint = center + vec2(0.35 / prismWidth, 0.0);
-        
-        // Move coordinate system to exit point for the fan
-        vec2 spectrumUV = uv - exitPoint;
-        
-        float angle = atan(spectrumUV.y, spectrumUV.x);
-        float radius = length(spectrumUV);
-        
-        // Fix: Restore spectrum color calculation
         float noiseVal = noise(uv * 4.0 + vec2(u_time * 0.2, 0.0));
-        // Use local angle for color distribution
-        float colorIndex = (angle * 3.0) + (noiseVal * 0.5) - (u_time * 0.1);
+        float colorIndex = (angle * 2.0) + (noiseVal * 0.5) - (u_time * 0.05);
         vec3 spectrum = palette(colorIndex);
         
-        float baseAngle = -0.25; // Slightly more downward
-        float spread = 0.6; // Much Wider fan for dramatic effect
+        float fanMask = smoothstep(0.6, 0.1, abs(angle));
+        fanMask *= smoothstep(-0.05, 0.35, uv.x);
         
-        // Softer edges for a voluminous look
-        float fanMask = smoothstep(baseAngle - spread - 0.2, baseAngle, angle);
-        fanMask *= smoothstep(baseAngle + spread + 0.2, baseAngle, angle);
-        
-        // Smooth start from the prism edge
-        fanMask *= smoothstep(0.0, 0.3, spectrumUV.x); 
-        
-        // Thicker, softer streaks instead of thin noise
-        float streaks = smoothstep(0.3, 0.8, noise(vec2(angle * 5.0, radius * 1.5 - u_time * 0.8)));
-        
-        // Boost color vibrancy
-        spectrum *= 1.5; 
-        
-        // Add glow core
-        spectrum += vec3(0.2, 0.2, 0.4) * fanMask * 0.5;
-        spectrum += streaks * 0.3; // Add streaks additively
+        float streaks = smoothstep(0.4, 0.6, noise(vec2(angle * 10.0, radius * 2.0 - u_time)));
+        spectrum += streaks * 0.12;
 
         // --- FINAL COMPOSITION ---
         vec3 col = vec3(0.0);
@@ -240,12 +195,9 @@ const fragmentShaderSource = `
         col += vec3(1.0) * entryMask * 2.5;
         alpha += entryMask;
 
-        // Spectrum (behind all prisms) - Make it pop
-        // Distance fade to make it look like light dissipating
-        float distFade = smoothstep(3.0, 0.5, radius); 
-        
-        col += spectrum * fanMask * distFade * 1.2; 
-        alpha += fanMask * distFade * 0.8;
+        // Spectrum (behind all prisms)
+        col += spectrum * fanMask * 0.8; 
+        alpha += fanMask * 0.5;
 
         // Prisms on top
         col = mix(col, finalColor, finalAlpha);
