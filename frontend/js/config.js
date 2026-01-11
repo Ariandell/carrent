@@ -57,7 +57,7 @@ const TRANSLATIONS = {
         // Manifesto / Landing v2
         "manifesto_hero_1": "РЕАЛЬНІСТЬ.",
         "manifesto_hero_2": "ПІД КОНТРОЛЕМ.",
-        "manifesto_hero_desc": "Надаємо досвід через<br>точні технології.",
+        "manifesto_hero_desc": "Керуйте справжніми машинами через інтернет. <br>Нульова затримка. Повне занурення.",
         "manifesto_btn": "Запустити Двигун",
         "manifesto_scroll": "Гортай Вниз",
 
@@ -243,7 +243,7 @@ const TRANSLATIONS = {
         // Manifesto / Landing v2
         "manifesto_hero_1": "REALITY.",
         "manifesto_hero_2": "CONTROLLED.",
-        "manifesto_hero_desc": "Empowering experiences through<br>precision technology.",
+        "manifesto_hero_desc": "Drive real physical machines over the internet. <br>Zero latency. Infinite immersion.",
         "manifesto_btn": "Start Engine",
         "manifesto_scroll": "Scroll to Dive",
 
