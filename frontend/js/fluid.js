@@ -537,6 +537,10 @@
     // State for interaction handling
     let isHovering = false;
     let hoverTimer = null;
+    let fadeOutTimer = null;
+    let isSmokeVisible = true;
+    let smokeOpacity = 1.0;
+    let targetOpacity = 1.0;
 
     function repel(x, y) {
         // Create an outward explosion of hidden velocity (wind)
@@ -584,18 +588,31 @@
         splat(x, y, 0, 0, color);
     }
 
-    // Smart Hover Detection
+    // Smart Hover Detection with Fade Timing
     document.addEventListener('mouseover', e => {
         if (e.target.closest('button, a, .btn, input, [role="button"]')) {
             isHovering = true;
-            if (hoverTimer) clearTimeout(hoverTimer);
+
+            // Clear any pending return timer
+            if (hoverTimer) {
+                clearTimeout(hoverTimer);
+                hoverTimer = null;
+            }
+
             // Instant Repel on Entry
             const pos = getPointerPos(e);
             repel(pos.x, pos.y);
-            // Also update pointers to avoid lag
+
+            // Update pointers to avoid lag
             updatePointer(pos.x, pos.y);
             lastX = pos.x;
             lastY = pos.y;
+
+            // Start fade-out timer (0.3s)
+            if (fadeOutTimer) clearTimeout(fadeOutTimer);
+            fadeOutTimer = setTimeout(() => {
+                targetOpacity = 0.0;
+            }, 300);
         }
     });
 
@@ -604,9 +621,18 @@
         // Only trigger leave if we actually left the interactive zone completely
         if (!to || !to.closest('button, a, .btn, input, [role="button"]')) {
             if (isHovering) {
+                isHovering = false;
+
+                // Clear fade-out timer
+                if (fadeOutTimer) {
+                    clearTimeout(fadeOutTimer);
+                    fadeOutTimer = null;
+                }
+
+                // Start fade-in timer (0.5s delay)
                 hoverTimer = setTimeout(() => {
-                    isHovering = false;
-                    // Trigger return effect (Implosion)
+                    targetOpacity = 1.0;
+                    // Trigger return effect (Implosion) when fading back in
                     implode(pointers[0].x, pointers[0].y);
                 }, 500);
             }
@@ -797,6 +823,11 @@
         gl.bindTexture(gl.TEXTURE_2D, velocity.read.tex);
         blit(velocity.write.fbo);
         velocity.swap();
+
+        // Smooth opacity transition
+        const fadeSpeed = 0.08; // Smooth fade speed
+        smokeOpacity += (targetOpacity - smokeOpacity) * fadeSpeed;
+        canvas.style.opacity = smokeOpacity.toFixed(3);
 
         // Display
         gl.useProgram(copyProgram.program);

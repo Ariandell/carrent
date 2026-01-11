@@ -75,8 +75,8 @@ const fragmentShaderSource = `
         if (d < 0.0) {
             // Inside the prism - create 3D glass effect
             
-            // Base glass color with slight blue tint
-            vec3 glassBase = vec3(0.08, 0.12, 0.18);
+            // Base glass color - DARK glass with subtle blue tint
+            vec3 glassBase = vec3(0.02, 0.025, 0.035);
             
             // Calculate distance from edges for depth effect
             float edgeDist = abs(d);
@@ -88,46 +88,46 @@ const fragmentShaderSource = `
             float facet2 = smoothstep(0.3, 0.8, -facetUV.y - facetUV.x * 0.5);
             float facet3 = smoothstep(-0.5, 0.2, facetUV.x);
             
-            // Combine facets for 3D appearance
+            // Combine facets for 3D appearance - DARKER values
             vec3 facetColor = vec3(0.0);
-            facetColor += vec3(0.15, 0.18, 0.25) * facet1 * 0.6;
-            facetColor += vec3(0.12, 0.15, 0.22) * facet2 * 0.5;
-            facetColor += vec3(0.18, 0.22, 0.28) * facet3 * 0.4;
+            facetColor += vec3(0.04, 0.05, 0.07) * facet1 * 0.4;
+            facetColor += vec3(0.03, 0.04, 0.06) * facet2 * 0.3;
+            facetColor += vec3(0.05, 0.06, 0.08) * facet3 * 0.3;
             
-            // Add subtle internal reflections
-            float internalReflection = noise(facetUV * 3.0 + u_time * 0.1) * 0.15;
+            // Add subtle internal reflections - reduced
+            float internalReflection = noise(facetUV * 3.0 + u_time * 0.1) * 0.05;
             facetColor += internalReflection;
             
-            // Fresnel effect - edges are more reflective
+            // Fresnel effect - edges are more reflective but darker
             float fresnel = pow(1.0 - depth, 3.0);
-            vec3 fresnelColor = vec3(0.3, 0.35, 0.45) * fresnel;
+            vec3 fresnelColor = vec3(0.08, 0.10, 0.14) * fresnel;
             
-            // Specular highlights on glass surface
+            // Specular highlights on glass surface - reduced intensity
             vec2 lightDir = normalize(vec2(-0.5, 0.8));
             float specular = pow(max(0.0, dot(normalize(facetUV), lightDir)), 32.0);
-            vec3 specularColor = vec3(1.0) * specular * 0.8;
+            vec3 specularColor = vec3(0.3, 0.35, 0.4) * specular * 0.4;
             
-            // Edge highlights - bright rims
+            // Edge highlights - subtle bright rims
             float edgeGlow = smoothstep(0.08, 0.0, edgeDist);
-            vec3 edgeColor = vec3(0.6, 0.7, 0.9) * edgeGlow;
+            vec3 edgeColor = vec3(0.2, 0.25, 0.3) * edgeGlow;
             
             // Combine all glass effects
             prismColor = glassBase + facetColor + fresnelColor + specularColor + edgeColor;
             
-            // Add chromatic aberration hint at edges
+            // Add chromatic aberration hint at edges - reduced
             float chromaticEdge = smoothstep(0.05, 0.0, edgeDist);
-            prismColor += palette(facetUV.x * 0.5 + facetUV.y * 0.3) * chromaticEdge * 0.2;
+            prismColor += palette(facetUV.x * 0.5 + facetUV.y * 0.3) * chromaticEdge * 0.08;
             
             prismAlpha = 0.95;
         }
         
-        // Outer edge glow - premium glass outline
+        // Outer edge glow - subtle glass outline
         float outerEdge = smoothstep(0.015, 0.0, abs(d));
         float innerEdge = smoothstep(0.025, 0.015, abs(d));
         
-        // Multi-layer edge for depth
-        vec3 edgeGlowColor = vec3(0.8, 0.9, 1.0) * outerEdge * 1.5;
-        edgeGlowColor += vec3(0.5, 0.6, 0.8) * innerEdge * 0.8;
+        // Multi-layer edge for depth - DARKER
+        vec3 edgeGlowColor = vec3(0.3, 0.35, 0.4) * outerEdge * 0.8;
+        edgeGlowColor += vec3(0.2, 0.25, 0.3) * innerEdge * 0.5;
         
         if (d >= 0.0) {
             prismColor = edgeGlowColor;
@@ -244,8 +244,8 @@ if (heroSection) {
     heroSection.insertBefore(canvas, heroSection.firstChild);
 }
 
-// Resolution Scale - Reduce for performance (0.5 = half resolution, crisp but faster)
-const resolutionScale = 0.5;
+// Resolution Scale - Full resolution for smooth anti-aliased edges
+const resolutionScale = 1.0;
 
 function resize() {
     // Set internal resolution lower than screen
