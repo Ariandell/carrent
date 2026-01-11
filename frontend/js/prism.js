@@ -212,16 +212,25 @@ const fragmentShaderSource = `
         float colorIndex = (angle * 3.0) + (noiseVal * 0.5) - (u_time * 0.1);
         vec3 spectrum = palette(colorIndex);
         
-        float baseAngle = -0.2; // Slight downward angle for exit
-        float spread = 0.3; // Fan spread width
+        float baseAngle = -0.25; // Slightly more downward
+        float spread = 0.6; // Much Wider fan for dramatic effect
         
-        // Only show to the right
-        float fanMask = smoothstep(baseAngle - spread, baseAngle, angle);
-        fanMask *= smoothstep(baseAngle + spread, baseAngle, angle);
-        fanMask *= smoothstep(0.0, 0.1, spectrumUV.x); // Start after exit point
+        // Softer edges for a voluminous look
+        float fanMask = smoothstep(baseAngle - spread - 0.2, baseAngle, angle);
+        fanMask *= smoothstep(baseAngle + spread + 0.2, baseAngle, angle);
         
-        float streaks = smoothstep(0.4, 0.6, noise(vec2(angle * 10.0, radius * 2.0 - u_time)));
-        spectrum += streaks * 0.12;
+        // Smooth start from the prism edge
+        fanMask *= smoothstep(0.0, 0.3, spectrumUV.x); 
+        
+        // Thicker, softer streaks instead of thin noise
+        float streaks = smoothstep(0.3, 0.8, noise(vec2(angle * 5.0, radius * 1.5 - u_time * 0.8)));
+        
+        // Boost color vibrancy
+        spectrum *= 1.5; 
+        
+        // Add glow core
+        spectrum += vec3(0.2, 0.2, 0.4) * fanMask * 0.5;
+        spectrum += streaks * 0.3; // Add streaks additively
 
         // --- FINAL COMPOSITION ---
         vec3 col = vec3(0.0);
@@ -231,9 +240,12 @@ const fragmentShaderSource = `
         col += vec3(1.0) * entryMask * 2.5;
         alpha += entryMask;
 
-        // Spectrum (behind all prisms)
-        col += spectrum * fanMask * 0.8; 
-        alpha += fanMask * 0.5;
+        // Spectrum (behind all prisms) - Make it pop
+        // Distance fade to make it look like light dissipating
+        float distFade = smoothstep(3.0, 0.5, radius); 
+        
+        col += spectrum * fanMask * distFade * 1.2; 
+        alpha += fanMask * distFade * 0.8;
 
         // Prisms on top
         col = mix(col, finalColor, finalAlpha);
