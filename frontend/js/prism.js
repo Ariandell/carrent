@@ -104,43 +104,41 @@ const fragmentShaderSource = `
         float ar = u_resolution.x / u_resolution.y;
         float baseScale = ar < 1.0 ? 1.8 : 1.2;
         
-        // Parallax offset based on scroll
-        float parallaxStrength = 0.4;
+        // --- SINGLE MINIMALIST PRISM ---
+        // Just one perfect triangle, no recursion, no depth tunnel
         
-        // Simple & Beatiful Clean Palette
-        vec3 colorFront = vec3(0.1, 0.6, 1.0);   // Clean Blue
-        vec3 colorBack = vec3(0.5, 0.1, 0.8);    // Soft Purple
-        
-        // --- RECURSIVE PRISMS (Reduced layers for clarity) ---
         vec3 finalColor = vec3(0.0);
         float finalAlpha = 0.0;
         
-        const int NUM_LAYERS = 6;
+        // Single layer setup
+        float scale = baseScale * 1.5; // Slightly larger for presence
+        vec2 offset = vec2(0.05, -0.05); // Centered but slightly offset for composition
         
-        // Draw from back to front
-        for (int i = NUM_LAYERS - 1; i >= 0; i--) {
-            float t = float(i) / float(NUM_LAYERS - 1); 
-            float invT = 1.0 - t;
+        // Draw the single iconic prism
+        vec2 prismUV = (uv - offset) * scale;
+        float d = sdTriangle(prismUV, 1.0);
+        
+        // 1. Fill (Glass Body) - Subtle gradient
+        if (d < 0.0) {
+            float glassAlpha = 0.1;
+            // Subtle vertical gradient for volume
+            float gradient = smoothstep(-1.0, 1.0, prismUV.y); 
+            vec3 fillCol = vec3(0.9, 0.95, 1.0) * (0.05 + gradient * 0.1);
             
-            float layerScale = baseScale * (1.0 + t * 3.0);
-            
-            float offsetX = 0.02 + t * 0.1;
-            float offsetY = -t * 0.02;
-            float parallaxX = u_scroll * parallaxStrength * (0.1 + t * 1.5);
-            float parallaxY = u_scroll * parallaxStrength * (0.02 + t * 0.3);
-            vec2 layerOffset = vec2(offsetX + parallaxX, offsetY + parallaxY);
-            
-            float darkness = 0.4 + invT * 0.6;
-            float edgeBright = 0.6 + invT * 0.4;
-            
-            vec3 layerColor = mix(colorBack, colorFront, invT);
-            
-            vec4 layer = drawPrism(uv, layerOffset, layerScale, darkness, edgeBright, layerColor);
-            
-            float layerAlphaMultiplier = 0.3 + invT * 0.7;
-            finalColor = mix(finalColor, layer.rgb, layer.a * layerAlphaMultiplier);
-            finalAlpha = max(finalAlpha, layer.a * layerAlphaMultiplier);
+            finalColor = fillCol;
+            finalAlpha = glassAlpha;
         }
+        
+        // 2. White Edge Outline (The Iconic Look)
+        float outlineWidth = 0.025;
+        float outerEdge = smoothstep(outlineWidth + 0.005, outlineWidth, abs(d)); // Sharp outer
+        
+        // Glowy white edge
+        vec3 edgeColor = vec3(1.0, 1.0, 1.0); // Pure white
+        
+        // Add edge to composition
+        finalColor = mix(finalColor, edgeColor, outerEdge);
+        finalAlpha = max(finalAlpha, outerEdge);
         
         // --- ENTRY BEAM (Laser) ---
         float beamY = abs(uv.y + uv.x * 0.35); 
