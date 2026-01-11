@@ -85,80 +85,76 @@ const fragmentShaderSource = `
         float d = sdTriangle(uv, triSize);
 
         // --- INPUT BEAM (White Laser) ---
-        // From left (-2.5, -0.45) to prism face (-0.35, -0.15)
-        vec2 inputStart = vec2(-2.5, -0.45); 
-        vec2 inputHit = vec2(-0.35, -0.15); // Hit point on left face
+        // NEW: Aim for center/upper part of left edge for "aesthetic entry"
+        // Previous hit: (-0.35, -0.15). Tri left edge is roughly x=-0.4 at y=0.
+        
+        vec2 inputStart = vec2(-2.5, -0.2); // Raised start
+        vec2 inputHit = vec2(-0.41, 0.05);  // Hitting the "Rib" (Refined Edge)
         vec2 inputDir = normalize(inputHit - inputStart);
         
         float inBeam = beam(uv, inputStart, inputDir, 0.012);
         
         // Cut off beam when it hits/enters the prism
         float inMask = smoothstep(0.05, -0.05, d); 
-        inMask *= step(uv.x, -0.3); // Hard clip
+        inMask *= step(uv.x, -0.38); // Clip at edge
 
         vec3 finalColor = vec3(0.0);
         float alpha = 0.0;
 
         finalColor += vec3(1.1) * inBeam * clamp(inMask, 0.0, 1.0);
 
-        // --- OUTPUT BEAM (Horizontal Flow) ---
-        // We want the fan to start from the right face (approx 0.35, -0.15)
-        // AND flow strictly RIGHT (angle 0)
-        
-        vec2 fanOrigin = vec2(0.25, -0.15); // Start point of rainbow
+        // --- OUTPUT BEAM (Hyper Fluid Horizontal) ---
+        // Origin: Approx right face
+        vec2 fanOrigin = vec2(0.38, -0.2); 
         vec2 fanUV = uv - fanOrigin;
 
         float angle = atan(fanUV.y, fanUV.x);
         float radius = length(fanUV);
 
-        // "Fluid" Logic driven by horizontal flow
-        // Map noise to move right-to-left to simulate flow leaving the prism
-        float flowX = fanUV.x * 2.5 - u_time * 0.5;
-        float noiseVal = noise(vec2(flowX, fanUV.y * 3.0));
+        // "Hyperscale" Fluid Logic
+        // Bigger, bolder flow
+        float flowX = fanUV.x * 1.8 - u_time * 0.6; // Faster, larger waves
+        float noiseVal = noise(vec2(flowX, fanUV.y * 2.0)); // Lower freq Y for "fatter" liquid
         
-        // Color Index based on y-position in the beam + slight angle spread
-        // To make it look like a spectrum sorted vertically somewhat
-        float colorIndex = (angle * 3.0) + (noiseVal * 0.5) - (u_time * 0.2);
+        // Intensity of color shifting
+        float colorIndex = (angle * 2.0) + (noiseVal * 0.8) - (u_time * 0.25);
         vec3 spectrum = palette(colorIndex);
 
-        // Masking: Strictly Horizontal to the Right
-        float fanDir = 0.0; // 0 radians = Right
-        float fanWidth = 0.25; // Spread width (narrower for "exact right" feel)
+        // Masking: Strictly Horizontal
+        float fanDir = 0.0; 
+        float fanWidth = 0.28; // Slightly wider to show off the fluid
         
-        // Soft cone shape
-        float fanMask = smoothstep(fanWidth, 0.0, abs(angle - fanDir));
-        
-        // Only forward (x > 0 relative to origin)
-        fanMask *= smoothstep(0.0, 0.1, fanUV.x); 
-        
-        // Soften start
-        fanMask *= smoothstep(0.0, 0.5, radius);
+        float fanMask = smoothstep(fanWidth, 0.05, abs(angle - fanDir));
+        fanMask *= smoothstep(0.0, 0.15, fanUV.x); 
+        fanMask *= smoothstep(0.0, 0.4, radius);
 
-        // Add "Streaks" moving horizontally
-        float streaks = smoothstep(0.35, 0.65, noise(vec2(flowX * 2.0, fanUV.y * 8.0)));
-        spectrum += streaks * 0.3;
+        // "Thick" Streaks
+        // Layering two noise patterns for complexity
+        float broadStreaks = smoothstep(0.2, 0.8, noise(vec2(flowX * 1.5, fanUV.y * 4.0)));
+        float fineStreaks = smoothstep(0.4, 0.6, noise(vec2(flowX * 3.0 + 5.0, fanUV.y * 10.0)));
+        
+        spectrum += broadStreaks * 0.5; // Big chunks of light
+        spectrum += fineStreaks * 0.2;  // Detailed sparkles
         
         // Combine Output
-        finalColor += spectrum * fanMask * 1.8;
+        // Boost brightness for "Bigger" feel
+        finalColor += spectrum * fanMask * 2.2;
 
         // --- PRISM RENDER (Glass Style) ---
         if (d < 0.0) {
             // INSIDE
             float dist = abs(d);
             
-            // 1. Subtle Fill (Dark Glass)
+            // Subtle Fill
             finalColor += vec3(1.0) * 0.03 * smoothstep(0.0, 0.5, dist);
             
-            // [REMOVED] Internal Refraction Ray
-            
-            alpha = 0.05; // Very low base alpha
+            alpha = 0.05; 
         }
         
         // --- THIN GLASS EDGE ---
-        // Very sharp, thin white outline (0.008)
         float edgeWidth = 0.008; 
         float edgeGlow = smoothstep(edgeWidth, 0.0, abs(d));
-        float edgeBloom = smoothstep(0.04, 0.0, abs(d)) * 0.5; // Faint glow
+        float edgeBloom = smoothstep(0.04, 0.0, abs(d)) * 0.5;
         
         vec3 edgeCol = vec3(0.95, 0.98, 1.0);
         finalColor += edgeCol * (edgeGlow * 1.5 + edgeBloom * 0.3);
