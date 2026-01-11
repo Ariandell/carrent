@@ -27,9 +27,12 @@ const fragmentShaderSource = `
     precision highp float;
     uniform vec2 u_resolution;
     uniform float u_time;
-    uniform float u_scroll; // 0.0 to 1.0 scroll progress
+    uniform float u_scroll;
 
-    // Full Spectral Palette (Rainbow)
+    // Consts
+    #define PI 3.14159265359
+
+    // Spectral Palette
     vec3 palette( in float t ) {
         vec3 a = vec3(0.5, 0.5, 0.5);
         vec3 b = vec3(0.5, 0.5, 0.5);
@@ -38,16 +41,17 @@ const fragmentShaderSource = `
         return a + b*cos( 6.28318*(c*t+d) );
     }
 
+    // SDF Triangle
     float sdTriangle( in vec2 p, in float r ) {
         const float k = sqrt(3.0);
-        p.x = abs(p.x) - 1.0;
-        p.y = p.y + 1.0/k;
+        p.x = abs(p.x) - r;
+        p.y = p.y + r/k;
         if( p.x+k*p.y > 0.0 ) p = vec2(p.x-k*p.y,-k*p.x-p.y)/2.0;
-        p.x -= clamp( p.x, -2.0, 0.0 );
+        p.x -= clamp( p.x, -2.0*r, 0.0 );
         return -length(p)*sign(p.y);
     }
 
-    // Simple noise
+    // Noise functions for fluid effect
     float hash(float n) { return fract(sin(n) * 43758.5453123); }
     float noise(in vec2 x) {
         vec2 p = floor(x);
@@ -58,130 +62,133 @@ const fragmentShaderSource = `
                    mix(hash(n+57.0), hash(n+58.0),f.x),f.y);
     }
 
-    // Draw a single SIMPLE & BEAUTIFUL prism layer
-    // Returns: vec4(color.rgb, alpha)
-    vec4 drawPrism(vec2 uv, vec2 offset, float scale, float darkness, float edgeBrightness, vec3 tintColor) {
-        vec2 prismUV = (uv - offset) * scale;
-        float d = sdTriangle(prismUV, 1.0);
+    float fbm(vec2 p) {
+        float f = 0.0;
+        f += 0.5000*noise(p); p*=2.02;
+        f += 0.2500*noise(p); p*=2.03;
+        f += 0.1250*noise(p); p*=2.01;
+        return f;
+    }
+
+    // Draw a beam segment
+    // start: start point, dir: direction, w: width, uv: current coord
+    float beam(vec2 uv, vec2 start, vec2 dir, float width, float flowSpeed) {
+        vec2 p = uv - start;
+        float proj = dot(p, dir);
+        float dist = length(p - dir * proj);
         
-        vec3 prismColor = vec3(0.0);
-        float prismAlpha = 0.0;
+        // Fluid distortion
+        float fluid = fbm(uv * 10.0 - vec2(u_time * flowSpeed, 0.0));
+        float warp = (fluid - 0.5) * 0.05;
         
-        if (d < 0.0) {
-            // Inside prism - soft, clean, transparent
-            float edgeDist = abs(d);
-            
-            // Very subtle fill
-            prismColor = tintColor * 0.1 * darkness;
-            
-            // Soft edge glow inside
-            float innerGlow = smoothstep(0.0, 0.4, edgeDist);
-            prismColor += tintColor * 0.2 * innerGlow * edgeBrightness;
-            
-            // Low alpha for readability
-            prismAlpha = 0.1 + innerGlow * 0.2 * darkness;
-        }
+        // Only draw forward
+        float beamMask = smoothstep(0.0, 0.1, proj);
         
-        // Clean, sharp edge
-        float edge = smoothstep(0.015, 0.0, abs(d));
-        vec3 edgeColor = tintColor * edgeBrightness * 0.8 * edge;
+        // Core width
+        float core = smoothstep(width + warp, width * 0.2 + warp, dist);
         
-        if (d >= 0.0) {
-            prismColor = edgeColor;
-            prismAlpha = edge * 0.8;
-        } else {
-            prismColor += edgeColor;
-            prismAlpha = max(prismAlpha, edge * 0.8);
-        }
-        
-        return vec4(prismColor, prismAlpha);
+        return core * beamMask;
     }
 
     void main() {
         vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
-        vec2 uv0 = uv;
+        float scale = 1.3; // Zoom out to fit everything
+        uv *= scale;
 
-        float ar = u_resolution.x / u_resolution.y;
-        float baseScale = ar < 1.0 ? 1.8 : 1.2;
+        // --- PRISM GEOMETRY ---
+        float triSize = 0.8;
+        float d = sdTriangle(uv, triSize);
         
-        // Parallax offset based on scroll
-        float parallaxStrength = 0.4;
+        // --- BEAM CALCS ---
+        // Input Beam (White) - Incoming from Left (-1.0, -0.2) to Prism Face
+        vec2 inputStart = vec2(-2.0, -0.4);
+        vec2 inputHit = vec2(-0.35, -0.15); // Approximate hit point on left face
+        vec2 inputDir = normalize(inputHit - inputStart);
         
-        // Simple & Beatiful Clean Palette
-        vec3 colorFront = vec3(0.1, 0.6, 1.0);   // Clean Blue
-        vec3 colorBack = vec3(0.5, 0.1, 0.8);    // Soft Purple
+        // Refraction (Fake) - Inside Beam
+        vec2 innerStart = inputHit;
+        vec2 innerEnd = vec2(0.35, -0.15); // Approximate exit point on right face
+        vec2 innerDir = normalize(innerEnd - innerStart);
         
-        // --- RECURSIVE PRISMS (Reduced layers for clarity) ---
+        // Output Beam (Rainbow) - Exiting Right
+        vec2 outputStart = innerEnd;
+        vec2 outputDir = vec2(0.9, -0.3); // Down-right
+        
+        // --- RENDERING ---
         vec3 finalColor = vec3(0.0);
-        float finalAlpha = 0.0;
-        
-        const int NUM_LAYERS = 6;
-        
-        // Draw from back to front
-        for (int i = NUM_LAYERS - 1; i >= 0; i--) {
-            float t = float(i) / float(NUM_LAYERS - 1); 
-            float invT = 1.0 - t;
-            
-            float layerScale = baseScale * (1.0 + t * 3.0);
-            
-            float offsetX = 0.02 + t * 0.1;
-            float offsetY = -t * 0.02;
-            float parallaxX = u_scroll * parallaxStrength * (0.1 + t * 1.5);
-            float parallaxY = u_scroll * parallaxStrength * (0.02 + t * 0.3);
-            vec2 layerOffset = vec2(offsetX + parallaxX, offsetY + parallaxY);
-            
-            float darkness = 0.4 + invT * 0.6;
-            float edgeBright = 0.6 + invT * 0.4;
-            
-            vec3 layerColor = mix(colorBack, colorFront, invT);
-            
-            vec4 layer = drawPrism(uv, layerOffset, layerScale, darkness, edgeBright, layerColor);
-            
-            float layerAlphaMultiplier = 0.3 + invT * 0.7;
-            finalColor = mix(finalColor, layer.rgb, layer.a * layerAlphaMultiplier);
-            finalAlpha = max(finalAlpha, layer.a * layerAlphaMultiplier);
-        }
-        
-        // --- ENTRY BEAM (Laser) ---
-        float beamY = abs(uv.y + uv.x * 0.35); 
-        float entryMask = smoothstep(0.004, 0.001, beamY); 
-        entryMask *= smoothstep(0.05, -0.5, uv.x);
-        entryMask *= smoothstep(-1.0, -0.5, uv.x);
-        
-        // --- RAINBOW BEAM ---
-        float angle = atan(uv.y, uv.x);
-        float radius = length(uv);
-        
-        float noiseVal = noise(uv * 4.0 + vec2(u_time * 0.2, 0.0));
-        float colorIndex = (angle * 2.0) + (noiseVal * 0.5) - (u_time * 0.05);
-        vec3 spectrum = palette(colorIndex);
-        
-        float fanMask = smoothstep(0.6, 0.1, abs(angle));
-        fanMask *= smoothstep(-0.05, 0.35, uv.x);
-        
-        float streaks = smoothstep(0.4, 0.6, noise(vec2(angle * 10.0, radius * 2.0 - u_time)));
-        spectrum += streaks * 0.12;
-
-        // --- FINAL COMPOSITION ---
-        vec3 col = vec3(0.0);
         float alpha = 0.0;
 
-        // Entry Beam
-        col += vec3(1.0) * entryMask * 2.5;
-        alpha += entryMask;
-
-        // Spectrum (behind all prisms)
-        col += spectrum * fanMask * 0.8; 
-        alpha += fanMask * 0.5;
-
-        // Prisms on top
-        col = mix(col, finalColor, finalAlpha);
-        alpha = max(alpha, finalAlpha);
+        // 1. Input Beam (White) - Stops at prism face roughly
+        float inBeam = beam(uv, inputStart, inputDir, 0.015, 2.0);
+        // Cut off input beam inside prism logic roughly
+        float hitDist = length(uv - inputHit);
+        float inMask = 1.0 - smoothstep(0.0, 0.1, uv.x + 0.35); // Hard cutoff near face
         
-        // Vignette
-        alpha *= smoothstep(1.8, 0.5, length(uv));
+        finalColor += vec3(1.2) * inBeam * clamp(inMask, 0.0, 1.0);
+        
+        // 2. Output Beam (Rainbow Spectrum)
+        // We create multiple slightly offset beams for the spectrum
+        vec2 p = uv - outputStart;
+        float proj = dot(p, normalize(outputDir));
+        
+        if (proj > 0.0) {
+            float distToBeam = dot(p, vec2(-outputDir.y, outputDir.x)); // Perpendicular distance
+            
+            // Spread factor increases with distance
+            float spread = 0.1 + proj * 0.3;
+            
+            // Normalized position within the spread (-1 to 1)
+            float t = distToBeam / spread;
+            
+            // Fluid warp for the rainbow
+            float rainbowFluid = fbm(uv * 4.0 - vec2(u_time * 1.5, u_time * 0.2));
+            float warp = (rainbowFluid - 0.5) * 0.1 * proj; // Warp increases with distance
+            
+            t += warp * 5.0; // Apply warp
+            
+            if (abs(t) < 1.0) {
+                // Color palette based on position in beam
+                vec3 specColor = palette(t * 0.5 + 0.5);
+                
+                // Intensity fade out
+                float intensity = smoothstep(1.0, 0.0, abs(t));
+                intensity *= smoothstep(0.0, 1.0, proj); // Fade in at start
+                
+                finalColor += specColor * intensity * 2.0;
+            }
+        }
 
-        gl_FragColor = vec4(col, alpha);
+        // 3. Prism Drawing
+        // Edge Glow
+        float edge = smoothstep(0.02, 0.0, abs(d));
+        vec3 edgeColor = vec3(0.9, 0.95, 1.0) * edge * 2.5;
+        
+        // Inner Glass Fill (Subtle)
+        float inner = smoothstep(0.0, -0.2, d);
+        vec3 glassColor = vec3(1.0, 1.0, 1.0) * 0.05 * inner;
+        
+        if (d < 0.0) {
+            // Inside Prism
+            finalColor += glassColor;
+            finalColor += edgeColor;
+            
+            // Internal light shaft (simple white line connecting hit points)
+            float internalBeam = beam(uv, inputHit, normalize(innerEnd - inputHit), 0.02, 0.0);
+            finalColor += vec3(1.0) * internalBeam * 0.5; // Faint internal beam
+            
+            alpha = max(alpha, 0.1); 
+        } else {
+            // Outside
+            finalColor += edgeColor;
+        }
+
+        // Add Vignette
+        float vignette = smoothstep(2.0, 0.5, length(uv * vec2(1.0, 0.8)));
+        finalColor *= vignette;
+        
+        alpha += length(finalColor) * 0.5;
+
+        gl_FragColor = vec4(finalColor, alpha);
     }
 `;
 
