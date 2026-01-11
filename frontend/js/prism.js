@@ -107,55 +107,112 @@ const fragmentShaderSource = `
         // --- SINGLE MINIMALIST PRISM ---
         // Just one perfect triangle, no recursion, no depth tunnel
         
+        // --- THIN PRISM WITH SUBTLE DEPTH ---
+        
         vec3 finalColor = vec3(0.0);
         float finalAlpha = 0.0;
         
-        // Single layer setup
-        float scale = baseScale * 1.5; // Slightly larger for presence
-        vec2 offset = vec2(0.05, -0.05); // Centered but slightly offset for composition
+        // Configuration
+        float prismWidth = 1.3; // Make it thinner (> 1.0 compresses X)
+        vec2 center = vec2(0.0, -0.05);
+        float mainScale = baseScale * 1.6;
         
-        // Draw the single iconic prism
-        vec2 prismUV = (uv - offset) * scale;
-        float d = sdTriangle(prismUV, 1.0);
+        // 1. BACK FACE (Depth)
+        // Drawn slightly opaque and offset
+        vec2 backOffset = vec2(0.04, 0.02); // Shifted right/up
+        vec2 backUV = (uv - center - backOffset) * mainScale;
+        backUV.x *= prismWidth;
+        float dBack = sdTriangle(backUV, 1.0);
         
-        // 1. Fill (Glass Body) - Subtle gradient
-        if (d < 0.0) {
-            float glassAlpha = 0.1;
-            // Subtle vertical gradient for volume
-            float gradient = smoothstep(-1.0, 1.0, prismUV.y); 
-            vec3 fillCol = vec3(0.9, 0.95, 1.0) * (0.05 + gradient * 0.1);
+        if (dBack < 0.0) {
+            float backAlpha = 0.15;
+            vec3 backCol = vec3(0.6, 0.7, 0.8) * 0.2; // Darker, bluish
             
-            finalColor = fillCol;
-            finalAlpha = glassAlpha;
+            // Edge of back face
+            float backEdge = smoothstep(0.02, 0.0, abs(dBack));
+            backCol += vec3(0.5, 0.6, 0.9) * backEdge * 0.5;
+            
+            finalColor = backCol;
+            finalAlpha = backAlpha;
         }
         
-        // 2. White Edge Outline (The Iconic Look)
-        float outlineWidth = 0.025;
-        float outerEdge = smoothstep(outlineWidth + 0.005, outlineWidth, abs(d)); // Sharp outer
+        // 2. FRONT FACE (The Main Prism)
+        vec2 frontUV = (uv - center) * mainScale;
+        frontUV.x *= prismWidth;
+        float dFront = sdTriangle(frontUV, 1.0);
         
-        // Glowy white edge
-        vec3 edgeColor = vec3(1.0, 1.0, 1.0); // Pure white
+        if (dFront < 0.0) {
+            // Glass body
+            float glassAlpha = 0.08;
+            // Vertical gradient
+            float gradient = smoothstep(-1.0, 1.2, frontUV.y); 
+            vec3 glassCol = vec3(0.95, 0.98, 1.0) * (0.1 + gradient * 0.2);
+            
+            // Interaction with back face (fake refraction look where they overlap)
+            if (finalAlpha > 0.0) {
+                 glassCol += vec3(0.1, 0.2, 0.3); // Additive darkening?
+            }
+            
+            finalColor = mix(finalColor, glassCol, 0.6);
+            finalAlpha = max(finalAlpha, glassAlpha);
+        }
         
-        // Add edge to composition
-        finalColor = mix(finalColor, edgeColor, outerEdge);
-        finalAlpha = max(finalAlpha, outerEdge);
+        // 3. FRONT EDGES (Bright White)
+        float outlineWidth = 0.02;
+        float frontEdge = smoothstep(outlineWidth + 0.005, outlineWidth, abs(dFront));
         
-        // --- ENTRY BEAM (Laser) ---
-        float beamY = abs(uv.y + uv.x * 0.35); 
-        float entryMask = smoothstep(0.004, 0.001, beamY); 
-        entryMask *= smoothstep(0.05, -0.5, uv.x);
-        entryMask *= smoothstep(-1.0, -0.5, uv.x);
+        // Make the corners glow more
+        // Vertices of the equilateral triangle in UV space are approx:
+        // Top: (0, 1), Bottom Right: (0.866, -0.5), Bottom Left: (-0.866, -0.5)
+        // But we scaled X, so actual coords differ. 
+        // We just use the SDF edge.
         
-        // --- RAINBOW BEAM ---
-        float angle = atan(uv.y, uv.x);
-        float radius = length(uv);
+        vec3 edgeCol = vec3(1.0);
+        finalColor = mix(finalColor, edgeCol, frontEdge);
+        finalAlpha = max(finalAlpha, frontEdge);
         
-        float noiseVal = noise(uv * 4.0 + vec2(u_time * 0.2, 0.0));
-        float colorIndex = (angle * 2.0) + (noiseVal * 0.5) - (u_time * 0.05);
-        vec3 spectrum = palette(colorIndex);
+        // 4. CONNECTION LINES (Depth wires)
+        // Connect corners of front and back? Too complex for loopless.
+        // We leave the visual separation to imply depth.
         
-        float fanMask = smoothstep(0.6, 0.1, abs(angle));
-        fanMask *= smoothstep(-0.05, 0.35, uv.x);
+        // --- BEAM ALIGNMENT ---
+        // We want the beam to hit the LEFT RIB (Left Edge)
+        // Triangle Left Edge is roughly at x = -0.5 (scaled)
+        // Let's adjust beam origin to hit that specific area.
+        
+        // Left side contact point approx:
+        vec2 hitPoint = center + vec2(-0.35 / prismWidth, 0.0); 
+        
+        // Beam Line: Shifted to pass through hitPoint
+        // y = k(x - hitX) + hitY
+        float beamSlope = -0.35;
+        float beamYVal = hitPoint.y + beamSlope * (uv.x - hitPoint.x);
+        float beamDist = abs(uv.y - beamYVal);
+        
+        float entryMask = smoothstep(0.004, 0.001, beamDist); 
+        
+        // Mask the beam so it stops AT the prism (somewhat)
+        // or fades into it.
+        float beamFade = smoothstep(hitPoint.x + 0.1, hitPoint.x - 0.2, uv.x);
+        entryMask *= beamFade;
+        entryMask *= smoothstep(-1.2, -0.5, uv.x); // Fade in from far left 
+        // --- SPECTRUM ORIGIN ---
+        // Exit from RIGHT RIB (Right Edge)
+        vec2 exitPoint = center + vec2(0.35 / prismWidth, 0.0);
+        
+        // Move coordinate system to exit point for the fan
+        vec2 spectrumUV = uv - exitPoint;
+        
+        float angle = atan(spectrumUV.y, spectrumUV.x);
+        float radius = length(spectrumUV);
+        
+        float baseAngle = -0.2; // Slight downward angle for exit
+        float spread = 0.3; // Fan spread width
+        
+        // Only show to the right
+        float fanMask = smoothstep(baseAngle - spread, baseAngle, angle);
+        fanMask *= smoothstep(baseAngle + spread, baseAngle, angle);
+        fanMask *= smoothstep(0.0, 0.1, spectrumUV.x); // Start after exit point
         
         float streaks = smoothstep(0.4, 0.6, noise(vec2(angle * 10.0, radius * 2.0 - u_time)));
         spectrum += streaks * 0.12;
