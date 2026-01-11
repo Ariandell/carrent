@@ -314,3 +314,130 @@ section {
 .animate-fade-in-up {
     animation: fadeInUp 0.2s ease-out;
 }
+
+/* ============================================
+   PREMIUM HERO SECTION STYLES
+   ============================================ */
+
+/* Hero Title - Maximum Readability */
+.hero-title {
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: #ffffff;
+    text-shadow:
+        0 0 30px rgba(0, 0, 0, 0.9),
+        0 0 60px rgba(0, 0, 0, 0.7),
+        0 0 100px rgba(0, 0, 0, 0.5),
+        0 2px 4px rgba(0, 0, 0, 0.8);
+    position: relative;
+    z-index: 30;
+}
+
+.hero-title-secondary {
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: rgba(255, 255, 255, 0.65);
+    text-shadow:
+        0 0 30px rgba(0, 0, 0, 0.9),
+        0 0 60px rgba(0, 0, 0, 0.7),
+        0 0 100px rgba(0, 0, 0, 0.5),
+        0 2px 4px rgba(0, 0, 0, 0.8);
+    position: relative;
+    z-index: 30;
+}
+
+/* Hero Description - Clear and Readable */
+.hero-description {
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow:
+        0 0 20px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(0, 0, 0, 0.6),
+        0 1px 3px rgba(0, 0, 0, 0.9);
+    font-weight: 400;
+    position: relative;
+    z-index: 30;
+}
+
+/* Premium Hero Button */
+.btn-hero {
+    position: relative;
+    padding: 1.25rem 3rem;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #ffffff;
+    background: linear-gradient(135deg, rgba(79, 209, 197, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%);
+    border: 2px solid rgba(79, 209, 197, 0.6);
+    border-radius: 9999px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 30;
+    box-shadow:
+        0 0 30px rgba(79, 209, 197, 0.3),
+        inset 0 0 20px rgba(79, 209, 197, 0.1);
+}
+
+.btn-hero:hover {
+    background: linear-gradient(135deg, rgba(79, 209, 197, 0.3) 0%, rgba(147, 51, 234, 0.3) 100%);
+    border-color: rgba(79, 209, 197, 0.9);
+    transform: scale(1.05);
+    box-shadow:
+        0 0 50px rgba(79, 209, 197, 0.5),
+        0 0 80px rgba(147, 51, 234, 0.3),
+        inset 0 0 30px rgba(79, 209, 197, 0.2);
+}
+
+.btn-hero-text {
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 0 20px rgba(79, 209, 197, 0.8);
+}
+
+.btn-hero-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(ellipse at center, rgba(79, 209, 197, 0.4) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.btn-hero:hover .btn-hero-glow {
+    opacity: 1;
+}
+
+/* Hero Scroll Hint */
+.hero-scroll-hint {
+    text-shadow:
+        0 0 10px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(0, 0, 0, 0.6);
+    z-index: 30;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+
+    .hero-title,
+    .hero-title-secondary {
+        text-shadow:
+            0 0 20px rgba(0, 0, 0, 0.95),
+            0 0 40px rgba(0, 0, 0, 0.8),
+            0 2px 4px rgba(0, 0, 0, 0.9);
+    }
+
+    .hero-description {
+        font-size: 1.1rem;
+        line-height: 1.7;
+    }
+
+    .btn-hero {
+        padding: 1rem 2rem;
+        font-size: 0.9rem;
+    }
+}

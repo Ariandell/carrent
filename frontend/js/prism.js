@@ -58,7 +58,7 @@ const fragmentShaderSource = `
                    mix(hash(n+57.0), hash(n+58.0),f.x),f.y);
     }
 
-    // Draw a single prism layer with given parameters and color tint
+    // Draw a single PREMIUM prism layer with elegant glass effect
     // Returns: vec4(color.rgb, alpha)
     vec4 drawPrism(vec2 uv, vec2 offset, float scale, float darkness, float edgeBrightness, vec3 tintColor) {
         vec2 prismUV = (uv - offset) * scale;
@@ -68,47 +68,50 @@ const fragmentShaderSource = `
         float prismAlpha = 0.0;
         
         if (d < 0.0) {
-            // Inside prism - colored glass
-            float baseDark = 0.008 * darkness;
-            vec3 glassBase = tintColor * baseDark;
-            
+            // Inside prism - premium transparent glass
             float edgeDist = abs(d);
-            float depth = smoothstep(0.0, 0.3, edgeDist);
+            float depth = smoothstep(0.0, 0.5, edgeDist);
             
-            // Facet lighting with color
-            float facet1 = smoothstep(0.3, 0.8, prismUV.y - prismUV.x * 0.5);
-            float facet2 = smoothstep(0.3, 0.8, -prismUV.y - prismUV.x * 0.5);
-            float facet3 = smoothstep(-0.5, 0.2, prismUV.x);
+            // Very subtle glass tint - almost invisible in center
+            float centerTransparency = smoothstep(0.0, 0.4, edgeDist);
+            vec3 glassBase = tintColor * 0.02 * (1.0 - centerTransparency * 0.8);
+            
+            // Soft facet lighting - subtle highlights
+            float facet1 = smoothstep(0.4, 0.9, prismUV.y - prismUV.x * 0.5);
+            float facet2 = smoothstep(0.4, 0.9, -prismUV.y - prismUV.x * 0.5);
+            float facet3 = smoothstep(-0.4, 0.3, prismUV.x);
             
             vec3 facetColor = vec3(0.0);
-            facetColor += tintColor * 0.015 * facet1 * 0.3 * darkness;
-            facetColor += tintColor * 0.012 * facet2 * 0.2 * darkness;
-            facetColor += tintColor * 0.018 * facet3 * 0.2 * darkness;
+            facetColor += tintColor * 0.025 * facet1 * 0.15;
+            facetColor += tintColor * 0.02 * facet2 * 0.1;
+            facetColor += tintColor * 0.03 * facet3 * 0.1;
             
-            // Fresnel with color
-            float fresnel = pow(1.0 - depth, 3.0);
-            vec3 fresnelColor = tintColor * 0.03 * fresnel * darkness;
+            // Elegant Fresnel effect - bright edges
+            float fresnel = pow(1.0 - depth, 4.0);
+            vec3 fresnelColor = tintColor * 0.15 * fresnel * edgeBrightness;
             
-            // Edge glow with color
-            float edgeGlow = smoothstep(0.05, 0.0, edgeDist);
-            vec3 edgeColor = tintColor * edgeBrightness * 0.12 * edgeGlow;
+            // Premium edge glow
+            float edgeGlow = smoothstep(0.08, 0.0, edgeDist);
+            vec3 edgeColor = tintColor * edgeBrightness * 0.4 * edgeGlow;
             
             prismColor = glassBase + facetColor + fresnelColor + edgeColor;
-            prismAlpha = 0.75 * darkness;
+            // Much lower alpha in center for readability
+            prismAlpha = 0.15 + fresnel * 0.35 * darkness;
         }
         
-        // Edge outline with color
-        float outerEdge = smoothstep(0.01, 0.0, abs(d));
-        float innerEdge = smoothstep(0.018, 0.01, abs(d));
+        // Sharp premium edge outline
+        float outerEdge = smoothstep(0.012, 0.0, abs(d));
+        float innerEdge = smoothstep(0.025, 0.012, abs(d));
         
-        vec3 edgeGlowColor = tintColor * edgeBrightness * 0.18 * outerEdge * 0.5;
-        edgeGlowColor += tintColor * edgeBrightness * 0.08 * innerEdge * 0.25;
+        vec3 edgeGlowColor = tintColor * edgeBrightness * 0.6 * outerEdge;
+        edgeGlowColor += tintColor * edgeBrightness * 0.2 * innerEdge;
         
         if (d >= 0.0) {
             prismColor = edgeGlowColor;
-            prismAlpha = outerEdge * 0.6 + innerEdge * 0.25;
+            prismAlpha = outerEdge * 0.9 + innerEdge * 0.4;
         } else {
             prismColor += edgeGlowColor;
+            prismAlpha = max(prismAlpha, outerEdge * 0.8);
         }
         
         return vec4(prismColor, prismAlpha);
@@ -124,15 +127,15 @@ const fragmentShaderSource = `
         // Parallax offset based on scroll
         float parallaxStrength = 0.4;
         
-        // Color gradient: Cyan -> Blue -> Purple -> Magenta (for depth)
-        vec3 colorFront = vec3(0.4, 0.9, 1.0);   // Cyan
-        vec3 colorBack = vec3(0.8, 0.3, 0.9);    // Purple/Magenta
+        // Premium color gradient: Cyan -> Electric Blue -> Violet (luxury feel)
+        vec3 colorFront = vec3(0.3, 0.85, 1.0);   // Electric Cyan
+        vec3 colorBack = vec3(0.6, 0.2, 0.95);    // Deep Violet
         
-        // --- RECURSIVE PRISMS (12 layers for infinite depth) ---
+        // --- RECURSIVE PRISMS (8 layers for elegant depth) ---
         vec3 finalColor = vec3(0.0);
         float finalAlpha = 0.0;
         
-        const int NUM_LAYERS = 12;
+        const int NUM_LAYERS = 8;
         
         // Draw from back to front
         for (int i = NUM_LAYERS - 1; i >= 0; i--) {
@@ -140,31 +143,31 @@ const fragmentShaderSource = `
             float invT = 1.0 - t; // 1 = front, 0 = back
             
             // Scale: smaller as we go deeper
-            float layerScale = baseScale * (1.0 + t * 4.0);
+            float layerScale = baseScale * (1.0 + t * 3.5);
             
             // Offset: more offset for deeper layers (parallax)
-            float offsetX = 0.01 + t * 0.15;
-            float offsetY = -t * 0.03;
-            float parallaxX = u_scroll * parallaxStrength * (0.1 + t * 2.0);
-            float parallaxY = u_scroll * parallaxStrength * (0.02 + t * 0.4);
+            float offsetX = 0.02 + t * 0.12;
+            float offsetY = -t * 0.025;
+            float parallaxX = u_scroll * parallaxStrength * (0.1 + t * 1.5);
+            float parallaxY = u_scroll * parallaxStrength * (0.02 + t * 0.3);
             vec2 layerOffset = vec2(offsetX + parallaxX, offsetY + parallaxY);
             
-            // Darkness: darker as we go deeper
-            float darkness = 0.15 + invT * 0.85;
+            // Brightness increases towards front
+            float darkness = 0.3 + invT * 0.7;
             
-            // Edge brightness: dimmer as we go deeper
-            float edgeBright = 0.2 + invT * 0.8;
+            // Edge brightness: bright edges on all layers
+            float edgeBright = 0.5 + invT * 0.5;
             
-            // Color: gradient from front to back
+            // Color: smooth gradient from front to back
             vec3 layerColor = mix(colorBack, colorFront, invT);
             
             // Draw layer
             vec4 layer = drawPrism(uv, layerOffset, layerScale, darkness, edgeBright, layerColor);
             
-            // Blend with depth-based alpha
-            float layerAlphaMultiplier = 0.2 + invT * 0.8;
+            // Blend with depth-based alpha - more transparent layers
+            float layerAlphaMultiplier = 0.15 + invT * 0.5;
             finalColor = mix(finalColor, layer.rgb, layer.a * layerAlphaMultiplier);
-            finalAlpha = max(finalAlpha, layer.a * layerAlphaMultiplier);
+            finalAlpha = max(finalAlpha, layer.a * layerAlphaMultiplier * 0.7);
         }
         
         // --- ENTRY BEAM (Laser) ---
