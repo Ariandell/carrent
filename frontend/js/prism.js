@@ -29,7 +29,6 @@ const fragmentShaderSource = `
     uniform float u_time;
     uniform float u_scroll;
 
-    // Consts
     #define PI 3.14159265359
 
     // Spectral Palette
@@ -51,7 +50,7 @@ const fragmentShaderSource = `
         return -length(p)*sign(p.y);
     }
 
-    // Noise functions for fluid effect
+    // Noise
     float hash(float n) { return fract(sin(n) * 43758.5453123); }
     float noise(in vec2 x) {
         vec2 p = floor(x);
@@ -62,132 +61,107 @@ const fragmentShaderSource = `
                    mix(hash(n+57.0), hash(n+58.0),f.x),f.y);
     }
 
-    float fbm(vec2 p) {
-        float f = 0.0;
-        f += 0.5000*noise(p); p*=2.02;
-        f += 0.2500*noise(p); p*=2.03;
-        f += 0.1250*noise(p); p*=2.01;
-        return f;
-    }
-
-    // Draw a beam segment
-    // start: start point, dir: direction, w: width, uv: current coord
-    float beam(vec2 uv, vec2 start, vec2 dir, float width, float flowSpeed) {
+    // Simple Line Beam (for Input)
+    float beam(vec2 uv, vec2 start, vec2 dir, float width) {
         vec2 p = uv - start;
         float proj = dot(p, dir);
         float dist = length(p - dir * proj);
         
-        // Fluid distortion
-        float fluid = fbm(uv * 10.0 - vec2(u_time * flowSpeed, 0.0));
-        float warp = (fluid - 0.5) * 0.05;
+        // Slight noise for consistency
+        float warp = (noise(uv * 10.0 + u_time) - 0.5) * 0.01;
         
-        // Only draw forward
         float beamMask = smoothstep(0.0, 0.1, proj);
-        
-        // Core width
         float core = smoothstep(width + warp, width * 0.2 + warp, dist);
-        
         return core * beamMask;
     }
 
     void main() {
         vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
-        float scale = 1.3; // Zoom out to fit everything
+        float scale = 1.3;
         uv *= scale;
 
-        // --- PRISM GEOMETRY ---
+        // --- PRISM ---
         float triSize = 0.8;
         float d = sdTriangle(uv, triSize);
-        
-        // --- BEAM CALCS ---
-        // Input Beam (White) - Incoming from Left (-1.0, -0.2) to Prism Face
-        vec2 inputStart = vec2(-2.0, -0.4);
-        vec2 inputHit = vec2(-0.35, -0.15); // Approximate hit point on left face
+
+        // --- INPUT BEAM (White Laser) ---
+        // From left (-2.5, -0.45) to prism face (-0.35, -0.15)
+        vec2 inputStart = vec2(-2.5, -0.45); 
+        vec2 inputHit = vec2(-0.35, -0.15); // Hit point on left face
         vec2 inputDir = normalize(inputHit - inputStart);
         
-        // Refraction (Fake) - Inside Beam
-        vec2 innerStart = inputHit;
-        vec2 innerEnd = vec2(0.35, -0.15); // Approximate exit point on right face
-        vec2 innerDir = normalize(innerEnd - innerStart);
+        float inBeam = beam(uv, inputStart, inputDir, 0.012);
         
-        // Output Beam (Rainbow) - Exiting Right
-        vec2 outputStart = innerEnd;
-        vec2 outputDir = vec2(0.9, -0.3); // Down-right
-        
-        // --- RENDERING ---
+        // Cut off beam when it hits/enters the prism
+        float inMask = smoothstep(0.05, -0.05, d); 
+        inMask *= step(uv.x, -0.3); // Hard clip
+
         vec3 finalColor = vec3(0.0);
         float alpha = 0.0;
 
-        // 1. Input Beam (White) - Stops at prism face roughly
-        float inBeam = beam(uv, inputStart, inputDir, 0.015, 2.0);
-        // Cut off input beam inside prism logic roughly
-        float hitDist = length(uv - inputHit);
-        float inMask = 1.0 - smoothstep(0.0, 0.1, uv.x + 0.35); // Hard cutoff near face
-        
-        finalColor += vec3(1.2) * inBeam * clamp(inMask, 0.0, 1.0);
-        
-        // 2. Output Beam (Rainbow Spectrum)
-        // We create multiple slightly offset beams for the spectrum
-        vec2 p = uv - outputStart;
-        float proj = dot(p, normalize(outputDir));
-        
-        if (proj > 0.0) {
-            float distToBeam = dot(p, vec2(-outputDir.y, outputDir.x)); // Perpendicular distance
-            
-            // Spread factor increases with distance
-            float spread = 0.1 + proj * 0.3;
-            
-            // Normalized position within the spread (-1 to 1)
-            float t = distToBeam / spread;
-            
-            // Fluid warp for the rainbow
-            float rainbowFluid = fbm(uv * 4.0 - vec2(u_time * 1.5, u_time * 0.2));
-            float warp = (rainbowFluid - 0.5) * 0.1 * proj; // Warp increases with distance
-            
-            t += warp * 5.0; // Apply warp
-            
-            if (abs(t) < 1.0) {
-                // Color palette based on position in beam
-                vec3 specColor = palette(t * 0.5 + 0.5);
-                
-                // Intensity fade out
-                float intensity = smoothstep(1.0, 0.0, abs(t));
-                intensity *= smoothstep(0.0, 1.0, proj); // Fade in at start
-                
-                finalColor += specColor * intensity * 2.0;
-            }
-        }
+        finalColor += vec3(1.1) * inBeam * clamp(inMask, 0.0, 1.0);
 
-        // 3. Prism Drawing
-        // Edge Glow
-        float edge = smoothstep(0.02, 0.0, abs(d));
-        vec3 edgeColor = vec3(0.9, 0.95, 1.0) * edge * 2.5;
+        // --- OUTPUT BEAM (Restored "Fluid/Fan" Effect) ---
+        // Rotated/Offset UV for correct fan direction
+        vec2 fanUV = uv;
+        fanUV.x -= 0.1; // Origin near center
+        fanUV.y += 0.15;
+
+        float angle = atan(fanUV.y, fanUV.x);
+        float radius = length(fanUV);
+
+        // "Old Fluid" Logic: Noise driving Color Index
+        float noiseVal = noise(fanUV * 3.5 + vec2(u_time * 0.3, 0.0));
         
-        // Inner Glass Fill (Subtle)
-        float inner = smoothstep(0.0, -0.2, d);
-        vec3 glassColor = vec3(1.0, 1.0, 1.0) * 0.05 * inner;
+        // Color Index based on angle + noise
+        float colorIndex = (angle * 2.5) + (noiseVal * 0.6) - (u_time * 0.1);
+        vec3 spectrum = palette(colorIndex);
+
+        // Masking: Point roughly Right-Down (-30 degrees approx)
+        float fanDir = -0.3; 
+        float fanWidth = 0.3; // Spread width
+        float fanMask = smoothstep(fanWidth, 0.1, abs(angle - fanDir));
         
+        // Fade in as it exits
+        fanMask *= smoothstep(0.35, 0.6, fanUV.x); 
+
+        // Add "Streaks"
+        float streaks = smoothstep(0.3, 0.7, noise(vec2(angle * 12.0, radius * 3.0 - u_time * 1.5)));
+        spectrum += streaks * 0.2;
+        
+        // Combine Output
+        finalColor += spectrum * fanMask * 1.5;
+
+        // --- PRISM RENDER (Glass Style) ---
         if (d < 0.0) {
-            // Inside Prism
-            finalColor += glassColor;
-            finalColor += edgeColor;
+            // INSIDE
+            float dist = abs(d);
             
-            // Internal light shaft (simple white line connecting hit points)
-            float internalBeam = beam(uv, inputHit, normalize(innerEnd - inputHit), 0.02, 0.0);
-            finalColor += vec3(1.0) * internalBeam * 0.5; // Faint internal beam
+            // 1. Subtle Fill (Dark Glass)
+            finalColor += vec3(1.0) * 0.03 * smoothstep(0.0, 0.5, dist);
             
-            alpha = max(alpha, 0.1); 
-        } else {
-            // Outside
-            finalColor += edgeColor;
+            // 2. Internal Refraction Ray (Connecting Input to Output)
+            float internal = beam(uv, inputHit, vec2(1.0, -0.1), 0.015);
+            finalColor += vec3(1.0) * internal * 0.4 * smoothstep(0.0, 0.2, dist);
+
+            alpha = 0.1; // Low base alpha
         }
-
-        // Add Vignette
-        float vignette = smoothstep(2.0, 0.5, length(uv * vec2(1.0, 0.8)));
-        finalColor *= vignette;
         
-        alpha += length(finalColor) * 0.5;
+        // --- THIN GLASS EDGE ---
+        // Very sharp, thin white outline (0.008)
+        float edgeWidth = 0.008; 
+        float edgeGlow = smoothstep(edgeWidth, 0.0, abs(d));
+        float edgeBloom = smoothstep(0.04, 0.0, abs(d)) * 0.5; // Faint glow
+        
+        vec3 edgeCol = vec3(0.95, 0.98, 1.0);
+        finalColor += edgeCol * (edgeGlow * 1.5 + edgeBloom * 0.3);
 
+        // --- VIGNETTE ---
+        float vignette = smoothstep(2.2, 0.8, length(uv));
+        finalColor *= vignette;
+
+        alpha += length(finalColor) * 0.4;
+        
         gl_FragColor = vec4(finalColor, alpha);
     }
 `;
