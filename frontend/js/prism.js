@@ -107,9 +107,9 @@ const fragmentShaderSource = `
             float specular = pow(max(0.0, dot(normalize(facetUV), lightDir)), 64.0);
             vec3 specularColor = vec3(0.7, 0.8, 0.9) * specular * 0.7;
             
-            // Edge highlights - sharp bright rims
+            // Edge highlights - sharp bright rims - DARKER
             float edgeGlow = smoothstep(0.04, 0.0, edgeDist);
-            vec3 edgeColor = vec3(0.3, 0.4, 0.5) * edgeGlow;
+            vec3 edgeColor = vec3(0.08, 0.1, 0.12) * edgeGlow;
             
             // Combine all glass effects
             prismColor = glassBase + facetColor + fresnelColor + specularColor + edgeColor;
@@ -125,9 +125,9 @@ const fragmentShaderSource = `
         float outerEdge = smoothstep(0.015, 0.0, abs(d));
         float innerEdge = smoothstep(0.025, 0.015, abs(d));
         
-        // Multi-layer edge for depth - DARKER
-        vec3 edgeGlowColor = vec3(0.3, 0.35, 0.4) * outerEdge * 0.8;
-        edgeGlowColor += vec3(0.2, 0.25, 0.3) * innerEdge * 0.5;
+        // Multi-layer edge for depth - MUCH DARKER
+        vec3 edgeGlowColor = vec3(0.05, 0.06, 0.08) * outerEdge * 0.8;
+        edgeGlowColor += vec3(0.04, 0.05, 0.06) * innerEdge * 0.5;
         
         if (d >= 0.0) {
             prismColor = edgeGlowColor;
