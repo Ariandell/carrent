@@ -15,11 +15,9 @@ async def check_expired_rentals():
     
     async with AsyncSessionLocal() as db:
         try:
-            # 1. Get ALL active rentals
-            # We explicitly load the user/car to avoid async detachment issues if we need them later
-            result = await db.execute(
-                select(Rental).where(Rental.status == RentalStatus.ACTIVE)
-            )
+            # 1. EXPIRATION CHECK
+            # Get ALL active rentals
+            result = await db.execute(select(Rental).where(Rental.status == RentalStatus.ACTIVE))
             active_rentals = result.scalars().all()
             
             expired_count = 0
@@ -56,13 +54,41 @@ async def check_expired_rentals():
 
                     expired_count += 1
             
-            if expired_count > 0:
+            # 2. ORPHAN CHECK (Fix for forced deletions)
+            # Find cars that are BUSY but have no active rental
+            busy_cars_result = await db.execute(select(Car).where(Car.status == CarStatus.BUSY))
+            busy_cars = busy_cars_result.scalars().all()
+            
+            orphaned_count = 0
+            for car in busy_cars:
+                # Check if there is an active rental for this car
+                rental_check = await db.execute(
+                    select(Rental)
+                    .where(Rental.car_id == car.id)
+                    .where(Rental.status == RentalStatus.ACTIVE)
+                )
+                active_rental = rental_check.scalars().first()
+                
+                if not active_rental:
+                    print(f"🧹 Rental Monitor: Found ORPHANED busy car {car.name} (ID: {car.id}). Resetting to FREE.")
+                    car.status = CarStatus.FREE
+                    orphaned_count += 1
+                    
+                    # Safety stop stream
+                    if car.raspberry_id:
+                         try:
+                            await manager.send_command_to_car(car.raspberry_id, "stop_stream")
+                         except:
+                             pass
+
+            if expired_count > 0 or orphaned_count > 0:
                 await db.commit()
-                print(f"✅ Rental Monitor: Closed {expired_count} expired rentals.")
+                print(f"✅ Rental Monitor: Closed {expired_count} expired rentals and fixed {orphaned_count} orphaned cars.")
                 # Broadcast update to all clients
                 await manager.broadcast_status_update()
-            else:
-                print("👍 Rental Monitor: No expired rentals found.")
+            elif expired_count == 0 and orphaned_count == 0:
+                # print("👍 Rental Monitor: nominal.") # reduce log noise
+                pass
 
         except Exception as e:
             print(f"❌ Rental Monitor Error: {e}")
