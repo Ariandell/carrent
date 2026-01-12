@@ -102,3 +102,20 @@ async def reply_ticket(
     tasks.add_task(send_support_reply_email, recipient_email, ticket.subject, reply_data.message)
     
     return {"message": "Reply sent successfully"}
+
+@router.delete("/{ticket_id}")
+async def delete_ticket(
+    ticket_id: str,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_admin_user)
+):
+    result = await db.execute(select(SupportTicket).where(SupportTicket.id == ticket_id))
+    ticket = result.scalars().first()
+    
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+        
+    await db.delete(ticket)
+    await db.commit()
+    
+    return {"message": "Ticket deleted successfully"}

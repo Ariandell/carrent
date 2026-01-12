@@ -99,6 +99,10 @@
                 <button onclick="closeTicketModal()" class="btn-secondary px-4 py-2 rounded-lg text-sm">Закрити</button>
                 <button id="closeTicketBtn" class="btn-primary px-4 py-2 rounded-lg text-sm">Позначити як
                     вирішене</button>
+                <button id="deleteTicketBtn"
+                    class="px-4 py-2 rounded-lg text-sm bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors">
+                    Видалити
+                </button>
             </div>
         </div>
     </div>
@@ -167,6 +171,10 @@
                                     class="px-2 py-1 text-xs rounded-lg border border-white/10 hover:bg-white/5 transition-colors">
                                 Закрити
                             </button>` : `<span class="text-xs text-muted">Завершено</span>`}
+                            <button onclick="deleteTicket('${t.id}')" 
+                                    class="px-2 py-1 text-xs rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors" title="Видалити">
+                                🗑️
+                            </button>
                         </td>
                     `;
                     table.appendChild(row);
@@ -214,6 +222,8 @@
             document.getElementById('replyText').value = '';
             document.getElementById('sendReplyBtn').onclick = () => sendReply(ticket.id);
 
+            document.getElementById('deleteTicketBtn').onclick = () => deleteTicket(ticket.id, true);
+
             document.getElementById('ticketModal').classList.remove('hidden');
         }
 
@@ -243,6 +253,18 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalContent;
+            }
+        }
+
+        async function deleteTicket(id, isModal = false) {
+            if (!confirm('Ви впевнені, що хочете ВИДАЛИТИ цей запит? Цю дію неможливо відмінити.')) return;
+            try {
+                await api.delete(`/api/support/${id}`);
+                if (isModal) closeTicketModal();
+                loadTickets();
+                showToast('Запит успішно видалено', 'success');
+            } catch (e) {
+                alert('Помилка видалення: ' + e.message);
             }
         }
     </script>
