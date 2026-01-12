@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, delete
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime, timedelta
@@ -184,6 +184,30 @@ async def list_users(db: AsyncSession = Depends(get_db), admin: User = Depends(g
         )
         for u in users
     ]
+
+@router.delete("/users/{user_id}")
+async def delete_user(user_id: uuid.UUID, db: AsyncSession = Depends(get_db), admin: User = Depends(get_admin_user)):
+    # Get user
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalars().first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    # Delete related data first (Manual Cascade)
+    await db.execute(delete(Transaction).where(Transaction.user_id == user_id))
+    await db.execute(delete(Rental).where(Rental.user_id == user_id))
+    
+    # Delete support tickets (if any)
+    # Note: SupportTicket model might act differently, but good to clean if linked
+    from app.models.support import SupportTicket
+    await db.execute(delete(SupportTicket).where(SupportTicket.user_id == user_id))
+    
+    # Delete user
+    await db.delete(user)
+    await db.commit()
+    
+    return {"message": "User and all related data deleted successfully"}
 
 @router.get("/users/{user_id}/history", response_model=UserHistory)
 async def get_user_history(user_id: uuid.UUID, db: AsyncSession = Depends(get_db), admin: User = Depends(get_admin_user)):

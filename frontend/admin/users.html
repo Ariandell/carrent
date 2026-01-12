@@ -162,8 +162,13 @@
                         <td class="p-4 font-mono text-blue-500">${u.balance_minutes} хв</td>
                         <td class="p-4">${u.total_rentals}</td>
                         <td class="p-4 font-bold text-emerald-500">₴${u.total_spent.toFixed(0)}</td>
-                        <td class="p-4">
+                        <td class="p-4 flex items-center gap-2">
                             <button onclick="openUserHistory('${u.id}')" class="text-blue-500 hover:text-blue-400 text-xs font-bold uppercase">Історія</button>
+                            ${!isAdmin ? `
+                            <button onclick="deleteUser('${u.id}', '${u.name}')" 
+                                    class="w-6 h-6 flex items-center justify-center rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors" title="Видалити">
+                                🗑️
+                            </button>` : ''}
                         </td>
                     `;
                         table.appendChild(row);
@@ -264,6 +269,25 @@
             function closeModal() {
                 document.getElementById('userModal').classList.add('hidden');
                 currentHistoryData = null;
+            }
+
+            async function deleteUser(id, name) {
+                if (!confirm(`Ви впевнені, що хочете ВИДАЛИТИ користувача ${name || id}? Ця дія видалить всі його оренди та транзакції. ВІДНОВЛЕННЯ НЕМОЖЛИВЕ!`)) return;
+
+                // Double confirmation for safety
+                const verification = prompt(`Введіть 'ВИДАЛИТИ' щоб підтвердити видалення користувача ${name || id}`);
+                if (verification !== 'ВИДАЛИТИ') {
+                    alert('Видалення скасовано');
+                    return;
+                }
+
+                try {
+                    await api.delete(`/api/admin/users/${id}`);
+                    loadUsers();
+                    showToast('Користувача успішно видалено', 'success');
+                } catch (e) {
+                    alert('Помилка видалення: ' + e.message);
+                }
             }
         </script>
 </body>
