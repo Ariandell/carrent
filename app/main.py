@@ -22,6 +22,9 @@ from app.database import init_db
 @app.on_event("startup")
 async def startup_event():
     await init_db()
+    # Start Rental Monitor Background Task
+    from app.services.rental_monitor import start_rental_monitor
+    asyncio.create_task(start_rental_monitor())
 
 from app.routers import auth, users, cars, websockets, rentals, payments, admin, support, uploads
 app.include_router(auth.router)
